@@ -30,15 +30,20 @@ int Main()
     // Initialize engine
     SharedPtr<Context> context(new Context);
     SharedPtr<Engine> engine(new Engine(context));
+    VariantMap parameters;
+    parameters[EP_HEADLESS] = true;
+    parameters[EP_RESOURCE_PATHS] = ".";
+    if (!engine->Initialize(parameters))
+        return 1;
 
     const String& modelFileName = arguments[0];
     const String& animationFileName = arguments[1];
     const String& skeletonFileName = arguments[2];
     const String& outputFileName = arguments[3];
 
-    Model* model = LoadResource<Model>(context, modelFileName);
-    Animation* animation = LoadResource<Animation>(context, animationFileName);
-    CharacterSkeleton* characterSkeleton = LoadResource<CharacterSkeleton>(context, skeletonFileName);
+    SharedPtr<Model> model(LoadResource<Model>(context, modelFileName));
+    SharedPtr<Animation> animation(LoadResource<Animation>(context, animationFileName));
+    SharedPtr<CharacterSkeleton> characterSkeleton(LoadResource<CharacterSkeleton>(context, skeletonFileName));
     if (!model || !animation || !characterSkeleton)
         return 3;
 

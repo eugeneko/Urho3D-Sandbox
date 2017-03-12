@@ -1,26 +1,16 @@
 #include "CharacterAnimator.h"
 
-// #include <FlexEngine/Math/MathDefs.h>
-// #include <FlexEngine/Math/PoissonRandom.h>
-// #include <FlexEngine/Math/StandardRandom.h>
-//
+#include <Urho3D/AngelScript/APITemplates.h>
 #include <Urho3D/Core/Context.h>
 #include <Urho3D/Container/Ptr.h>
-// #include <Urho3D/Core/WorkQueue.h>
 #include <Urho3D/Graphics/AnimatedModel.h>
 #include <Urho3D/Graphics/Animation.h>
 #include <Urho3D/Graphics/AnimationState.h>
 #include <Urho3D/Graphics/AnimationController.h>
 #include <Urho3D/Graphics/DebugRenderer.h>
 #include <Urho3D/IO/Log.h>
-// #include <Urho3D/Graphics/Geometry.h>
-// #include <Urho3D/Graphics/IndexBuffer.h>
-// #include <Urho3D/Graphics/Terrain.h>
-// #include <Urho3D/Graphics/VertexBuffer.h>
-// #include <Urho3D/Graphics/Material.h>
 #include <Urho3D/Math/MathDefs.h>
 #include <Urho3D/Math/Sphere.h>
-// #include <Urho3D/Scene/Node.h>
 #include <Urho3D/Resource/ResourceCache.h>
 
 #include <algorithm>
@@ -459,57 +449,6 @@ bool CharacterSkeleton::BeginLoad(Deserializer& source)
     return false;
 }
 
-bool CharacterSkeleton::EndLoad()
-{
-    ResourceCache* cache = GetSubsystem<ResourceCache>();
-    SharedPtr<Model> model(cache->GetResource<Model>(modelName_));
-    if (!model)
-    {
-        URHO3D_LOGERROR("Could not load CharacterSkeleton model");
-        return false;
-    }
-    Skeleton& skeleton = model->GetSkeleton();
-
-    for (Segment2Map::KeyValue& elem : segments2_)
-    {
-        CharacterSkeletonSegment2& segment = elem.second_;
-        Bone* rootBone = skeleton.GetBone(segment.rootBone_);
-        Bone* jointBone = skeleton.GetBone(segment.jointBone_);
-        Bone* targetBone = skeleton.GetBone(segment.targetBone_);
-
-        if (!rootBone)
-        {
-            URHO3D_LOGERRORF("Root bone '%s' of '%s' 2-segment is not found", segment.rootBone_.CString(), segment.name_.CString());
-            return false;
-        }
-        if (!jointBone)
-        {
-            URHO3D_LOGERRORF("Joint bone '%s' of '%s' 2-segment is not found", segment.jointBone_.CString(), segment.name_.CString());
-            return false;
-        }
-        if (!targetBone)
-        {
-            URHO3D_LOGERRORF("Target bone '%s' of '%s' 2-segment is not found", segment.targetBone_.CString(), segment.name_.CString());
-            return false;
-        }
-        if (jointBone->parentIndex_ != rootBone - &skeleton.GetBones()[0])
-        {
-            URHO3D_LOGERRORF("Joint bone of '%s' 2-segment must be a child of root bone", segment.name_.CString());
-            return false;
-        }
-        if (targetBone->parentIndex_ != jointBone - &skeleton.GetBones()[0])
-        {
-            URHO3D_LOGERRORF("Target bone of '%s' 2-segment must be a child of joint bone", segment.name_.CString());
-            return false;
-        }
-
-        segment.initialRootRotation_ = rootBone->initialRotation_;
-        segment.initialJointRotation_ = jointBone->initialRotation_;
-        segment.initialTargetRotation_ = targetBone->initialRotation_;
-    }
-    return true;
-}
-
 bool CharacterSkeleton::BeginLoad(const XMLElement& source)
 {
     modelName_ = source.GetChild("model").GetAttribute("name");
@@ -518,9 +457,6 @@ bool CharacterSkeleton::BeginLoad(const XMLElement& source)
         URHO3D_LOGERROR("CharacterSkeleton model name mustn't be empty");
         return false;
     }
-
-    ResourceCache* cache = GetSubsystem<ResourceCache>();
-    cache->BackgroundLoadResource<Model>(modelName_, true, this);
 
     for (XMLElement segmentNode = source.GetChild("segment2"); !segmentNode.IsNull(); segmentNode = segmentNode.GetNext("segment2"))
     {
@@ -767,15 +703,21 @@ void CharacterAnimationController::Update(float timeStep)
     AnimationController::Update(timeStep);
     AnimatedModel* animatedModel = node_->GetComponent<AnimatedModel>();
     animatedModel->ApplyAnimation();
-    ApplyAnimation();
+    ApplyAnimation(animatedModel);
 }
 
 void CharacterAnimationController::ApplyAnimation()
 {
+    AnimatedModel* animatedModel = node_->GetComponent<AnimatedModel>();
+    ApplyAnimation(animatedModel);
+}
+
+void CharacterAnimationController::ApplyAnimation(AnimatedModel* animatedModel)
+{
     if (skeleton_ && !skeleton_->GetSegments2().Empty())
     {
         for (const CharacterSkeleton::Segment2Map::KeyValue& elem : skeleton_->GetSegments2())
-            UpdateSegment2(elem.second_);
+            UpdateSegment2(animatedModel, elem.second_);
     }
 }
 
@@ -796,22 +738,27 @@ CharacterAnimation* CharacterAnimationController::GetCharacterAnimation(const St
         return animationCache_[animationName];
 
     ResourceCache* cache = GetSubsystem<ResourceCache>();
-    CharacterAnimation* characterAnimation = cache->GetResource<CharacterAnimation>(animationName + ".xml");
+    CharacterAnimation* characterAnimation = cache->GetResource<CharacterAnimation>(animationName.Replaced(".ani", ".xml", false));
     animationCache_[animationName] = characterAnimation;
     return characterAnimation;
 }
 
-void CharacterAnimationController::UpdateSegment2(const CharacterSkeletonSegment2& segment)
+void CharacterAnimationController::UpdateSegment2(AnimatedModel* animatedModel, const CharacterSkeletonSegment2& segment)
 {
+    Skeleton& skeleton = animatedModel->GetSkeleton();
+    Bone* rootBone = skeleton.GetBone(segment.rootBone_);
+    Bone* jointBone = skeleton.GetBone(segment.jointBone_);
+    Bone* targetBone = skeleton.GetBone(segment.targetBone_);
+
     // Get nodes and bones
     // #TODO Cache these ops
-    Node* thighNode = node_->GetChild(segment.rootBone_, true);
-    Node* calfNode = thighNode->GetChild(segment.jointBone_);
-    Node* heelNode = calfNode->GetChild(segment.targetBone_);
+    Node* thighNode = rootBone->node_;
+    Node* calfNode = jointBone->node_;
+    Node* heelNode = targetBone->node_;
 
-    thighNode->SetRotationSilent(segment.initialRootRotation_);
-    calfNode->SetRotationSilent(segment.initialJointRotation_);
-    heelNode->SetRotationSilent(segment.initialTargetRotation_);
+    thighNode->SetRotationSilent(rootBone->initialRotation_);
+    calfNode->SetRotationSilent(jointBone->initialRotation_);
+    heelNode->SetRotationSilent(targetBone->initialRotation_);
     thighNode->MarkDirty();
 
     // Apply animations
@@ -873,6 +820,36 @@ void CharacterAnimationController::UpdateSegment2(const CharacterSkeletonSegment
     heelNode->SetWorldRotation(adjustToGoundRotation * origHeelRotation.Slerp(fixedHeelRotation, state.globalRotationFactor_));
 
     thighNode->MarkDirty();
+}
+
+//////////////////////////////////////////////////////////////////////////
+void CharacterAnimationController_SetTargetTransform(const String& segment, const Matrix3x4& transform,
+    CharacterAnimationController* characterAnimationController)
+{
+    characterAnimationController->SetTargetTransform(segment, transform);
+}
+
+void CharacterAnimationController_SetTargetRotationAmount(const String& segment, float rotationAmount,
+    CharacterAnimationController* characterAnimationController)
+{
+    characterAnimationController->SetTargetRotationAmount(segment, rotationAmount);
+}
+
+void CharacterAnimationController_SetTargetRotationBalance(const String& segment, float globalFactor,
+    CharacterAnimationController* characterAnimationController)
+{
+    characterAnimationController->SetTargetRotationBalance(segment, globalFactor);
+}
+
+void RegisterCharacterAnimatorScriptAPI(asIScriptEngine* engine)
+{
+    RegisterResource<CharacterSkeleton>(engine, "CharacterSkeleton");
+
+    RegisterComponent<CharacterAnimationController>(engine, "CharacterAnimationController");
+    RegisterSubclass<CharacterAnimationController, AnimationController>(engine, "AnimationController", "CharacterAnimationController");
+    engine->RegisterObjectMethod("CharacterAnimationController", "void SetTargetTransform(const String&in, const Matrix3x4&in)", asFUNCTION(CharacterAnimationController_SetTargetTransform), asCALL_CDECL_OBJLAST);
+    engine->RegisterObjectMethod("CharacterAnimationController", "void SetTargetRotationAmount(const String&in, float)", asFUNCTION(CharacterAnimationController_SetTargetRotationAmount), asCALL_CDECL_OBJLAST);
+    engine->RegisterObjectMethod("CharacterAnimationController", "void SetTargetRotationBalance(const String&in, float)", asFUNCTION(CharacterAnimationController_SetTargetRotationBalance), asCALL_CDECL_OBJLAST);
 }
 
 }

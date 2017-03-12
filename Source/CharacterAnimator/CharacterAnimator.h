@@ -5,15 +5,13 @@
 #include <Urho3D/Resource/XMLFile.h>
 #include <Urho3D/Scene/LogicComponent.h>
 
+class asIScriptEngine;
+
 namespace Urho3D
 {
 
 class Animation;
-// class IndexBuffer;
-// class Terrain;
-// class VertexBuffer;
-// struct WorkItem;
-// class WorkQueue;
+class AnimatedModel;
 class Model;
 
 }
@@ -32,12 +30,6 @@ struct CharacterSkeletonSegment2
     String jointBone_;
     /// Name of the bone that is related to the target position of the segment. Must be a child of the joint bone.
     String targetBone_;
-    /// Initial rotation of root bone.
-    Quaternion initialRootRotation_;
-    /// Initial rotation of joint bone.
-    Quaternion initialJointRotation_;
-    /// Initial rotation of target bone.
-    Quaternion initialTargetRotation_;
 };
 
 /// Character skeleton.
@@ -59,8 +51,6 @@ public:
 
     /// Load resource from stream. May be called from a worker thread. Return true if successful.
     virtual bool BeginLoad(Deserializer& source);
-    /// Finish resource loading. Always called from the main thread. Return true if successful.
-    virtual bool EndLoad();
 
     /// Load from an XML element. Return true if successful.
     bool BeginLoad(const XMLElement& source);
@@ -227,8 +217,10 @@ public:
 private:
     /// Get character animation.
     CharacterAnimation* GetCharacterAnimation(const String& animationName);
+    /// Apply animation.
+    void ApplyAnimation(AnimatedModel* animatedModel);
     /// Update 2-segment.
-    void UpdateSegment2(const CharacterSkeletonSegment2& segment);
+    void UpdateSegment2(AnimatedModel* animatedModel, const CharacterSkeletonSegment2& segment);
     /// State of 2-segment.
     struct Segment2State
     {
@@ -249,5 +241,8 @@ private:
     HashMap<StringHash, Segment2State> segment2states_;
 
 };
+
+/// Register script API
+void RegisterCharacterAnimatorScriptAPI(asIScriptEngine* engine);
 
 }

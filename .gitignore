@@ -3,3 +3,7 @@ build/
 
 # Ignore Urho3D CMake modules
 CMake/
+
+# Ignore Urho3D assets
+bin/CoreData
+bin/Data
