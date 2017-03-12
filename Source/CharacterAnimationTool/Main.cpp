@@ -4,6 +4,7 @@
 #include <Urho3D/Graphics/Model.h>
 #include <Urho3D/Graphics/Animation.h>
 #include <Urho3D/IO/File.h>
+#include <Urho3D/IO/Log.h>
 #include <Urho3D/Input/Input.h>
 #include <Urho3D/UI/UI.h>
 #include <CharacterAnimator/CharacterAnimator.h>
@@ -25,7 +26,10 @@ int Main()
     // Check number of arguments
     const StringVector& arguments = GetArguments();
     if (arguments.Size() < 4)
-        return 2;
+    {
+        Log::WriteRaw("Usage: CharacterAnimationTool model.mdl skeleton.xml animation.ani output.xml");
+        return 1;
+    }
 
     // Initialize engine
     SharedPtr<Context> context(new Context);
@@ -33,27 +37,40 @@ int Main()
     VariantMap parameters;
     parameters[EP_HEADLESS] = true;
     parameters[EP_RESOURCE_PATHS] = ".";
+    parameters[EP_LOG_NAME] = "";
     if (!engine->Initialize(parameters))
-        return 1;
+    {
+        Log::WriteRaw("Failed to initialize engine");
+        return 2;
+    }
 
     const String& modelFileName = arguments[0];
-    const String& animationFileName = arguments[1];
-    const String& skeletonFileName = arguments[2];
+    const String& skeletonFileName = arguments[1];
+    const String& animationFileName = arguments[2];
     const String& outputFileName = arguments[3];
 
     SharedPtr<Model> model(LoadResource<Model>(context, modelFileName));
     SharedPtr<Animation> animation(LoadResource<Animation>(context, animationFileName));
     SharedPtr<CharacterSkeleton> characterSkeleton(LoadResource<CharacterSkeleton>(context, skeletonFileName));
     if (!model || !animation || !characterSkeleton)
+    {
+        Log::WriteRaw("Failed to open input resources");
         return 3;
+    }
 
     CharacterAnimation characterAnimation(context);
     characterAnimation.SetName(outputFileName);
-    if (characterAnimation.ImportAnimation(*characterSkeleton, *model, *animation))
-        characterAnimation.SaveFile(outputFileName);
-    else
+    if (!characterAnimation.ImportAnimation(*characterSkeleton, *model, *animation))
+    {
+        Log::WriteRaw("Failed to import animation");
         return 4;
-    
+    }
+
+    if (!characterAnimation.SaveFile(outputFileName))
+    {
+        Log::WriteRaw("Failed to save destination file");
+        return 5;
+    }
     return 0;
 }
 

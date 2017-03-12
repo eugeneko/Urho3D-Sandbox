@@ -12,17 +12,19 @@ class Animator : ScriptObject
     
     void Update(float timeStep)
     {
-        CharacterAnimationController@ animController = node.GetComponent("CharacterAnimationController");
+        AnimationController@ animController = node.GetComponent("CharacterAnimationController");
+        
+        CharacterAnimationController@ characterController = node.GetComponent("CharacterAnimationController");
         Node@ groundControl = node.GetChild("control:Ground");
         if (groundControl !is null)
         {
-            animController.SetTargetTransform("LeftFoot", groundControl.transform);
-            animController.SetTargetTransform("RightFoot", groundControl.transform);
+            characterController.SetTargetTransform("LeftFoot", groundControl.transform);
+            characterController.SetTargetTransform("RightFoot", groundControl.transform);
         }
 
-        animController.SetTargetRotationAmount("LeftFoot", footRotationAmount);
-        animController.SetTargetRotationAmount("RightFoot", footRotationAmount);
-        animController.SetTargetRotationBalance("LeftFoot", footRotationGlobal);
-        animController.SetTargetRotationBalance("RightFoot", footRotationGlobal);
+        characterController.SetTargetRotationAmount("LeftFoot", footRotationAmount);
+        characterController.SetTargetRotationAmount("RightFoot", footRotationAmount);
+        characterController.SetTargetRotationBalance("LeftFoot", footRotationGlobal);
+        characterController.SetTargetRotationBalance("RightFoot", footRotationGlobal);
     }
 }

@@ -7,3 +7,10 @@ CMake/
 # Ignore Urho3D assets
 bin/CoreData
 bin/Data
+
+# Ignore compiled binaries
+bin/*.exe
+bin/*.dll
+
+# Ignore logs
+bin/*/*.log
