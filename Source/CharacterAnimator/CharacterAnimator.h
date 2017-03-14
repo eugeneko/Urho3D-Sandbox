@@ -195,6 +195,8 @@ public:
     /// Register object factory.
     static void RegisterObject(Context* context);
 
+    /// Set animation transform.
+    void SetAnimationTransform(const Matrix3x4& transform);
     /// Set target transform of segment.
     void SetTargetTransform(StringHash segment, const Matrix3x4& transform);
     /// Set amount of transformation applied to rotation of target bone.
@@ -239,6 +241,8 @@ private:
     HashMap<StringHash, SharedPtr<CharacterAnimation>> animationCache_;
     /// States.
     HashMap<StringHash, Segment2State> segment2states_;
+    /// Animation transform.
+    Matrix3x4 animationTransform_;
 
 };
 

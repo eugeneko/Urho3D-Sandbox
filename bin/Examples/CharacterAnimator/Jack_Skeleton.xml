@@ -1,0 +1,7 @@
+<skeleton>
+    <model name = "Objects/Swat/Swat.mdl"/>
+    <segment2 name = "LeftFoot" root="Bip01_L_Thigh" joint="Bip01_L_Calf" target="Bip01_L_Foot" />
+    <segment2 name = "RightFoot" root="Bip01_R_Thigh" joint="Bip01_R_Calf" target="Bip01_R_Foot" />
+    <segment2 name = "LeftHand" root="Bip01_L_UpperArm" joint="Bip01_L_Forearm" target="Bip01_L_Hand" />
+    <segment2 name = "RightHand" root="Bip01_R_UpperArm" joint="Bip01_R_Forearm" target="Bip01_R_Hand" />
+</skeleton>

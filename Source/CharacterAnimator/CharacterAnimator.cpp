@@ -426,6 +426,14 @@ Vector3 ResolveKneePosition(const Vector3& thighPosition, const Vector3& targetH
     return thighPosition + direction * distance + orthoJointDirection * radius;
 }
 
+/// Return vector clamped by sphere.
+Vector3 ClampVector(const Vector3& vec, const Vector3& origin, float radius)
+{
+    const Vector3 delta = vec - origin;
+    const float length = delta.Length();
+    return length <= radius ? vec : origin + delta / length * radius;
+}
+
 //////////////////////////////////////////////////////////////////////////
 CharacterSkeleton::CharacterSkeleton(Context* context)
     : Resource(context)
@@ -675,6 +683,11 @@ void CharacterAnimationController::RegisterObject(Context* context)
     URHO3D_MIXED_ACCESSOR_ATTRIBUTE("Skeleton", GetSkeletonAttr, SetSkeletonAttr, ResourceRef, ResourceRef(XMLFile::GetTypeStatic()), AM_DEFAULT);
 }
 
+void CharacterAnimationController::SetAnimationTransform(const Matrix3x4& transform)
+{
+    animationTransform_ = transform;
+}
+
 void CharacterAnimationController::SetTargetTransform(StringHash segment, const Matrix3x4& transform)
 {
     Segment2State& state = segment2states_[segment];
@@ -745,13 +758,17 @@ CharacterAnimation* CharacterAnimationController::GetCharacterAnimation(const St
 
 void CharacterAnimationController::UpdateSegment2(AnimatedModel* animatedModel, const CharacterSkeletonSegment2& segment)
 {
+    // Get nodes and bones
     Skeleton& skeleton = animatedModel->GetSkeleton();
     Bone* rootBone = skeleton.GetBone(segment.rootBone_);
     Bone* jointBone = skeleton.GetBone(segment.jointBone_);
     Bone* targetBone = skeleton.GetBone(segment.targetBone_);
+    if (!rootBone || !jointBone || !targetBone)
+    {
+        URHO3D_LOGERRORF("Skeleton segment '%s' is not found in the model", segment.name_.CString());
+        return;
+    }
 
-    // Get nodes and bones
-    // #TODO Cache these ops
     Node* thighNode = rootBone->node_;
     Node* calfNode = jointBone->node_;
     Node* heelNode = targetBone->node_;
@@ -798,19 +815,27 @@ void CharacterAnimationController::UpdateSegment2(AnimatedModel* animatedModel, 
     // Get state
     const Segment2State& state = segment2states_[segment.name_];
 
-    // Resolve foot shape
-    Vector3 newHeelPosition = node_->GetWorldTransform() * state.targetTransform_ * keyFrame.heelPosition_;
-    const Vector3 jointDirection = Quaternion(node_->GetWorldRotation() * baseDirection, newHeelPosition - thighNode->GetWorldPosition()) * keyFrame.kneeDirection_;
-    const Vector3 newCalfPosition = ResolveKneePosition(thighNode->GetWorldPosition(), newHeelPosition, node_->GetWorldRotation() * jointDirection,
-        thighLength, calfLength);
+    // Resolve limb
+    const Matrix3x4 animationToWorld = node_->GetWorldTransform() * animationTransform_;
+    const Matrix3x4 worldToAnimation = animationToWorld.Inverse();
+
+    const Vector3 worldPos0 = thighNode->GetWorldPosition();
+    const Vector3 worldPos2 = ClampVector(animationToWorld * state.targetTransform_ * keyFrame.heelPosition_, worldPos0, thighLength + calfLength);
+    const Vector3 worldJointDirection = worldPos2 - worldPos0;
+    const Vector3 animJointDirection = worldToAnimation.RotationMatrix() * worldJointDirection;
+    const Vector3 animJointOrientation = Quaternion(baseDirection, animJointDirection) * keyFrame.kneeDirection_;
+    const Vector3 worldJointOrientation = animationToWorld.RotationMatrix() * animJointOrientation;
+    const Vector3 worldPos1 = ResolveKneePosition(worldPos0, worldPos2, worldJointOrientation, thighLength, calfLength);
 
     // Apply foot shape
-    if (!MatchChildPosition(*thighNode, *calfNode, newCalfPosition))
+    if (!MatchChildPosition(*thighNode, *calfNode, worldPos1))
         URHO3D_LOGWARNING("Failed to resolve thigh-calf segment of foot animation");
+    Vector3 q1 = keyFrame.thighRotationFix_.EulerAngles();
     thighNode->SetRotation(thighNode->GetRotation() * keyFrame.thighRotationFix_);
 
-    if (!MatchChildPosition(*calfNode, *heelNode, newHeelPosition))
+    if (!MatchChildPosition(*calfNode, *heelNode, worldPos2))
         URHO3D_LOGWARNING("Failed to resolve calf-heel segment of foot animation");
+    Vector3 q2 = keyFrame.calfRotationFix_.EulerAngles();
     calfNode->SetRotation(calfNode->GetRotation() * keyFrame.calfRotationFix_);
 
     // Resolve heel rotation
@@ -847,6 +872,7 @@ void RegisterCharacterAnimatorScriptAPI(asIScriptEngine* engine)
 
     RegisterComponent<CharacterAnimationController>(engine, "CharacterAnimationController");
     RegisterSubclass<CharacterAnimationController, AnimationController>(engine, "AnimationController", "CharacterAnimationController");
+    engine->RegisterObjectMethod("CharacterAnimationController", "void SetAnimationTransform(const Matrix3x4&in)", asMETHOD(CharacterAnimationController, SetAnimationTransform), asCALL_THISCALL);
     engine->RegisterObjectMethod("CharacterAnimationController", "void SetTargetTransform(const String&in, const Matrix3x4&in)", asFUNCTION(CharacterAnimationController_SetTargetTransform), asCALL_CDECL_OBJLAST);
     engine->RegisterObjectMethod("CharacterAnimationController", "void SetTargetRotationAmount(const String&in, float)", asFUNCTION(CharacterAnimationController_SetTargetRotationAmount), asCALL_CDECL_OBJLAST);
     engine->RegisterObjectMethod("CharacterAnimationController", "void SetTargetRotationBalance(const String&in, float)", asFUNCTION(CharacterAnimationController_SetTargetRotationBalance), asCALL_CDECL_OBJLAST);
