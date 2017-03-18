@@ -435,15 +435,95 @@ Vector3 ClampVector(const Vector3& vec, const Vector3& origin, float radius)
 }
 
 //////////////////////////////////////////////////////////////////////////
-CharacterSkeleton::CharacterSkeleton(Context* context)
-    : Resource(context)
+
+/// Get bone index.
+unsigned GetBoneIndex(Skeleton& skeleton, const String& boneName)
 {
+    Bone* bone = skeleton.GetBone(boneName);
+    return bone ? bone - &skeleton.GetBones().Front() : skeleton.GetNumBones();
 }
 
-CharacterSkeleton::~CharacterSkeleton()
+/// Compute global transforms of the skeleton - implementation.
+void ComputeGlobalTransforms(Skeleton& skeleton, unsigned boneIndex, PODVector<Matrix3x4>& transforms, PODVector<bool>& dirty)
 {
+    // Don't compute twice
+    if (!dirty[boneIndex])
+        return;
+
+    // Compute parent if dirty
+    const Bone* bone = skeleton.GetBone(boneIndex);
+    if (bone->parentIndex_ != boneIndex)
+        ComputeGlobalTransforms(skeleton, bone->parentIndex_, transforms, dirty);
+
+    // Compute global transform
+    const Matrix3x4 localTransform(bone->initialPosition_, bone->initialRotation_, bone->initialScale_);
+    const Matrix3x4 parentTransform = bone->parentIndex_ == boneIndex ? Matrix3x4::IDENTITY : transforms[bone->parentIndex_];
+    transforms[boneIndex] = parentTransform * localTransform;
+    dirty[boneIndex] = false;
 }
 
+/// Compute global transforms of the skeleton.
+PODVector<Matrix3x4> ComputeGlobalTransforms(Skeleton& skeleton)
+{
+    const unsigned numBones = skeleton.GetNumBones();
+    PODVector<Matrix3x4> transforms(numBones);
+    PODVector<bool> dirty(numBones);
+    for (unsigned i = 0; i < numBones; ++i)
+        ComputeGlobalTransforms(skeleton, i, transforms, dirty);
+    return transforms;
+}
+
+//////////////////////////////////////////////////////////////////////////
+CharacterSkeletonSegmentType GetCharacterSkeletonSegmentType(const String& name)
+{
+    if (name == "root")
+        return CharacterSkeletonSegmentType::Root;
+    else if (name == "chain")
+        return CharacterSkeletonSegmentType::Chain;
+    return CharacterSkeletonSegmentType::Root;
+}
+
+//////////////////////////////////////////////////////////////////////////
+CharacterSkeletonSegmentData* CharacterSkeletonSegmentData::Create(CharacterSkeletonSegmentType type)
+{
+    switch (type)
+    {
+    case CharacterSkeletonSegmentType::Root:
+        return new CharacterSkeletonRootSegmentData();
+    default:
+        return nullptr;
+    }
+}
+
+void CharacterSkeletonSegmentData::Reset()
+{
+    accumulatedWeight_ = 0.0f;
+}
+
+//////////////////////////////////////////////////////////////////////////
+void CharacterSkeletonRootSegmentData::Reset()
+{
+    CharacterSkeletonSegmentData::Reset();
+    position_ = Vector3::ZERO;
+    rotation_ = Quaternion::IDENTITY;
+}
+
+void CharacterSkeletonRootSegmentData::Merge(const CharacterSkeletonSegmentData& other, float weight)
+{
+    const CharacterSkeletonRootSegmentData& rhs = static_cast<const CharacterSkeletonRootSegmentData&>(other);
+    const float balance = weight / (weight + accumulatedWeight_);
+    position_ = position_.Lerp(rhs.position_, balance);
+    rotation_ = rotation_.Slerp(rhs.rotation_, balance);
+    accumulatedWeight_ += weight;
+}
+
+void CharacterSkeletonRootSegmentData::Apply(CharacterSkeletonSegment& dest)
+{
+    dest.nodes_[0]->SetWorldPosition(dest.globalPositions_[0] + position_);
+    dest.nodes_[0]->SetWorldRotation(dest.globalRotations_[0] * rotation_);
+}
+
+//////////////////////////////////////////////////////////////////////////
 void CharacterSkeleton::RegisterObject(Context* context)
 {
     context->RegisterFactory<CharacterSkeleton>();
@@ -453,54 +533,130 @@ bool CharacterSkeleton::BeginLoad(Deserializer& source)
 {
     SharedPtr<XMLFile> xmlFile = MakeShared<XMLFile>(context_);
     if (xmlFile->Load(source))
-        return BeginLoad(xmlFile->GetRoot());
+        return LoadXML(xmlFile->GetRoot());
     return false;
 }
 
-bool CharacterSkeleton::BeginLoad(const XMLElement& source)
+bool CharacterSkeleton::LoadXML(const XMLElement& source)
 {
-    modelName_ = source.GetChild("model").GetAttribute("name");
-    if (modelName_.Empty())
+    for (XMLElement child = source.GetChild(); child; child = child.GetNext())
     {
-        URHO3D_LOGERROR("CharacterSkeleton model name mustn't be empty");
-        return false;
+        CharacterSkeletonSegment segment;
+        segment.name_ = child.GetAttribute("name");
+        segment.type_ = GetCharacterSkeletonSegmentType(child.GetName());
+        segment.boneNames_ = child.GetAttribute("bones").Split(' ');
+        segments_.Push(segment);
     }
+    return true;
+}
 
-    for (XMLElement segmentNode = source.GetChild("segment2"); !segmentNode.IsNull(); segmentNode = segmentNode.GetNext("segment2"))
+const CharacterSkeletonSegment* CharacterSkeleton::FindSegment(const String& name) const
+{
+    for (const CharacterSkeletonSegment& segment : segments_)
+        if (segment.name_ == name)
+            return &segment;
+    return nullptr;
+}
+
+bool CharacterSkeleton::AllocateSegmentData(Vector<CharacterSkeletonSegment>& segmentsData, Skeleton& skeleton)
+{
+    const PODVector<Matrix3x4> globalTransforms = ComputeGlobalTransforms(skeleton);
+
+    const unsigned numSegments = segments_.Size();
+    segmentsData.Resize(numSegments);
+    for (unsigned i = 0; i < numSegments; ++i)
     {
-        CharacterSkeletonSegment2 segment;
-        segment.name_ = segmentNode.GetAttribute("name");
-        segment.rootBone_ = segmentNode.GetAttribute("root");
-        segment.jointBone_ = segmentNode.GetAttribute("joint");
-        segment.targetBone_ = segmentNode.GetAttribute("target");
-
-        if (segment.name_.Empty())
+        // Allocate segment
+        const CharacterSkeletonSegment& segment = segments_[i];
+        segmentsData[i] = segment;
+        segmentsData[i].data_.reset(CharacterSkeletonSegmentData::Create(segment.type_));
+        if (!segmentsData[i].data_)
         {
-            URHO3D_LOGERROR("CharacterSkeleton 2-segment name mustn't be empty");
+            URHO3D_LOGERRORF("Cannot initialize data of segment %s", segment.name_.CString());
             return false;
         }
 
-        if (segment.rootBone_.Empty() || segment.jointBone_.Empty() || segment.targetBone_.Empty())
+        // Fill bone data
+        const unsigned numBones = segment.boneNames_.Size();
+        segmentsData[i].bones_.Resize(numBones);
+        segmentsData[i].nodes_.Resize(numBones);
+        segmentsData[i].globalPositions_.Resize(numBones);
+        segmentsData[i].globalRotations_.Resize(numBones);
+        for (unsigned j = 0; j < numBones; ++j)
         {
-            URHO3D_LOGERROR("CharacterSkeleton 2-segment bones names mustn't be empty");
-            return false;
-        }
+            const unsigned boneIndex = GetBoneIndex(skeleton, segment.boneNames_[j]);
+            Bone* bone = skeleton.GetBone(boneIndex);
+            if (!bone)
+            {
+                URHO3D_LOGERRORF("Cannot find bone %s of segment %s", segment.boneNames_[j].CString(), segment.name_.CString());
+                return false;
+            }
 
-        segments2_.Populate(segment.name_, segment);
+            segmentsData[i].bones_[j] = bone;
+            segmentsData[i].nodes_[j] = bone->node_;
+            segmentsData[i].globalPositions_[j] = globalTransforms[boneIndex].Translation();
+            segmentsData[i].globalRotations_[j] = globalTransforms[boneIndex].Rotation();
+        }
     }
     return true;
 }
 
 //////////////////////////////////////////////////////////////////////////
-CharacterAnimation::CharacterAnimation(Context* context)
-    : Resource(context)
+SharedPtr<CharacterAnimationTrack> CharacterAnimationTrack::Create(CharacterSkeletonSegmentType type, const String& name)
 {
+    switch (type)
+    {
+    case Urho3D::CharacterSkeletonSegmentType::Root:
+        return MakeShared<RootAnimationTrack>(name);
+    case Urho3D::CharacterSkeletonSegmentType::Chain:
+    default:
+        return nullptr;
+    }
 }
 
-CharacterAnimation::~CharacterAnimation()
+//////////////////////////////////////////////////////////////////////////
+void RootAnimationTrack::ImportFrame(const CharacterSkeletonSegment& segment)
 {
+    CharacterSkeletonRootSegmentData frame;
+    frame.position_ = segment.nodes_[0]->GetWorldPosition() - segment.globalPositions_[0];
+    frame.rotation_ = segment.nodes_[0]->GetWorldRotation() * segment.globalRotations_[0].Inverse();
+    track_.Push(frame);
 }
 
+void RootAnimationTrack::MergeFrame(unsigned firstFrame, unsigned secondFrame, float factor,
+    float weight, CharacterSkeletonSegmentData& dest)
+{
+    const CharacterSkeletonRootSegmentData& first = track_[firstFrame];
+    const CharacterSkeletonRootSegmentData& second = track_[secondFrame];
+    dest.Merge(first, weight * (1 - factor));
+    dest.Merge(second, weight * factor);
+}
+
+bool RootAnimationTrack::SaveXML(XMLElement& dest) const
+{
+    const unsigned numKeys = track_.Size();
+    for (unsigned i = 0; i < numKeys; ++i)
+    {
+        XMLElement child = dest.CreateChild("key");
+        child.SetVector3("position", track_[i].position_);
+        child.SetQuaternion("rotation", track_[i].rotation_);
+    }
+    return true;
+}
+
+bool RootAnimationTrack::LoadXML(const XMLElement& source)
+{
+    for (XMLElement child = source.GetChild("key"); child; child = child.GetNext())
+    {
+        CharacterSkeletonRootSegmentData frame;
+        frame.position_ = child.GetVector3("position");
+        frame.rotation_ = child.GetQuaternion("rotation");
+        track_.Push(frame);
+    }
+    return true;
+}
+
+//////////////////////////////////////////////////////////////////////////
 void CharacterAnimation::RegisterObject(Context* context)
 {
     context->RegisterFactory<CharacterAnimation>();
@@ -510,69 +666,105 @@ bool CharacterAnimation::BeginLoad(Deserializer& source)
 {
     SharedPtr<XMLFile> xmlFile = MakeShared<XMLFile>(context_);
     if (xmlFile->Load(source))
-        return Load(xmlFile->GetRoot());
+        return LoadXML(xmlFile->GetRoot());
     return false;
 }
 
-bool CharacterAnimation::Load(const XMLElement& source)
+bool CharacterAnimation::LoadXML(const XMLElement& source)
 {
-    for (XMLElement segmentNode = source.GetChild("segment2"); !segmentNode.IsNull(); segmentNode = segmentNode.GetNext("segment2"))
-    {
-        CharacterAnimationSegment2Track track;
-        track.name_ = segmentNode.GetAttribute("name");
-        track.initialDirection_ = segmentNode.GetVector3("baseDirection");
+    // Read timestamps
+    if (XMLElement timestampsNode = source.GetChild("timestamps"))
+        for (XMLElement child = timestampsNode.GetChild("frame"); child; child = child.GetNext())
+            timeStamps_.Push(child.GetFloat("time"));
 
-        for (XMLElement keyFrameNode = segmentNode.GetChild("keyFrame");
-            !keyFrameNode.IsNull();
-            keyFrameNode = keyFrameNode.GetNext("keyFrame"))
+    // Read tracks
+    for (XMLElement child = source.GetChild(); child; child = child.GetNext())
+        if (child.GetName() != "timestamps")
         {
-            CharacterAnimationSegment2KeyFrame keyFrame;
-            keyFrame.time_ = keyFrameNode.GetFloat("time");
-            keyFrame.heelPosition_ = keyFrameNode.GetVector3("targetPosition");
-            keyFrame.kneeDirection_ = keyFrameNode.GetVector3("jointOrientation");
-            keyFrame.thighRotationFix_ = keyFrameNode.GetQuaternion("rootRotation");
-            keyFrame.calfRotationFix_ = keyFrameNode.GetQuaternion("jointRotation");
-            keyFrame.heelRotationLocal_ = keyFrameNode.GetQuaternion("targetRotation");
-            keyFrame.heelRotationWorld_ = keyFrameNode.GetQuaternion("targetRotationWorld");
-            track.keyFrames_.Push(keyFrame);
+            const CharacterSkeletonSegmentType type = GetCharacterSkeletonSegmentType(child.GetName());
+            if (SharedPtr<CharacterAnimationTrack> track = CharacterAnimationTrack::Create(type, child.GetAttribute("name")))
+            {
+                track->LoadXML(child);
+                tracks_.Push(track);
+            }
         }
-        segments2_.Populate(track.name_, track);
-    }
     return true;
 }
 
-bool CharacterAnimation::Save(XMLElement& dest) const
+bool CharacterAnimation::SaveXML(XMLElement& dest) const
 {
-    for (const Segment2TrackMap::KeyValue& elem : segments2_)
+    unsigned numFrames = timeStamps_.Size();
+
+    // Save timestamps
+    if (XMLElement node = dest.CreateChild("timestamps"))
+        for (unsigned i = 0; i < numFrames; ++i)
+            node.CreateChild("frame").SetFloat("time", timeStamps_[i]);
+
+    // Save tracks
+    for (CharacterAnimationTrack* track : tracks_)
     {
-        XMLElement segment2Node = dest.CreateChild("segment2");
-        const CharacterAnimationSegment2Track& track = elem.second_;
-        segment2Node.SetAttribute("name", track.name_);
-        segment2Node.SetVector3("baseDirection", track.initialDirection_);
-        for (const CharacterAnimationSegment2KeyFrame& keyFrame : track.keyFrames_)
-        {
-            XMLElement keyFrameNode = segment2Node.CreateChild("keyFrame");
-            keyFrameNode.SetFloat("time", keyFrame.time_);
-            keyFrameNode.SetVector3("targetPosition", keyFrame.heelPosition_);
-            keyFrameNode.SetVector3("jointOrientation", keyFrame.kneeDirection_);
-            keyFrameNode.SetQuaternion("rootRotation", keyFrame.thighRotationFix_);
-            keyFrameNode.SetQuaternion("jointRotation", keyFrame.calfRotationFix_);
-            keyFrameNode.SetQuaternion("targetRotation", keyFrame.heelRotationLocal_);
-            keyFrameNode.SetQuaternion("targetRotationWorld", keyFrame.heelRotationWorld_);
-        }
+        XMLElement node = dest.CreateChild(track->GetTypeString());
+        node.SetAttribute("name", track->GetName());
+        track->SaveXML(node);
     }
+
     return true;
+}
+
+CharacterAnimationTrack* CharacterAnimation::FindTrack(const String& name) const
+{
+    for (CharacterAnimationTrack* track : tracks_)
+        if (track->GetName() == name)
+            return track;
+    return nullptr;
+}
+
+void CharacterAnimation::GetKeyFrameIndex(float time, unsigned& index) const
+{
+    if (time < 0.0f)
+        time = 0.0f;
+
+    if (index >= timeStamps_.Size())
+        index = timeStamps_.Size() - 1;
+
+    // Check for being too far ahead
+    while (index && time < timeStamps_[index])
+        --index;
+
+    // Check for being too far behind
+    while (index < timeStamps_.Size() - 1 && time >= timeStamps_[index + 1])
+        ++index;
+}
+
+unsigned CharacterAnimation::GetKeyFrameIndex(float time) const
+{
+    unsigned index = 0;
+    GetKeyFrameIndex(time, index);
+    return index;
+}
+
+void CharacterAnimation::GetKeyFrame(float time, unsigned& firstFrame, unsigned& secondFrame, float& factor) const
+{
+    firstFrame = GetKeyFrameIndex(time);
+    secondFrame = firstFrame + 1 < timeStamps_.Size() ? firstFrame + 1 : 0;
+    const float timeInterval = Max(0.0f, timeStamps_[secondFrame] - timeStamps_[firstFrame]);
+    factor = timeInterval > 0.0f ? (time - timeStamps_[firstFrame]) / timeInterval : 1.0f;
+}
+
+float CharacterAnimation::GetLength() const
+{
+    return timeStamps_.Size() > 0 ? timeStamps_.Back() - timeStamps_.Front() : 0.0f;
 }
 
 bool CharacterAnimation::Save(Serializer& dest) const
 {
     SharedPtr<XMLFile> xml(new XMLFile(context_));
-    XMLElement animationNode = xml->CreateRoot("animation");
-
-    Save(animationNode);
+    XMLElement rootNode = xml->CreateRoot("animation");
+    SaveXML(rootNode);
     return xml->Save(dest);
 }
 
+#if 0
 bool CharacterAnimation::ImportAnimation(CharacterSkeleton& characterSkeleton, Model& model, Animation& animation)
 {
     // Setup temporary node for playback
@@ -665,6 +857,68 @@ bool CharacterAnimation::ImportAnimation(CharacterSkeleton& characterSkeleton, M
     segments2_.Insert(segments2);
     return true;
 }
+#endif
+
+bool CharacterAnimation::Import(Animation& animation, Model& model, CharacterSkeleton& rig, const Matrix3x4& transform)
+{
+    // Read timestamps
+    unsigned numFrames = 0;
+    for (const auto& item : animation.GetTracks())
+    {
+        const AnimationTrack& track = item.second_;
+        if (numFrames != 0 && track.keyFrames_.Size() != numFrames)
+        {
+            URHO3D_LOGERROR("CharacterAnimation has inconsistent number of key frames in tracks");
+            return false;
+        }
+
+        numFrames = track.keyFrames_.Size();
+        if (numFrames > 0)
+        {
+            timeStamps_.Resize(numFrames);
+            for (unsigned i = 0; i < track.GetNumKeyFrames(); ++i)
+                timeStamps_[i] = track.keyFrames_[i].time_;
+        }
+    }
+    if (numFrames == 0)
+    {
+        URHO3D_LOGWARNING("CharacterAnimation is empty");
+        return true;
+    }
+
+    // Setup temporary node for playback
+    Node node(context_);
+    node.SetTransform(transform);
+    AnimatedModel* animatedModel = node.CreateComponent<AnimatedModel>();
+    animatedModel->SetModel(&model);
+    AnimationState* animationState = animatedModel->AddAnimationState(&animation);
+    animationState->SetWeight(1.0f);
+    Skeleton& skeleton = animatedModel->GetSkeleton();
+
+    // Create tracks
+    for (const CharacterSkeletonSegment& segment : rig.GetSegments())
+        tracks_.Push(CharacterAnimationTrack::Create(segment.type_, segment.name_));
+
+    // Gather segments data
+    Vector<CharacterSkeletonSegment> segmentData;
+    rig.AllocateSegmentData(segmentData, skeleton);
+
+    // Collect tracks
+    for (unsigned i = 0; i < numFrames; ++i)
+    {
+        // Play animation
+        animationState->SetTime(timeStamps_[i]);
+        animationState->Apply();
+        node.MarkDirty();
+
+        // Read tracks
+        for (unsigned j = 0; j < segmentData.Size(); ++i)
+            if (tracks_[j])
+                tracks_[j]->ImportFrame(segmentData[j]);
+    }
+
+    return true;
+}
 
 //////////////////////////////////////////////////////////////////////////
 CharacterAnimationController::CharacterAnimationController(Context* context)
@@ -713,25 +967,53 @@ void CharacterAnimationController::CleanSegment2(StringHash segment)
 
 void CharacterAnimationController::Update(float timeStep)
 {
+    UpdateHierarchy();
     AnimationController::Update(timeStep);
-    AnimatedModel* animatedModel = node_->GetComponent<AnimatedModel>();
-    animatedModel->ApplyAnimation();
-    ApplyAnimation(animatedModel);
+    if (animatedModel_)
+    {
+        animatedModel_->ApplyAnimation();
+        ApplyAnimation();
+    }
 }
 
 void CharacterAnimationController::ApplyAnimation()
 {
-    AnimatedModel* animatedModel = node_->GetComponent<AnimatedModel>();
-    ApplyAnimation(animatedModel);
+    // #TODO Remove it
+    animatedModel_->GetSkeleton().Reset();
+
+    // Reset segments data
+    for (CharacterSkeletonSegment& segment : segmentData_)
+        segment.data_->Reset();
+
+    // Animate segments
+    for (const AnimationControl& animationControl : GetAnimations())
+    {
+        CharacterAnimation* characterAnimation = GetCharacterAnimation(animationControl.name_);
+        if (!characterAnimation)
+            continue;
+        AnimationState* animationState = GetAnimationState(animationControl.name_);
+        if (!animationState)
+            continue;
+
+        unsigned firstFrame;
+        unsigned secondFrame;
+        float factor;
+        characterAnimation->GetKeyFrame(animationState->GetTime(), firstFrame, secondFrame, factor);
+
+        for (CharacterSkeletonSegment& segment : segmentData_)
+            if (CharacterAnimationTrack* track = characterAnimation->FindTrack(segment.name_))
+                track->MergeFrame(firstFrame, secondFrame, factor, animationState->GetWeight(), *segment.data_);
+    }
+
+    // Apply animations
+    for (CharacterSkeletonSegment& segment : segmentData_)
+        segment.data_->Apply(segment);
 }
 
-void CharacterAnimationController::ApplyAnimation(AnimatedModel* animatedModel)
+void CharacterAnimationController::SetSkeleton(CharacterSkeleton* skeleton)
 {
-    if (skeleton_ && !skeleton_->GetSegments2().Empty())
-    {
-        for (const CharacterSkeleton::Segment2Map::KeyValue& elem : skeleton_->GetSegments2())
-            UpdateSegment2(animatedModel, elem.second_);
-    }
+    skeleton_ = skeleton;
+    animatedModel_.Reset();
 }
 
 void CharacterAnimationController::SetSkeletonAttr(const ResourceRef& value)
@@ -745,6 +1027,21 @@ Urho3D::ResourceRef CharacterAnimationController::GetSkeletonAttr() const
     return ResourceRef(XMLFile::GetTypeStatic(), GetResourceName(skeleton_));
 }
 
+void CharacterAnimationController::UpdateHierarchy()
+{
+    // Get component
+    if (!node_ || !skeleton_)
+        return;
+    if (animatedModel_ && &animatedModel_->GetSkeleton() == animatedModelSkeleton_)
+        return;
+    animatedModel_ = node_->GetComponent<AnimatedModel>();
+    animatedModelSkeleton_ = &animatedModel_->GetSkeleton();
+    if (!animatedModel_)
+        return;
+
+    skeleton_->AllocateSegmentData(segmentData_, *animatedModelSkeleton_);
+}
+
 CharacterAnimation* CharacterAnimationController::GetCharacterAnimation(const String& animationName)
 {
     if (animationCache_.Contains(animationName))
@@ -756,10 +1053,10 @@ CharacterAnimation* CharacterAnimationController::GetCharacterAnimation(const St
     return characterAnimation;
 }
 
-void CharacterAnimationController::UpdateSegment2(AnimatedModel* animatedModel, const CharacterSkeletonSegment2& segment)
+void CharacterAnimationController::UpdateSegment2(const CharacterSkeletonSegment2& segment)
 {
     // Get nodes and bones
-    Skeleton& skeleton = animatedModel->GetSkeleton();
+    Skeleton& skeleton = animatedModel_->GetSkeleton();
     Bone* rootBone = skeleton.GetBone(segment.rootBone_);
     Bone* jointBone = skeleton.GetBone(segment.jointBone_);
     Bone* targetBone = skeleton.GetBone(segment.targetBone_);
@@ -791,7 +1088,7 @@ void CharacterAnimationController::UpdateSegment2(AnimatedModel* animatedModel, 
         AnimationState* animationState = GetAnimationState(animationControl.name_);
         if (!animationState)
             continue;
-        CharacterAnimationSegment2Track* track = characterAnimation->FindTrack(segment.name_);
+        CharacterAnimationSegment2Track* track = 0;// characterAnimation->FindTrack(segment.name_);
         if (!track)
             continue;
 

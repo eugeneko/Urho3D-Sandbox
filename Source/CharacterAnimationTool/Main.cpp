@@ -60,7 +60,7 @@ int Main()
 
     CharacterAnimation characterAnimation(context);
     characterAnimation.SetName(outputFileName);
-    if (!characterAnimation.ImportAnimation(*characterSkeleton, *model, *animation))
+    if (!characterAnimation.Import(*animation, *model, *characterSkeleton))
     {
         Log::WriteRaw("Failed to import animation");
         return 4;

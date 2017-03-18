@@ -1,9 +1,11 @@
 #pragma once
 
+#include <Urho3D/Container/ArrayPtr.h>
 #include <Urho3D/Graphics/AnimationController.h>
 #include <Urho3D/Resource/Resource.h>
 #include <Urho3D/Resource/XMLFile.h>
 #include <Urho3D/Scene/LogicComponent.h>
+#include <memory>
 
 class asIScriptEngine;
 
@@ -32,37 +34,114 @@ struct CharacterSkeletonSegment2
     String targetBone_;
 };
 
+/// Type of character skeleton segment
+enum class CharacterSkeletonSegmentType
+{
+    /// Track of the root node. Relative position and rotation are stored.
+    Root,
+    /// Track of the limb. Target position, 1D-rotations and joint direction are stored.
+    Limb,
+    /// Track of the node chain. Array of rotations and target position are stored.
+    Chain
+};
+
+/// Get character skeleton segment type by name.
+CharacterSkeletonSegmentType GetCharacterSkeletonSegmentType(const String& name);
+
+struct CharacterSkeletonSegment;
+
+/// Character skeleton segment data.
+class CharacterSkeletonSegmentData
+{
+public:
+    /// Create by type.
+    static CharacterSkeletonSegmentData* Create(CharacterSkeletonSegmentType type);
+    /// Destruct.
+    virtual ~CharacterSkeletonSegmentData() {}
+    /// Reset state.
+    virtual void Reset();
+    /// Merge state with specified weight to this.
+    virtual void Merge(const CharacterSkeletonSegmentData& other, float weight) = 0;
+    /// Apply segment animations to segment.
+    virtual void Apply(CharacterSkeletonSegment& dest) = 0;
+
+protected:
+    /// Weight.
+    float accumulatedWeight_ = 0.0f;
+};
+
+/// Character skeleton segment.
+struct CharacterSkeletonSegment
+{
+    /// Segment name.
+    String name_;
+    /// Segment type.
+    CharacterSkeletonSegmentType type_;
+    /// Names of bones in segment.
+    Vector<String> boneNames_;
+
+    /// Bones of the segment.
+    PODVector<Bone*> bones_;
+    /// Nodes of the segment.
+    PODVector<Node*> nodes_;
+    /// Global initial positions.
+    PODVector<Vector3> globalPositions_;
+    /// Global initial rotations.
+    PODVector<Quaternion> globalRotations_;
+
+    /// Data.
+    std::shared_ptr<CharacterSkeletonSegmentData> data_;
+};
+
+/// Character skeleton root segment data.
+class CharacterSkeletonRootSegmentData : public CharacterSkeletonSegmentData
+{
+public:
+    /// Position.
+    Vector3 position_;
+    /// Rotation.
+    Quaternion rotation_;
+
+public:
+    CharacterSkeletonRootSegmentData& operator = (const CharacterSkeletonRootSegmentData& other) = default;
+
+    /// @see CharacterSkeletonSegmentData::Reset
+    virtual void Reset() override;
+    /// @see CharacterSkeletonSegmentData::Merge
+    virtual void Merge(const CharacterSkeletonSegmentData& other, float weight) override;
+    /// @see CharacterSkeletonSegmentData::Apply
+    virtual void Apply(CharacterSkeletonSegment& dest) override;
+
+};
+
 /// Character skeleton.
 class CharacterSkeleton : public Resource
 {
     URHO3D_OBJECT(CharacterSkeleton, Resource);
 
 public:
-    /// Container of 2-segment.
-    using Segment2Map = HashMap<StringHash, CharacterSkeletonSegment2>;
-
-public:
     /// Construct.
-    CharacterSkeleton(Context* context);
+    CharacterSkeleton(Context* context) : Resource(context) {}
     /// Destruct.
-    virtual ~CharacterSkeleton();
+    virtual ~CharacterSkeleton() {}
     /// Register object factory.
     static void RegisterObject(Context* context);
-
     /// Load resource from stream. May be called from a worker thread. Return true if successful.
     virtual bool BeginLoad(Deserializer& source);
-
     /// Load from an XML element. Return true if successful.
-    bool BeginLoad(const XMLElement& source);
+    bool LoadXML(const XMLElement& source);
 
-    /// Get 2-segments.
-    const Segment2Map& GetSegments2() const { return segments2_; }
+    /// Get segments.
+    const Vector<CharacterSkeletonSegment>& GetSegments() const { return segments_; }
+    /// Find segment by name.
+    const CharacterSkeletonSegment* FindSegment(const String& name) const;
+
+    /// Allocate segment data.
+    bool AllocateSegmentData(Vector<CharacterSkeletonSegment>& segmentsData, Skeleton& skeleton);
 
 private:
-    /// Model name.
-    String modelName_;
-    /// Container of 2-segments.
-    Segment2Map segments2_;
+    /// Segments.
+    Vector<CharacterSkeletonSegment> segments_;
 };
 
 /// Blend animations and return result.
@@ -145,21 +224,89 @@ struct CharacterAnimationSegment2Track
     }
 };
 
+/// Bone of character skeleton.
+struct CharacterSkeletonBone
+{
+    /// Bone.
+    Bone* bone_;
+    /// Node.
+    Node* node_;
+    /// Global initial position.
+    Vector3 globalInitialPosition_;
+    /// Global initial rotation.
+    Quaternion globalInitialRotation_;
+};
+
+/// Character animation track base class.
+class CharacterAnimationTrack : public RefCounted
+{
+public:
+    /// Create track by type.
+    static SharedPtr<CharacterAnimationTrack> Create(CharacterSkeletonSegmentType type, const String& name);
+    /// Construct.
+    CharacterAnimationTrack(CharacterSkeletonSegmentType type, const String& name) : type_(type), name_(name) {}
+    /// Destruct.
+    virtual ~CharacterAnimationTrack() {}
+    /// Import frame.
+    virtual void ImportFrame(const CharacterSkeletonSegment& segment) = 0;
+    /// Merge frame to destination with specified weight.
+    virtual void MergeFrame(unsigned firstFrame, unsigned secondFrame, float factor,
+        float weight, CharacterSkeletonSegmentData& dest) = 0;
+    /// Save XML.
+    virtual bool SaveXML(XMLElement& dest) const = 0;
+    /// Load XML.
+    virtual bool LoadXML(const XMLElement& source) = 0;
+    /// Get type string.
+    virtual String GetTypeString() const = 0;
+    /// Check whether the number of bones is valid.
+    virtual bool CheckNumberOfBones(unsigned numBones) const = 0;
+    /// Get name.
+    String GetName() const { return name_; }
+
+private:
+    /// Track type.
+    CharacterSkeletonSegmentType type_;
+    /// Track name.
+    const String name_;
+};
+
+/// Root animation track.
+class RootAnimationTrack : public CharacterAnimationTrack
+{
+public:
+    /// Construct.
+    RootAnimationTrack(const String& name) : CharacterAnimationTrack(CharacterSkeletonSegmentType::Root, name) {}
+    /// @see CharacterAnimationTrack::ImportFrame
+    virtual void ImportFrame(const CharacterSkeletonSegment& segment) override;
+    /// @see CharacterAnimationTrack::MergeFrame
+    virtual void MergeFrame(unsigned firstFrame, unsigned secondFrame, float factor,
+        float weight, CharacterSkeletonSegmentData& dest) override;
+    /// @see CharacterAnimationTrack::SaveXML
+    virtual bool SaveXML(XMLElement& dest) const override;
+    /// @see CharacterAnimationTrack::LoadXML
+    virtual bool LoadXML(const XMLElement& source) override;
+    /// @see CharacterAnimationTrack::GetTypeString
+    virtual String GetTypeString() const override { return "root"; }
+    /// @see CharacterAnimationTrack::CheckNumberOfBones
+    virtual bool CheckNumberOfBones(unsigned numBones) const override { return numBones == 1; }
+
+public:
+    /// Track.
+    Vector<CharacterSkeletonRootSegmentData> track_;
+};
+
 /// Character Animation.
 class CharacterAnimation : public Resource
 {
     URHO3D_OBJECT(CharacterAnimation, Resource);
 
 public:
-    /// Map of tracks for 2-segments.
-    using Segment2TrackMap = HashMap<StringHash, CharacterAnimationSegment2Track>;
-public:
     /// Construct.
-    CharacterAnimation(Context* context);
-    /// Destruct.
-    virtual ~CharacterAnimation();
+    CharacterAnimation(Context* context) : Resource(context) {}
     /// Register object factory.
     static void RegisterObject(Context* context);
+    /// Import joint animation.
+    bool Import(Animation& animation, Model& model, CharacterSkeleton& rig, const Matrix3x4& transform = Matrix3x4::IDENTITY);
 
     /// Load resource from stream. May be called from a worker thread. Return true if successful.
     virtual bool BeginLoad(Deserializer& source);
@@ -167,19 +314,28 @@ public:
     virtual bool Save(Serializer& dest) const;
 
     /// Load from an XML element. Return true if successful.
-    bool Load(const XMLElement& source);
+    bool LoadXML(const XMLElement& source);
     /// Save to an XML element. Return true if successful.
-    bool Save(XMLElement& dest) const;
+    bool SaveXML(XMLElement& dest) const;
 
-    /// Import animation using model and skeleton.
-    bool ImportAnimation(CharacterSkeleton& characterSkeleton, Model& model, Animation& animation);
+    /// Get tracks.
+    const Vector<SharedPtr<CharacterAnimationTrack>>& GetTracks() const { return tracks_; }
     /// Find track by name.
-    CharacterAnimationSegment2Track* FindTrack(const String& name) const { return segments2_[name]; }
+    CharacterAnimationTrack* FindTrack(const String& name) const;
+    /// Get index of key frame.
+    void GetKeyFrameIndex(float time, unsigned& index) const;
+    /// Get index of key frame.
+    unsigned GetKeyFrameIndex(float time) const;
+    /// Get interpolated key frame indexes.
+    void GetKeyFrame(float time, unsigned& firstFrame, unsigned& secondFrame, float& factor) const;
+    /// Get animation length.
+    float GetLength() const;
 
 private:
-    /// Tracks for 2-segments.
-    Segment2TrackMap segments2_;
-
+    /// Time stamps.
+    PODVector<float> timeStamps_;
+    /// Tracks.
+    Vector<SharedPtr<CharacterAnimationTrack>> tracks_;
 };
 
 /// Character Animation Controller.
@@ -211,18 +367,21 @@ public:
     /// Apply animations.
     void ApplyAnimation();
 
+    /// Set skeleton.
+    void SetSkeleton(CharacterSkeleton* skeleton);
     /// Set skeleton attribute.
     void SetSkeletonAttr(const ResourceRef& value);
     /// Return skeleton attribute.
     ResourceRef GetSkeletonAttr() const;
 
 private:
+    /// Lazy initialize model and hierarchy if needed.
+    void UpdateHierarchy();
     /// Get character animation.
     CharacterAnimation* GetCharacterAnimation(const String& animationName);
-    /// Apply animation.
-    void ApplyAnimation(AnimatedModel* animatedModel);
+
     /// Update 2-segment.
-    void UpdateSegment2(AnimatedModel* animatedModel, const CharacterSkeletonSegment2& segment);
+    void UpdateSegment2(const CharacterSkeletonSegment2& segment);
     /// State of 2-segment.
     struct Segment2State
     {
@@ -237,6 +396,13 @@ private:
 private:
     /// Skeleton.
     SharedPtr<CharacterSkeleton> skeleton_;
+    /// Animated model.
+    WeakPtr<AnimatedModel> animatedModel_;
+    /// Animated model skeleton.
+    Skeleton* animatedModelSkeleton_ = nullptr;
+    /// Segment data.
+    Vector<CharacterSkeletonSegment> segmentData_;
+
     /// Cached animations.
     HashMap<StringHash, SharedPtr<CharacterAnimation>> animationCache_;
     /// States.
