@@ -490,6 +490,8 @@ CharacterSkeletonSegmentData* CharacterSkeletonSegmentData::Create(CharacterSkel
     {
     case CharacterSkeletonSegmentType::Root:
         return new CharacterSkeletonRootSegmentData();
+    case CharacterSkeletonSegmentType::Chain:
+        return new CharacterSkeletonChainSegmentData();
     default:
         return nullptr;
     }
@@ -517,10 +519,38 @@ void CharacterSkeletonRootSegmentData::Merge(const CharacterSkeletonSegmentData&
     accumulatedWeight_ += weight;
 }
 
-void CharacterSkeletonRootSegmentData::Apply(CharacterSkeletonSegment& dest)
+void CharacterSkeletonRootSegmentData::Apply(const Vector3& parentPosition, const Quaternion& parentRotation,
+    CharacterSkeletonSegment& dest)
 {
-    dest.nodes_[0]->SetWorldPosition(dest.globalPositions_[0] + position_);
-    dest.nodes_[0]->SetWorldRotation(dest.globalRotations_[0] * rotation_);
+    dest.nodes_[0]->SetWorldPosition(parentPosition + dest.globalPositions_[0] + position_);
+    dest.nodes_[0]->SetWorldRotation(parentRotation * rotation_ * dest.globalRotations_[0]);
+}
+
+//////////////////////////////////////////////////////////////////////////
+void CharacterSkeletonChainSegmentData::Reset()
+{
+    CharacterSkeletonSegmentData::Reset();
+    position_ = Vector3::ZERO;
+    for (Quaternion& rotation : rotations_)
+        rotation = Quaternion::IDENTITY;
+}
+
+void CharacterSkeletonChainSegmentData::Merge(const CharacterSkeletonSegmentData& other, float weight)
+{
+    const CharacterSkeletonChainSegmentData& rhs = static_cast<const CharacterSkeletonChainSegmentData&>(other);
+    const float balance = weight / (weight + accumulatedWeight_);
+    position_ = position_.Lerp(rhs.position_, balance);
+    rotations_.Resize(rhs.rotations_.Size());
+    for (unsigned i = 0; i < rotations_.Size(); ++i)
+        rotations_[i] = rotations_[i].Slerp(rhs.rotations_[i], balance);
+    accumulatedWeight_ += weight;
+}
+
+void CharacterSkeletonChainSegmentData::Apply(const Vector3& parentPosition, const Quaternion& parentRotation,
+    CharacterSkeletonSegment& dest)
+{
+    for (unsigned i = 0; i < dest.nodes_.Size(); ++i)
+        dest.nodes_[i]->SetWorldRotation(parentRotation * rotations_[i] * dest.globalRotations_[i]);
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -609,6 +639,7 @@ SharedPtr<CharacterAnimationTrack> CharacterAnimationTrack::Create(CharacterSkel
     case Urho3D::CharacterSkeletonSegmentType::Root:
         return MakeShared<RootAnimationTrack>(name);
     case Urho3D::CharacterSkeletonSegmentType::Chain:
+        return MakeShared<ChainAnimationTrack>(name);
     default:
         return nullptr;
     }
@@ -651,6 +682,52 @@ bool RootAnimationTrack::LoadXML(const XMLElement& source)
         CharacterSkeletonRootSegmentData frame;
         frame.position_ = child.GetVector3("position");
         frame.rotation_ = child.GetQuaternion("rotation");
+        track_.Push(frame);
+    }
+    return true;
+}
+
+//////////////////////////////////////////////////////////////////////////
+void ChainAnimationTrack::ImportFrame(const CharacterSkeletonSegment& segment)
+{
+    CharacterSkeletonChainSegmentData frame;
+    frame.position_ = segment.nodes_.Back()->GetWorldPosition();
+    frame.rotations_.Resize(segment.nodes_.Size());
+    for (unsigned i = 0; i < segment.nodes_.Size(); ++i)
+        frame.rotations_[i] = segment.nodes_[i]->GetWorldRotation() * segment.globalRotations_[i].Inverse();
+    track_.Push(frame);
+}
+
+void ChainAnimationTrack::MergeFrame(unsigned firstFrame, unsigned secondFrame, float factor,
+    float weight, CharacterSkeletonSegmentData& dest)
+{
+    const CharacterSkeletonChainSegmentData& first = track_[firstFrame];
+    const CharacterSkeletonChainSegmentData& second = track_[secondFrame];
+    dest.Merge(first, weight * (1 - factor));
+    dest.Merge(second, weight * factor);
+}
+
+bool ChainAnimationTrack::SaveXML(XMLElement& dest) const
+{
+    const unsigned numKeys = track_.Size();
+    for (unsigned i = 0; i < numKeys; ++i)
+    {
+        XMLElement child = dest.CreateChild("frame");
+        child.SetVector3("position", track_[i].position_);
+        for (unsigned j = 0; j < track_[i].rotations_.Size(); ++j)
+            child.CreateChild("bone").SetQuaternion("rotation", track_[i].rotations_[j]);
+    }
+    return true;
+}
+
+bool ChainAnimationTrack::LoadXML(const XMLElement& source)
+{
+    for (XMLElement child = source.GetChild("frame"); child; child = child.GetNext())
+    {
+        CharacterSkeletonChainSegmentData frame;
+        frame.position_ = child.GetVector3("position");
+        for (XMLElement bone = child.GetChild("bone"); bone; bone = bone.GetNext())
+            frame.rotations_.Push(bone.GetQuaternion("rotation"));
         track_.Push(frame);
     }
     return true;
@@ -912,7 +989,7 @@ bool CharacterAnimation::Import(Animation& animation, Model& model, CharacterSke
         node.MarkDirty();
 
         // Read tracks
-        for (unsigned j = 0; j < segmentData.Size(); ++i)
+        for (unsigned j = 0; j < segmentData.Size(); ++j)
             if (tracks_[j])
                 tracks_[j]->ImportFrame(segmentData[j]);
     }
@@ -1007,7 +1084,7 @@ void CharacterAnimationController::ApplyAnimation()
 
     // Apply animations
     for (CharacterSkeletonSegment& segment : segmentData_)
-        segment.data_->Apply(segment);
+        segment.data_->Apply(node_->GetWorldPosition(), node_->GetWorldRotation(), segment);
 }
 
 void CharacterAnimationController::SetSkeleton(CharacterSkeleton* skeleton)

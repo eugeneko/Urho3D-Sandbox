@@ -1,3 +1,4 @@
 <skeleton>
     <root name="Root"       bones="swat:Hips"/>
+    <chain name="Spine"     bones="swat:Spine swat:Spine1 swat:Spine2 swat:Neck"/>
 </skeleton>

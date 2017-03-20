@@ -63,7 +63,7 @@ public:
     /// Merge state with specified weight to this.
     virtual void Merge(const CharacterSkeletonSegmentData& other, float weight) = 0;
     /// Apply segment animations to segment.
-    virtual void Apply(CharacterSkeletonSegment& dest) = 0;
+    virtual void Apply(const Vector3& parentPosition, const Quaternion& parentRotation, CharacterSkeletonSegment& dest) = 0;
 
 protected:
     /// Weight.
@@ -103,15 +103,31 @@ public:
     Quaternion rotation_;
 
 public:
-    CharacterSkeletonRootSegmentData& operator = (const CharacterSkeletonRootSegmentData& other) = default;
-
     /// @see CharacterSkeletonSegmentData::Reset
     virtual void Reset() override;
     /// @see CharacterSkeletonSegmentData::Merge
     virtual void Merge(const CharacterSkeletonSegmentData& other, float weight) override;
     /// @see CharacterSkeletonSegmentData::Apply
-    virtual void Apply(CharacterSkeletonSegment& dest) override;
+    virtual void Apply(const Vector3& parentPosition, const Quaternion& parentRotation, CharacterSkeletonSegment& dest) override;
 
+};
+
+/// Character skeleton chain segment data.
+class CharacterSkeletonChainSegmentData : public CharacterSkeletonSegmentData
+{
+public:
+    /// Target position.
+    Vector3 position_;
+    /// Segment rotations.
+    PODVector<Quaternion> rotations_;
+
+public:
+    /// @see CharacterSkeletonSegmentData::Reset
+    virtual void Reset() override;
+    /// @see CharacterSkeletonSegmentData::Merge
+    virtual void Merge(const CharacterSkeletonSegmentData& other, float weight) override;
+    /// @see CharacterSkeletonSegmentData::Apply
+    virtual void Apply(const Vector3& parentPosition, const Quaternion& parentRotation, CharacterSkeletonSegment& dest) override;
 };
 
 /// Character skeleton.
@@ -293,6 +309,31 @@ public:
 public:
     /// Track.
     Vector<CharacterSkeletonRootSegmentData> track_;
+};
+
+/// Chain animation track.
+class ChainAnimationTrack : public CharacterAnimationTrack
+{
+public:
+    /// Construct.
+    ChainAnimationTrack(const String& name) : CharacterAnimationTrack(CharacterSkeletonSegmentType::Chain, name) {}
+    /// @see CharacterAnimationTrack::ImportFrame
+    virtual void ImportFrame(const CharacterSkeletonSegment& segment) override;
+    /// @see CharacterAnimationTrack::MergeFrame
+    virtual void MergeFrame(unsigned firstFrame, unsigned secondFrame, float factor,
+        float weight, CharacterSkeletonSegmentData& dest) override;
+    /// @see CharacterAnimationTrack::SaveXML
+    virtual bool SaveXML(XMLElement& dest) const override;
+    /// @see CharacterAnimationTrack::LoadXML
+    virtual bool LoadXML(const XMLElement& source) override;
+    /// @see CharacterAnimationTrack::GetTypeString
+    virtual String GetTypeString() const override { return "chain"; }
+    /// @see CharacterAnimationTrack::CheckNumberOfBones
+    virtual bool CheckNumberOfBones(unsigned numBones) const override { return numBones > 2; }
+
+public:
+    /// Track.
+    Vector<CharacterSkeletonChainSegmentData> track_;
 };
 
 /// Character Animation.
