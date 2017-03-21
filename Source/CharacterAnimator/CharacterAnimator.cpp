@@ -444,7 +444,8 @@ unsigned GetBoneIndex(Skeleton& skeleton, const String& boneName)
 }
 
 /// Compute global transforms of the skeleton - implementation.
-void ComputeGlobalTransforms(Skeleton& skeleton, unsigned boneIndex, PODVector<Matrix3x4>& transforms, PODVector<bool>& dirty)
+void ComputeGlobalTransforms(Skeleton& skeleton, unsigned boneIndex, const Matrix3x4& baseTransform,
+    PODVector<Matrix3x4>& transforms, PODVector<bool>& dirty)
 {
     // Don't compute twice
     if (!dirty[boneIndex])
@@ -453,23 +454,23 @@ void ComputeGlobalTransforms(Skeleton& skeleton, unsigned boneIndex, PODVector<M
     // Compute parent if dirty
     const Bone* bone = skeleton.GetBone(boneIndex);
     if (bone->parentIndex_ != boneIndex)
-        ComputeGlobalTransforms(skeleton, bone->parentIndex_, transforms, dirty);
+        ComputeGlobalTransforms(skeleton, bone->parentIndex_, baseTransform, transforms, dirty);
 
     // Compute global transform
     const Matrix3x4 localTransform(bone->initialPosition_, bone->initialRotation_, bone->initialScale_);
-    const Matrix3x4 parentTransform = bone->parentIndex_ == boneIndex ? Matrix3x4::IDENTITY : transforms[bone->parentIndex_];
+    const Matrix3x4 parentTransform = bone->parentIndex_ == boneIndex ? baseTransform : transforms[bone->parentIndex_];
     transforms[boneIndex] = parentTransform * localTransform;
     dirty[boneIndex] = false;
 }
 
 /// Compute global transforms of the skeleton.
-PODVector<Matrix3x4> ComputeGlobalTransforms(Skeleton& skeleton)
+PODVector<Matrix3x4> ComputeGlobalTransforms(Skeleton& skeleton, const Matrix3x4& baseTransform)
 {
     const unsigned numBones = skeleton.GetNumBones();
     PODVector<Matrix3x4> transforms(numBones);
     PODVector<bool> dirty(numBones);
     for (unsigned i = 0; i < numBones; ++i)
-        ComputeGlobalTransforms(skeleton, i, transforms, dirty);
+        ComputeGlobalTransforms(skeleton, i, baseTransform, transforms, dirty);
     return transforms;
 }
 
@@ -588,9 +589,10 @@ const CharacterSkeletonSegment* CharacterSkeleton::FindSegment(const String& nam
     return nullptr;
 }
 
-bool CharacterSkeleton::AllocateSegmentData(Vector<CharacterSkeletonSegment>& segmentsData, Skeleton& skeleton)
+bool CharacterSkeleton::AllocateSegmentData(Vector<CharacterSkeletonSegment>& segmentsData
+    , Skeleton& skeleton, const Matrix3x4& baseTransform)
 {
-    const PODVector<Matrix3x4> globalTransforms = ComputeGlobalTransforms(skeleton);
+    const PODVector<Matrix3x4> globalTransforms = ComputeGlobalTransforms(skeleton, baseTransform);
 
     const unsigned numSegments = segments_.Size();
     segmentsData.Resize(numSegments);
@@ -978,7 +980,7 @@ bool CharacterAnimation::Import(Animation& animation, Model& model, CharacterSke
 
     // Gather segments data
     Vector<CharacterSkeletonSegment> segmentData;
-    rig.AllocateSegmentData(segmentData, skeleton);
+    rig.AllocateSegmentData(segmentData, skeleton, transform);
 
     // Collect tracks
     for (unsigned i = 0; i < numFrames; ++i)
@@ -1017,6 +1019,9 @@ void CharacterAnimationController::RegisterObject(Context* context)
 void CharacterAnimationController::SetAnimationTransform(const Matrix3x4& transform)
 {
     animationTransform_ = transform;
+
+    // #TODO Add dirty flag
+    animatedModelSkeleton_ = nullptr;
 }
 
 void CharacterAnimationController::SetTargetTransform(StringHash segment, const Matrix3x4& transform)
@@ -1116,7 +1121,7 @@ void CharacterAnimationController::UpdateHierarchy()
     if (!animatedModel_)
         return;
 
-    skeleton_->AllocateSegmentData(segmentData_, *animatedModelSkeleton_);
+    skeleton_->AllocateSegmentData(segmentData_, *animatedModelSkeleton_, animationTransform_);
 }
 
 CharacterAnimation* CharacterAnimationController::GetCharacterAnimation(const String& animationName)

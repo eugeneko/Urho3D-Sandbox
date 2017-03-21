@@ -7,8 +7,8 @@
 	<attribute name="Elapsed Time" value="0" />
 	<attribute name="Next Replicated Node ID" value="715" />
 	<attribute name="Next Replicated Component ID" value="81" />
-	<attribute name="Next Local Node ID" value="16778012" />
-	<attribute name="Next Local Component ID" value="16778728" />
+	<attribute name="Next Local Node ID" value="16778014" />
+	<attribute name="Next Local Component ID" value="16778752" />
 	<attribute name="Variables" />
 	<attribute name="Variable Names" value="" />
 	<component type="Octree" id="1" />
@@ -117,6 +117,7 @@
 			<attribute name="Delayed Method Calls" value="0" />
 			<attribute name="Script File" value="ScriptFile;CharacterAnimator/Script_CompareAnimations.as" />
 			<attribute name="Class Name" value="Animator" />
+			<attribute name="rotation" value="0" />
 		</component>
 		<component type="AnimationController" id="76">
 			<attribute name="Node Animation States">
@@ -633,7 +634,7 @@
 		<attribute name="Name" value="Animated" />
 		<attribute name="Tags" />
 		<attribute name="Position" value="0 0 0" />
-		<attribute name="Rotation" value="1 0 0 0" />
+		<attribute name="Rotation" value="-4.37114e-08 -0 -1 0" />
 		<attribute name="Scale" value="1 1 1" />
 		<attribute name="Variables" />
 		<component type="AnimatedModel" id="72">
@@ -712,6 +713,7 @@
 			<attribute name="Delayed Method Calls" value="0" />
 			<attribute name="Script File" value="ScriptFile;CharacterAnimator/Script_CompareAnimations.as" />
 			<attribute name="Class Name" value="Animator" />
+			<attribute name="rotation" value="-180" />
 		</component>
 		<node id="710">
 			<attribute name="Is Enabled" value="true" />
@@ -1335,6 +1337,7 @@
 			<attribute name="Delayed Method Calls" value="0" />
 			<attribute name="Script File" value="ScriptFile;CharacterAnimator/Script_CompareAnimations.as" />
 			<attribute name="Class Name" value="Animator" />
+			<attribute name="rotation" value="0" />
 		</component>
 		<node id="713">
 			<attribute name="Is Enabled" value="true" />

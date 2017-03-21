@@ -44,10 +44,22 @@ int Main()
         return 2;
     }
 
-    const String& modelFileName = arguments[0];
-    const String& skeletonFileName = arguments[1];
-    const String& animationFileName = arguments[2];
-    const String& outputFileName = arguments[3];
+    unsigned argumentIndex = 0;
+    const String& modelFileName = arguments[argumentIndex++];
+    const String& skeletonFileName = arguments[argumentIndex++];
+    const String& animationFileName = arguments[argumentIndex++];
+    const String& outputFileName = arguments[argumentIndex++];
+
+    Matrix3x4 transform;
+    while (argumentIndex < arguments.Size())
+    {
+        const String& tag = arguments[argumentIndex++];
+        if (argumentIndex < arguments.Size())
+        {
+            if (tag == "-ry")
+                transform = transform * Matrix3x4(Quaternion(ToFloat(arguments[argumentIndex++]), Vector3::UP).RotationMatrix());
+        }
+    }
 
     SharedPtr<Model> model(LoadResource<Model>(context, modelFileName));
     SharedPtr<Animation> animation(LoadResource<Animation>(context, animationFileName));
@@ -60,7 +72,7 @@ int Main()
 
     CharacterAnimation characterAnimation(context);
     characterAnimation.SetName(outputFileName);
-    if (!characterAnimation.Import(*animation, *model, *characterSkeleton))
+    if (!characterAnimation.Import(*animation, *model, *characterSkeleton, transform))
     {
         Log::WriteRaw("Failed to import animation");
         return 4;

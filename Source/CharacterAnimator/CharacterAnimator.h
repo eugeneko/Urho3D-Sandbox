@@ -153,7 +153,7 @@ public:
     const CharacterSkeletonSegment* FindSegment(const String& name) const;
 
     /// Allocate segment data.
-    bool AllocateSegmentData(Vector<CharacterSkeletonSegment>& segmentsData, Skeleton& skeleton);
+    bool AllocateSegmentData(Vector<CharacterSkeletonSegment>& segmentsData, Skeleton& skeleton, const Matrix3x4& baseTransform);
 
 private:
     /// Segments.
