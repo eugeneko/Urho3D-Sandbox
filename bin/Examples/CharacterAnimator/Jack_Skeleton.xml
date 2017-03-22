@@ -1,4 +1,4 @@
 <skeleton>
-    <root name="Root"       bones="Bip01_Pelvis"/>
+    <root  name="Root"      bones="Bip01_Pelvis"/>
     <chain name="Spine"     bones="Bip01_Spine Bip01_Spine1 Bip01_Spine2 Bip01_Neck"/>
 </skeleton>

@@ -139,9 +139,9 @@ public:
     /// Limb direction.
     Vector3 direction_;
     /// First segment rotation.
-    float rotation0_;
+    float rotation0_ = 0.0f;
     /// Second segment rotation.
-    float rotation1_;
+    float rotation1_ = 0.0f;
     /// Target segment rotation.
     Quaternion rotation2_;
 
@@ -376,7 +376,7 @@ public:
     /// @see CharacterAnimationTrack::LoadXML
     virtual bool LoadXML(const XMLElement& source) override;
     /// @see CharacterAnimationTrack::GetTypeString
-    virtual String GetTypeString() const override { return "chain"; }
+    virtual String GetTypeString() const override { return "limb"; }
     /// @see CharacterAnimationTrack::CheckNumberOfBones
     virtual bool CheckNumberOfBones(unsigned numBones) const override { return numBones > 2; }
 

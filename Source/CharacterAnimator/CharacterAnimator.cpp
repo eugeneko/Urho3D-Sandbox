@@ -481,6 +481,8 @@ CharacterSkeletonSegmentType GetCharacterSkeletonSegmentType(const String& name)
         return CharacterSkeletonSegmentType::Root;
     else if (name == "chain")
         return CharacterSkeletonSegmentType::Chain;
+    else if (name == "limb")
+        return CharacterSkeletonSegmentType::Limb;
     return CharacterSkeletonSegmentType::Root;
 }
 
@@ -493,6 +495,8 @@ CharacterSkeletonSegmentData* CharacterSkeletonSegmentData::Create(CharacterSkel
         return new CharacterSkeletonRootSegmentData();
     case CharacterSkeletonSegmentType::Chain:
         return new CharacterSkeletonChainSegmentData();
+    case CharacterSkeletonSegmentType::Limb:
+        return new CharacterSkeletonLimbSegmentData();
     default:
         return nullptr;
     }
@@ -617,8 +621,8 @@ const CharacterSkeletonSegment* CharacterSkeleton::FindSegment(const String& nam
     return nullptr;
 }
 
-bool CharacterSkeleton::AllocateSegmentData(Vector<CharacterSkeletonSegment>& segmentsData
-    , Skeleton& skeleton, const Matrix3x4& baseTransform)
+bool CharacterSkeleton::AllocateSegmentData(Vector<CharacterSkeletonSegment>& segmentsData,
+    Skeleton& skeleton, const Matrix3x4& baseTransform)
 {
     const PODVector<Matrix3x4> globalTransforms = ComputeGlobalTransforms(skeleton, baseTransform);
 
@@ -670,6 +674,8 @@ SharedPtr<CharacterAnimationTrack> CharacterAnimationTrack::Create(CharacterSkel
         return MakeShared<RootAnimationTrack>(name);
     case Urho3D::CharacterSkeletonSegmentType::Chain:
         return MakeShared<ChainAnimationTrack>(name);
+    case Urho3D::CharacterSkeletonSegmentType::Limb:
+        return MakeShared<LimbAnimationTrack>(name);
     default:
         return nullptr;
     }
@@ -766,7 +772,8 @@ bool ChainAnimationTrack::LoadXML(const XMLElement& source)
 //////////////////////////////////////////////////////////////////////////
 void LimbAnimationTrack::ImportFrame(const CharacterSkeletonSegment& segment)
 {
-
+    CharacterSkeletonLimbSegmentData frame;
+    track_.Push(frame);
 }
 
 void LimbAnimationTrack::MergeFrame(unsigned firstFrame, unsigned secondFrame, float factor,
