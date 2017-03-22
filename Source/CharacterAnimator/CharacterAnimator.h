@@ -63,7 +63,7 @@ public:
     /// Merge state with specified weight to this.
     virtual void Merge(const CharacterSkeletonSegmentData& other, float weight) = 0;
     /// Apply segment animations to segment.
-    virtual void Apply(const Vector3& parentPosition, const Quaternion& parentRotation, CharacterSkeletonSegment& dest) = 0;
+    virtual void Apply(const Matrix3x4& rootTransform, CharacterSkeletonSegment& dest) = 0;
 
 protected:
     /// Weight.
@@ -108,7 +108,7 @@ public:
     /// @see CharacterSkeletonSegmentData::Merge
     virtual void Merge(const CharacterSkeletonSegmentData& other, float weight) override;
     /// @see CharacterSkeletonSegmentData::Apply
-    virtual void Apply(const Vector3& parentPosition, const Quaternion& parentRotation, CharacterSkeletonSegment& dest) override;
+    virtual void Apply(const Matrix3x4& rootTransform, CharacterSkeletonSegment& dest) override;
 
 };
 
@@ -127,7 +127,31 @@ public:
     /// @see CharacterSkeletonSegmentData::Merge
     virtual void Merge(const CharacterSkeletonSegmentData& other, float weight) override;
     /// @see CharacterSkeletonSegmentData::Apply
-    virtual void Apply(const Vector3& parentPosition, const Quaternion& parentRotation, CharacterSkeletonSegment& dest) override;
+    virtual void Apply(const Matrix3x4& rootTransform, CharacterSkeletonSegment& dest) override;
+};
+
+/// Character skeleton limb segment data.
+class CharacterSkeletonLimbSegmentData : public CharacterSkeletonSegmentData
+{
+public:
+    /// Target position.
+    Vector3 position_;
+    /// Limb direction.
+    Vector3 direction_;
+    /// First segment rotation.
+    float rotation0_;
+    /// Second segment rotation.
+    float rotation1_;
+    /// Target segment rotation.
+    Quaternion rotation2_;
+
+public:
+    /// @see CharacterSkeletonSegmentData::Reset
+    virtual void Reset() override;
+    /// @see CharacterSkeletonSegmentData::Merge
+    virtual void Merge(const CharacterSkeletonSegmentData& other, float weight) override;
+    /// @see CharacterSkeletonSegmentData::Apply
+    virtual void Apply(const Matrix3x4& rootTransform, CharacterSkeletonSegment& dest) override;
 };
 
 /// Character skeleton.
@@ -334,6 +358,31 @@ public:
 public:
     /// Track.
     Vector<CharacterSkeletonChainSegmentData> track_;
+};
+
+/// Limb animation track.
+class LimbAnimationTrack : public CharacterAnimationTrack
+{
+public:
+    /// Construct.
+    LimbAnimationTrack(const String& name) : CharacterAnimationTrack(CharacterSkeletonSegmentType::Limb, name) {}
+    /// @see CharacterAnimationTrack::ImportFrame
+    virtual void ImportFrame(const CharacterSkeletonSegment& segment) override;
+    /// @see CharacterAnimationTrack::MergeFrame
+    virtual void MergeFrame(unsigned firstFrame, unsigned secondFrame, float factor,
+        float weight, CharacterSkeletonSegmentData& dest) override;
+    /// @see CharacterAnimationTrack::SaveXML
+    virtual bool SaveXML(XMLElement& dest) const override;
+    /// @see CharacterAnimationTrack::LoadXML
+    virtual bool LoadXML(const XMLElement& source) override;
+    /// @see CharacterAnimationTrack::GetTypeString
+    virtual String GetTypeString() const override { return "chain"; }
+    /// @see CharacterAnimationTrack::CheckNumberOfBones
+    virtual bool CheckNumberOfBones(unsigned numBones) const override { return numBones > 2; }
+
+public:
+    /// Track.
+    Vector<CharacterSkeletonLimbSegmentData> track_;
 };
 
 /// Character Animation.

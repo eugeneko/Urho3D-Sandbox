@@ -520,11 +520,13 @@ void CharacterSkeletonRootSegmentData::Merge(const CharacterSkeletonSegmentData&
     accumulatedWeight_ += weight;
 }
 
-void CharacterSkeletonRootSegmentData::Apply(const Vector3& parentPosition, const Quaternion& parentRotation,
-    CharacterSkeletonSegment& dest)
+void CharacterSkeletonRootSegmentData::Apply(const Matrix3x4& rootTransform, CharacterSkeletonSegment& dest)
 {
-    dest.nodes_[0]->SetWorldPosition(parentPosition + dest.globalPositions_[0] + position_);
-    dest.nodes_[0]->SetWorldRotation(parentRotation * rotation_ * dest.globalRotations_[0]);
+    const Vector3 localPosition = dest.globalPositions_[0] + position_;
+    const Quaternion localRotation = rotation_ * dest.globalRotations_[0];
+    const Matrix3x4 localTransform(localPosition, localRotation, dest.nodes_[0]->GetScale());
+    const Matrix3x4& parentTransform = dest.nodes_[0]->GetParent()->GetWorldTransform();
+    dest.nodes_[0]->SetTransform(parentTransform.Inverse() * rootTransform * localTransform);
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -547,11 +549,37 @@ void CharacterSkeletonChainSegmentData::Merge(const CharacterSkeletonSegmentData
     accumulatedWeight_ += weight;
 }
 
-void CharacterSkeletonChainSegmentData::Apply(const Vector3& parentPosition, const Quaternion& parentRotation,
-    CharacterSkeletonSegment& dest)
+void CharacterSkeletonChainSegmentData::Apply(const Matrix3x4& rootTransform, CharacterSkeletonSegment& dest)
 {
     for (unsigned i = 0; i < dest.nodes_.Size(); ++i)
-        dest.nodes_[i]->SetWorldRotation(parentRotation * rotations_[i] * dest.globalRotations_[i]);
+        dest.nodes_[i]->SetWorldRotation(rootTransform.Rotation() * rotations_[i] * dest.globalRotations_[i]);
+}
+
+//////////////////////////////////////////////////////////////////////////
+void CharacterSkeletonLimbSegmentData::Reset()
+{
+    position_ = Vector3::ZERO;
+    direction_ = Vector3::ZERO;
+    rotation0_ = 0.0f;
+    rotation1_ = 0.0f;
+    rotation2_ = Quaternion::IDENTITY;
+}
+
+void CharacterSkeletonLimbSegmentData::Merge(const CharacterSkeletonSegmentData& other, float weight)
+{
+    const CharacterSkeletonLimbSegmentData& rhs = static_cast<const CharacterSkeletonLimbSegmentData&>(other);
+    const float balance = weight / (weight + accumulatedWeight_);
+    position_ = position_.Lerp(rhs.position_, balance);
+    direction_ = direction_.Lerp(rhs.direction_, balance);
+    rotation0_ = Lerp(rotation0_, rhs.rotation0_, balance);
+    rotation1_ = Lerp(rotation1_, rhs.rotation1_, balance);
+    rotation2_ = rotation2_.Slerp(rhs.rotation2_, balance);
+    accumulatedWeight_ += weight;
+}
+
+void CharacterSkeletonLimbSegmentData::Apply(const Matrix3x4& rootTransform, CharacterSkeletonSegment& dest)
+{
+
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -730,6 +758,51 @@ bool ChainAnimationTrack::LoadXML(const XMLElement& source)
         frame.position_ = child.GetVector3("position");
         for (XMLElement bone = child.GetChild("bone"); bone; bone = bone.GetNext())
             frame.rotations_.Push(bone.GetQuaternion("rotation"));
+        track_.Push(frame);
+    }
+    return true;
+}
+
+//////////////////////////////////////////////////////////////////////////
+void LimbAnimationTrack::ImportFrame(const CharacterSkeletonSegment& segment)
+{
+
+}
+
+void LimbAnimationTrack::MergeFrame(unsigned firstFrame, unsigned secondFrame, float factor,
+    float weight, CharacterSkeletonSegmentData& dest)
+{
+    const CharacterSkeletonLimbSegmentData& first = track_[firstFrame];
+    const CharacterSkeletonLimbSegmentData& second = track_[secondFrame];
+    dest.Merge(first, weight * (1 - factor));
+    dest.Merge(second, weight * factor);
+}
+
+bool LimbAnimationTrack::SaveXML(XMLElement& dest) const
+{
+    const unsigned numKeys = track_.Size();
+    for (unsigned i = 0; i < numKeys; ++i)
+    {
+        XMLElement child = dest.CreateChild("frame");
+        child.SetVector3("position", track_[i].position_);
+        child.SetVector3("direction", track_[i].direction_);
+        child.SetFloat("rotation0", track_[i].rotation0_);
+        child.SetFloat("rotation1", track_[i].rotation1_);
+        child.SetQuaternion("rotation2", track_[i].rotation2_);
+    }
+    return true;
+}
+
+bool LimbAnimationTrack::LoadXML(const XMLElement& source)
+{
+    for (XMLElement child = source.GetChild("frame"); child; child = child.GetNext())
+    {
+        CharacterSkeletonLimbSegmentData frame;
+        frame.position_ = child.GetVector3("position");
+        frame.direction_ = child.GetVector3("direction");
+        frame.rotation0_ = child.GetFloat("rotation0");
+        frame.rotation1_ = child.GetFloat("rotation1");
+        frame.rotation2_ = child.GetQuaternion("rotation2");
         track_.Push(frame);
     }
     return true;
@@ -1089,7 +1162,7 @@ void CharacterAnimationController::ApplyAnimation()
 
     // Apply animations
     for (CharacterSkeletonSegment& segment : segmentData_)
-        segment.data_->Apply(node_->GetWorldPosition(), node_->GetWorldRotation(), segment);
+        segment.data_->Apply(node_->GetWorldTransform(), segment);
 }
 
 void CharacterAnimationController::SetSkeleton(CharacterSkeleton* skeleton)
