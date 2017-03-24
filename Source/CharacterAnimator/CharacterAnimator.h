@@ -84,6 +84,9 @@ struct CharacterSkeletonSegment
     PODVector<Bone*> bones_;
     /// Nodes of the segment.
     PODVector<Node*> nodes_;
+    /// Initial transforms.
+    PODVector<Matrix3x4> initialTransforms_;
+    // #TODO Fix duplicate
     /// Global initial positions.
     PODVector<Vector3> globalPositions_;
     /// Global initial rotations.
@@ -139,11 +142,11 @@ public:
     /// Limb direction.
     Vector3 direction_;
     /// First segment rotation.
-    float rotation0_ = 0.0f;
+    float rotationA_ = 0.0f;
     /// Second segment rotation.
-    float rotation1_ = 0.0f;
+    float rotationB_ = 0.0f;
     /// Target segment rotation.
-    Quaternion rotation2_;
+    Quaternion rotationC_;
 
 public:
     /// @see CharacterSkeletonSegmentData::Reset

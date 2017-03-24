@@ -403,6 +403,8 @@ void CreateFootAnimationTrack(FootAnimationTrack& track, Model* model, Animation
         track.staticRanges_.Push(MakePair(rangeBegin, times.Back()));
 }
 
+//////////////////////////////////////////////////////////////////////////
+
 /// Intersect sphere and sphere. If there is no intersection point, second sphere is moved toward first one.
 void IntersectSphereSphereGuaranteed(const Sphere& first, const Sphere& second, float& distance, float& radius)
 {
@@ -412,6 +414,14 @@ void IntersectSphereSphereGuaranteed(const Sphere& first, const Sphere& second, 
     const float d = Min(R + r, (second.center_ - first.center_).Length());
     radius = Sqrt(Max(0.0f, (-d + r - R) * (-d - r + R) * (-d + r + R) * (d + r + R))) / (2 * d);
     distance = Sqrt(R * R - radius * radius);
+}
+
+/// Compute joint orientation.
+Vector3 ComputeJointOrientation(const Vector3& baseOrientation, const Vector3& baseDirection, const Vector3& currentDirection,
+    const Matrix3x4& rootTransform)
+{
+    const Quaternion rotation(baseDirection, rootTransform.Rotation().Inverse() * currentDirection);
+    return rotation * baseOrientation;
 }
 
 /// Resolve knee position.
@@ -433,8 +443,6 @@ Vector3 ClampVector(const Vector3& vec, const Vector3& origin, float radius)
     const float length = delta.Length();
     return length <= radius ? vec : origin + delta / length * radius;
 }
-
-//////////////////////////////////////////////////////////////////////////
 
 /// Get bone index.
 unsigned GetBoneIndex(Skeleton& skeleton, const String& boneName)
@@ -472,6 +480,42 @@ PODVector<Matrix3x4> ComputeGlobalTransforms(Skeleton& skeleton, const Matrix3x4
     for (unsigned i = 0; i < numBones; ++i)
         ComputeGlobalTransforms(skeleton, i, baseTransform, transforms, dirty);
     return transforms;
+}
+
+/// Project point onto segment.
+Vector3 ProjectPointOntoSegment(const Vector3& point, const Vector3& from, const Vector3& to)
+{
+    const Vector3 direction = (to - from).Normalized();
+    return direction * (point - from).ProjectOntoAxis(direction) + from;
+}
+
+/// Get rotation axis and angle.
+void GetAxisAngle(const Quaternion& rotation, Vector3& axis, float& angle)
+{
+    angle = 2 * Acos(rotation.w_);
+
+    const float ww = rotation.w_ * rotation.w_;
+    axis.x_ = rotation.x_ / sqrt(1 - ww);
+    axis.y_ = rotation.y_ / sqrt(1 - ww);
+    axis.z_ = rotation.z_ / sqrt(1 - ww);
+}
+
+/// Get rotation axis.
+Vector3 GetAxis(const Quaternion& rotation)
+{
+    Vector3 axis;
+    float angle;
+    GetAxisAngle(rotation, axis, angle);
+    return axis;
+}
+
+/// Get rotation angle.
+float GetAngle(const Quaternion& rotation)
+{
+    Vector3 axis;
+    float angle;
+    GetAxisAngle(rotation, axis, angle);
+    return angle;
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -562,11 +606,12 @@ void CharacterSkeletonChainSegmentData::Apply(const Matrix3x4& rootTransform, Ch
 //////////////////////////////////////////////////////////////////////////
 void CharacterSkeletonLimbSegmentData::Reset()
 {
+    CharacterSkeletonSegmentData::Reset();
     position_ = Vector3::ZERO;
     direction_ = Vector3::ZERO;
-    rotation0_ = 0.0f;
-    rotation1_ = 0.0f;
-    rotation2_ = Quaternion::IDENTITY;
+    rotationA_ = 0.0f;
+    rotationB_ = 0.0f;
+    rotationC_ = Quaternion::IDENTITY;
 }
 
 void CharacterSkeletonLimbSegmentData::Merge(const CharacterSkeletonSegmentData& other, float weight)
@@ -575,14 +620,46 @@ void CharacterSkeletonLimbSegmentData::Merge(const CharacterSkeletonSegmentData&
     const float balance = weight / (weight + accumulatedWeight_);
     position_ = position_.Lerp(rhs.position_, balance);
     direction_ = direction_.Lerp(rhs.direction_, balance);
-    rotation0_ = Lerp(rotation0_, rhs.rotation0_, balance);
-    rotation1_ = Lerp(rotation1_, rhs.rotation1_, balance);
-    rotation2_ = rotation2_.Slerp(rhs.rotation2_, balance);
+    rotationA_ = Lerp(rotationA_, rhs.rotationA_, balance);
+    rotationB_ = Lerp(rotationB_, rhs.rotationB_, balance);
+    rotationC_ = rotationC_.Slerp(rhs.rotationC_, balance);
     accumulatedWeight_ += weight;
 }
 
 void CharacterSkeletonLimbSegmentData::Apply(const Matrix3x4& rootTransform, CharacterSkeletonSegment& dest)
 {
+    Node* node0 = dest.nodes_[0];
+    Node* node1 = dest.nodes_[1];
+    Node* node2 = dest.nodes_[2];
+
+    const Matrix3x4& initialA = dest.initialTransforms_[0];
+    const Matrix3x4& initialB = dest.initialTransforms_[1];
+    const Matrix3x4& initialC = dest.initialTransforms_[2];
+
+    const float thighLength = (node0->GetWorldPosition() - node1->GetWorldPosition()).Length();
+    const float calfLength = (node1->GetWorldPosition() - node2->GetWorldPosition()).Length();
+
+    // Resolve limb
+    const Vector3 worldPos0 = node0->GetWorldPosition();
+    const Vector3 worldPos2 = ClampVector(rootTransform.ToMatrix3() * position_ + worldPos0, worldPos0, thighLength + calfLength);
+    const Vector3 baseDirection = initialC.Translation() - initialA.Translation();
+    const Vector3 worldJointOrientation = ComputeJointOrientation(direction_, baseDirection, worldPos2 - worldPos0, rootTransform);
+    const Vector3 worldPos1 = ResolveKneePosition(worldPos0, worldPos2, worldJointOrientation, thighLength, calfLength);
+
+    // Apply foot shape
+    if (!MatchChildPosition(*node0, *node1, worldPos1))
+        URHO3D_LOGWARNING("Failed to resolve thigh-calf segment of foot animation");
+
+    if (!MatchChildPosition(*node1, *node2, worldPos2))
+        URHO3D_LOGWARNING("Failed to resolve calf-heel segment of foot animation");
+
+    // Resolve heel rotation
+//     const Quaternion origHeelRotation = calfNode->GetWorldRotation() * keyFrame.heelRotationLocal_;
+//     const Quaternion fixedHeelRotation = node_->GetWorldRotation() * keyFrame.heelRotationWorld_;
+//     const Quaternion adjustToGoundRotation = Quaternion::IDENTITY.Slerp(state.targetTransform_.Rotation(), state.targetRotationAmount_);
+//     heelNode->SetWorldRotation(adjustToGoundRotation * origHeelRotation.Slerp(fixedHeelRotation, state.globalRotationFactor_));
+//
+//     thighNode->MarkDirty();
 
 }
 
@@ -644,6 +721,7 @@ bool CharacterSkeleton::AllocateSegmentData(Vector<CharacterSkeletonSegment>& se
         const unsigned numBones = segment.boneNames_.Size();
         segmentsData[i].bones_.Resize(numBones);
         segmentsData[i].nodes_.Resize(numBones);
+        segmentsData[i].initialTransforms_.Resize(numBones);
         segmentsData[i].globalPositions_.Resize(numBones);
         segmentsData[i].globalRotations_.Resize(numBones);
         for (unsigned j = 0; j < numBones; ++j)
@@ -658,6 +736,7 @@ bool CharacterSkeleton::AllocateSegmentData(Vector<CharacterSkeletonSegment>& se
 
             segmentsData[i].bones_[j] = bone;
             segmentsData[i].nodes_[j] = bone->node_;
+            segmentsData[i].initialTransforms_[j] = globalTransforms[boneIndex];
             segmentsData[i].globalPositions_[j] = globalTransforms[boneIndex].Translation();
             segmentsData[i].globalRotations_[j] = globalTransforms[boneIndex].Rotation();
         }
@@ -773,6 +852,53 @@ bool ChainAnimationTrack::LoadXML(const XMLElement& source)
 void LimbAnimationTrack::ImportFrame(const CharacterSkeletonSegment& segment)
 {
     CharacterSkeletonLimbSegmentData frame;
+
+    Node* nodeA = segment.nodes_[0];
+    Node* nodeB = segment.nodes_[1];
+    Node* nodeC = segment.nodes_[2];
+
+    const Matrix3x4 transformA = nodeA->GetWorldTransform();
+    const Matrix3x4 transformB = nodeB->GetWorldTransform();
+    const Matrix3x4 transformC = nodeC->GetWorldTransform();
+
+    const Matrix3x4& initialA = segment.initialTransforms_[0];
+    const Matrix3x4& initialB = segment.initialTransforms_[1];
+    const Matrix3x4& initialC = segment.initialTransforms_[2];
+
+    // Get relative position
+    frame.position_ = transformC.Translation() - transformA.Translation();
+
+    // Get joint bending direction
+    const Vector3 positionAproj = ProjectPointOntoSegment(transformB.Translation(), transformA.Translation(), transformC.Translation());
+    const Vector3 initialDirection = initialC.Translation() - initialA.Translation();
+    const Vector3 newDirection = transformC.Translation() - transformA.Translation();
+    frame.direction_ = Quaternion(newDirection, initialDirection) * (positionAproj - transformB.Translation()).Normalized();
+
+    // Revert transforms to initial
+    const Vector3 zeroDelta = nodeA->GetWorldPosition() - initialA.Translation();
+    if (!MatchChildPosition(*nodeA, *nodeB, initialB.Translation() + zeroDelta))
+        URHO3D_LOGWARNING("Failed to resolve thigh-calf segment of foot animation");
+    if (!MatchChildPosition(*nodeB, *nodeC, initialC.Translation() + zeroDelta))
+        URHO3D_LOGWARNING("Failed to resolve calf-heel segment of foot animation");
+
+    // Gather rotations
+    const Quaternion pureRotationA = initialA.Rotation().Inverse() * nodeA->GetWorldRotation();
+    const Quaternion pureRotationB = initialB.Rotation().Inverse() * nodeB->GetWorldRotation();
+    const Quaternion pureRotationC = initialC.Rotation().Inverse() * nodeC->GetWorldRotation();
+
+    frame.rotationA_ = GetAngle(pureRotationA);
+    frame.rotationB_ = GetAngle(pureRotationB);
+    frame.rotationC_ = transformC.Rotation() * initialC.Rotation().Inverse();
+
+    // Flip angles if needed
+    const Vector3 directionAB = (nodeB->GetWorldPosition() - nodeA->GetWorldPosition()).Normalized();
+    const Vector3 directionBC = (nodeC->GetWorldPosition() - nodeB->GetWorldPosition()).Normalized();
+    const Vector3 axisAB = GetAxis(pureRotationA);
+    const Vector3 axisBC = GetAxis(pureRotationB);
+
+    frame.rotationA_ *= Sign(directionAB.DotProduct(axisAB));
+    frame.rotationB_ *= Sign(directionBC.DotProduct(axisBC));
+
     track_.Push(frame);
 }
 
@@ -793,9 +919,9 @@ bool LimbAnimationTrack::SaveXML(XMLElement& dest) const
         XMLElement child = dest.CreateChild("frame");
         child.SetVector3("position", track_[i].position_);
         child.SetVector3("direction", track_[i].direction_);
-        child.SetFloat("rotation0", track_[i].rotation0_);
-        child.SetFloat("rotation1", track_[i].rotation1_);
-        child.SetQuaternion("rotation2", track_[i].rotation2_);
+        child.SetFloat("rotation0", track_[i].rotationA_);
+        child.SetFloat("rotation1", track_[i].rotationB_);
+        child.SetQuaternion("rotation2", track_[i].rotationC_);
     }
     return true;
 }
@@ -807,9 +933,9 @@ bool LimbAnimationTrack::LoadXML(const XMLElement& source)
         CharacterSkeletonLimbSegmentData frame;
         frame.position_ = child.GetVector3("position");
         frame.direction_ = child.GetVector3("direction");
-        frame.rotation0_ = child.GetFloat("rotation0");
-        frame.rotation1_ = child.GetFloat("rotation1");
-        frame.rotation2_ = child.GetQuaternion("rotation2");
+        frame.rotationA_ = child.GetFloat("rotation0");
+        frame.rotationB_ = child.GetFloat("rotation1");
+        frame.rotationC_ = child.GetQuaternion("rotation2");
         track_.Push(frame);
     }
     return true;
@@ -1074,6 +1200,7 @@ bool CharacterAnimation::Import(Animation& animation, Model& model, CharacterSke
         for (unsigned j = 0; j < segmentData.Size(); ++j)
             if (tracks_[j])
                 tracks_[j]->ImportFrame(segmentData[j]);
+        // #TODO Backup
     }
 
     return true;
