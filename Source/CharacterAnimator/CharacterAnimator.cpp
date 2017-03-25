@@ -420,8 +420,9 @@ void IntersectSphereSphereGuaranteed(const Sphere& first, const Sphere& second, 
 Vector3 ComputeJointOrientation(const Vector3& baseOrientation, const Vector3& baseDirection, const Vector3& currentDirection,
     const Matrix3x4& rootTransform)
 {
-    const Quaternion rotation(baseDirection, rootTransform.Rotation().Inverse() * currentDirection);
-    return rotation * baseOrientation;
+    const Quaternion rootRotation = rootTransform.Rotation();
+    const Quaternion rotation(baseDirection, rootRotation.Inverse() * currentDirection);
+    return rootRotation * rotation * baseOrientation;
 }
 
 /// Resolve knee position.
@@ -872,7 +873,7 @@ void LimbAnimationTrack::ImportFrame(const CharacterSkeletonSegment& segment)
     const Vector3 positionAproj = ProjectPointOntoSegment(transformB.Translation(), transformA.Translation(), transformC.Translation());
     const Vector3 initialDirection = initialC.Translation() - initialA.Translation();
     const Vector3 newDirection = transformC.Translation() - transformA.Translation();
-    frame.direction_ = Quaternion(newDirection, initialDirection) * (positionAproj - transformB.Translation()).Normalized();
+    frame.direction_ = Quaternion(newDirection, initialDirection) * (transformB.Translation() - positionAproj).Normalized();
 
     // Revert transforms to initial
     const Vector3 zeroDelta = nodeA->GetWorldPosition() - initialA.Translation();
