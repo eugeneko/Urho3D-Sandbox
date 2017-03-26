@@ -640,6 +640,12 @@ void CharacterSkeletonLimbSegmentData::Apply(const Matrix3x4& rootTransform, Cha
     const float thighLength = (node0->GetWorldPosition() - node1->GetWorldPosition()).Length();
     const float calfLength = (node1->GetWorldPosition() - node2->GetWorldPosition()).Length();
 
+    // Apply rotation
+    const Vector3 directionAB = (initialB.Translation() - initialA.Translation()).Normalized();
+    const Vector3 directionBC = (initialC.Translation() - initialB.Translation()).Normalized();
+    node0->SetWorldRotation(rootTransform.Rotation() * Quaternion(rotationA_, directionAB) * initialA.Rotation());
+    node1->SetWorldRotation(rootTransform.Rotation() * Quaternion(rotationA_, directionAB) * initialB.Rotation());
+
     // Resolve limb
     const Vector3 worldPos0 = node0->GetWorldPosition();
     const Vector3 worldPos2 = ClampVector(rootTransform.ToMatrix3() * position_ + worldPos0, worldPos0, thighLength + calfLength);
@@ -883,9 +889,9 @@ void LimbAnimationTrack::ImportFrame(const CharacterSkeletonSegment& segment)
         URHO3D_LOGWARNING("Failed to resolve calf-heel segment of foot animation");
 
     // Gather rotations
-    const Quaternion pureRotationA = initialA.Rotation().Inverse() * nodeA->GetWorldRotation();
-    const Quaternion pureRotationB = initialB.Rotation().Inverse() * nodeB->GetWorldRotation();
-    const Quaternion pureRotationC = initialC.Rotation().Inverse() * nodeC->GetWorldRotation();
+    const Quaternion pureRotationA = nodeA->GetWorldRotation() * initialA.Rotation().Inverse();
+    const Quaternion pureRotationB = nodeB->GetWorldRotation() * initialB.Rotation().Inverse();
+    const Quaternion pureRotationC = nodeC->GetWorldRotation() * initialC.Rotation().Inverse();
 
     frame.rotationA_ = GetAngle(pureRotationA);
     frame.rotationB_ = GetAngle(pureRotationB);
