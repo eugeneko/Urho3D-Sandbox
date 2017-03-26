@@ -660,14 +660,8 @@ void CharacterSkeletonLimbSegmentData::Apply(const Matrix3x4& rootTransform, Cha
     if (!MatchChildPosition(*node1, *node2, worldPos2))
         URHO3D_LOGWARNING("Failed to resolve calf-heel segment of foot animation");
 
-    // Resolve heel rotation
-//     const Quaternion origHeelRotation = calfNode->GetWorldRotation() * keyFrame.heelRotationLocal_;
-//     const Quaternion fixedHeelRotation = node_->GetWorldRotation() * keyFrame.heelRotationWorld_;
-//     const Quaternion adjustToGoundRotation = Quaternion::IDENTITY.Slerp(state.targetTransform_.Rotation(), state.targetRotationAmount_);
-//     heelNode->SetWorldRotation(adjustToGoundRotation * origHeelRotation.Slerp(fixedHeelRotation, state.globalRotationFactor_));
-//
-//     thighNode->MarkDirty();
-
+    // Apply target rotation
+    node2->SetWorldRotation(rootTransform.Rotation() * rotationC_ * initialC.Rotation());
 }
 
 //////////////////////////////////////////////////////////////////////////

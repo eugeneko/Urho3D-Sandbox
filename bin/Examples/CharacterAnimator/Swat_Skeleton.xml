@@ -1,8 +1,8 @@
 <skeleton>
     <root  name="Root"      bones="swat:Hips"/>
-    <chain name="Spine"     bones="swat:Spine       swat:Spine1     swat:Spine2     swat:Neck"/>
-    <limb  name="LeftFoot"  bones="swat:LeftUpLeg   swat:LeftLeg    swat:LeftFoot"/>
-    <!--limb  name="RightFoot" bones="swat:RightUpLeg  swat:RightLeg       swat:RightFoot"/>
+    <chain name="Spine"     bones="swat:Spine       swat:Spine1         swat:Spine2     swat:Neck"/>
+    <limb  name="LeftFoot"  bones="swat:LeftUpLeg   swat:LeftLeg        swat:LeftFoot"/>
+    <limb  name="RightFoot" bones="swat:RightUpLeg  swat:RightLeg       swat:RightFoot"/>
     <limb  name="LeftHand"  bones="swat:LeftArm     swat:LeftForeArm    swat:LeftHand"/>
-    <limb  name="RightHand" bones="swat:RightArm    swat:RightForeArm   swat:RightHand"/-->
+    <limb  name="RightHand" bones="swat:RightArm    swat:RightForeArm   swat:RightHand"/>
 </skeleton>

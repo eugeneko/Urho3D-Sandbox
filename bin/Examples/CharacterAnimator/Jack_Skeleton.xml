@@ -1,4 +1,8 @@
 <skeleton>
     <root  name="Root"      bones="Bip01_Pelvis"/>
-    <chain name="Spine"     bones="Bip01_Spine Bip01_Spine1 Bip01_Spine2 Bip01_Neck"/>
+    <chain name="Spine"     bones="Bip01_Spine      Bip01_Spine1    Bip01_Spine2    Bip01_Neck"/>
+    <limb  name="LeftFoot"  bones="Bip01_L_Thigh    Bip01_L_Calf    Bip01_L_Foot" />
+    <limb  name="RightFoot" bones="Bip01_R_Thigh    Bip01_R_Calf    Bip01_R_Foot" />
+    <limb  name="LeftHand"  bones="Bip01_L_UpperArm Bip01_L_Forearm Bip01_L_Hand" />
+    <limb  name="RightHand" bones="Bip01_R_UpperArm Bip01_R_Forearm Bip01_R_Hand" />
 </skeleton>
