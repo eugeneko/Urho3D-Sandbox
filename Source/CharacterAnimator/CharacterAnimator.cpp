@@ -1268,12 +1268,13 @@ void CharacterAnimationController::Update(float timeStep)
 
 void CharacterAnimationController::ApplyAnimation()
 {
-    // #TODO Remove it
-    animatedModel_->GetSkeleton().Reset();
-
     // Reset segments data
     for (CharacterSkeletonSegment& segment : segmentData_)
+    {
         segment.data_->Reset();
+        for (Bone* bone : segment.bones_)
+            bone->node_->SetTransform(bone->initialPosition_, bone->initialRotation_, bone->initialScale_);
+    }
 
     // Animate segments
     for (const AnimationControl& animationControl : GetAnimations())
