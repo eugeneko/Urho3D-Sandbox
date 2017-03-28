@@ -6,7 +6,7 @@ class Animator : ScriptObject
         AnimationController@ animController = node.GetComponent("AnimationController");
         if (animController is null)
             animController = node.GetComponent("CharacterAnimationController");
-        animController.Play("CharacterAnimator/Jack_Walk.ani", 0, true);
+        animController.Play("CharacterAnimator/Kachujin_Walk.ani", 0, true);
 
         CharacterAnimationController@ characterController = node.GetComponent("CharacterAnimationController");
         if (characterController !is null)

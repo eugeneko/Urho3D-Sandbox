@@ -64,6 +64,8 @@ public:
     virtual void Merge(const CharacterSkeletonSegmentData& other, float weight) = 0;
     /// Apply segment animations to segment.
     virtual void Apply(const Matrix3x4& rootTransform, CharacterSkeletonSegment& dest) = 0;
+    /// Get accumulated weight.
+    virtual float GetAccumulatedWeight() const { return accumulatedWeight_; }
 
 protected:
     /// Weight.

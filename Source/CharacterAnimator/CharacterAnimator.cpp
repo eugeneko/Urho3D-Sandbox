@@ -1300,7 +1300,8 @@ void CharacterAnimationController::ApplyAnimation()
 
     // Apply animations
     for (CharacterSkeletonSegment& segment : segmentData_)
-        segment.data_->Apply(node_->GetWorldTransform(), segment);
+        if (segment.data_->GetAccumulatedWeight() > 1.0f - M_LARGE_EPSILON)
+            segment.data_->Apply(node_->GetWorldTransform(), segment);
 }
 
 void CharacterAnimationController::SetSkeleton(CharacterSkeleton* skeleton)
