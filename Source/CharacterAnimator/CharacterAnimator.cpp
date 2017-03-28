@@ -516,7 +516,21 @@ float GetAngle(const Quaternion& rotation)
     Vector3 axis;
     float angle;
     GetAxisAngle(rotation, axis, angle);
-    return angle;
+    return Fract(angle / 360) * 360;
+}
+
+/// Linear interpolation of angles.
+float LerpAngle(float lhs, float rhs, float t)
+{
+    lhs = Fract(lhs / 360) * 360;
+    rhs = Fract(rhs / 360) * 360;
+
+    const float diff = Abs(lhs - rhs);
+    return (diff < 180)
+        ? Lerp(lhs, rhs, t)
+        : (lhs > rhs)
+            ? Lerp(lhs - 360, rhs, t)
+            : Lerp(lhs, rhs - 360, t);
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -621,8 +635,8 @@ void CharacterSkeletonLimbSegmentData::Merge(const CharacterSkeletonSegmentData&
     const float balance = weight / (weight + accumulatedWeight_);
     position_ = position_.Lerp(rhs.position_, balance);
     direction_ = direction_.Lerp(rhs.direction_, balance);
-    rotationA_ = Lerp(rotationA_, rhs.rotationA_, balance);
-    rotationB_ = Lerp(rotationB_, rhs.rotationB_, balance);
+    rotationA_ = LerpAngle(rotationA_, rhs.rotationA_, balance);
+    rotationB_ = LerpAngle(rotationB_, rhs.rotationB_, balance);
     rotationC_ = rotationC_.Slerp(rhs.rotationC_, balance);
     accumulatedWeight_ += weight;
 }
