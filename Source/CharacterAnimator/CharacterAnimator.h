@@ -79,6 +79,8 @@ struct CharacterSkeletonSegment
     CharacterSkeletonSegmentType type_;
     /// Names of bones in segment.
     Vector<String> boneNames_;
+    /// Whether the segment animation is global.
+    bool globalAnimation_ = false;
 
     /// Bones of the segment.
     PODVector<Bone*> bones_;

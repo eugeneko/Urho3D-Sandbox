@@ -648,7 +648,8 @@ void CharacterSkeletonLimbSegmentData::Apply(const Matrix3x4& rootTransform, Cha
 
     // Resolve limb
     const Vector3 worldPos0 = node0->GetWorldPosition();
-    const Vector3 worldPos2 = ClampVector(rootTransform.ToMatrix3() * position_ + worldPos0, worldPos0, thighLength + calfLength);
+    const Vector3 targetOffset = dest.globalAnimation_ ? Vector3::ZERO : worldPos0;
+    const Vector3 worldPos2 = ClampVector(rootTransform.ToMatrix3() * position_ + targetOffset, worldPos0, thighLength + calfLength);
     const Vector3 baseDirection = initialC.Translation() - initialA.Translation();
     const Vector3 worldJointOrientation = ComputeJointOrientation(direction_, baseDirection, worldPos2 - worldPos0, rootTransform);
     const Vector3 worldPos1 = ResolveKneePosition(worldPos0, worldPos2, worldJointOrientation, thighLength, calfLength);
@@ -686,6 +687,7 @@ bool CharacterSkeleton::LoadXML(const XMLElement& source)
         segment.name_ = child.GetAttribute("name");
         segment.type_ = GetCharacterSkeletonSegmentType(child.GetName());
         segment.boneNames_ = child.GetAttribute("bones").Split(' ');
+        segment.globalAnimation_ = child.GetBool("global");
         segments_.Push(segment);
     }
     return true;
@@ -866,8 +868,8 @@ void LimbAnimationTrack::ImportFrame(const CharacterSkeletonSegment& segment)
     const Matrix3x4& initialB = segment.initialTransforms_[1];
     const Matrix3x4& initialC = segment.initialTransforms_[2];
 
-    // Get relative position
-    frame.position_ = transformC.Translation() - transformA.Translation();
+    // Get relative or global position
+    frame.position_ = segment.globalAnimation_ ? transformC.Translation() : transformC.Translation() - transformA.Translation();
 
     // Get joint bending direction
     const Vector3 positionAproj = ProjectPointOntoSegment(transformB.Translation(), transformA.Translation(), transformC.Translation());
