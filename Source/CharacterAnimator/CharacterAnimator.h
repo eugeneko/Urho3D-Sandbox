@@ -63,7 +63,7 @@ public:
     /// Merge state with specified weight to this.
     virtual void Merge(const CharacterSkeletonSegmentData& other, float weight) = 0;
     /// Apply segment animations to segment.
-    virtual void Apply(const Matrix3x4& rootTransform, CharacterSkeletonSegment& dest) = 0;
+    virtual void Apply(const Matrix3x4& rootTransform, const Matrix3x4& animTransform, CharacterSkeletonSegment& dest) = 0;
     /// Get accumulated weight.
     virtual float GetAccumulatedWeight() const { return accumulatedWeight_; }
 
@@ -115,7 +115,7 @@ public:
     /// @see CharacterSkeletonSegmentData::Merge
     virtual void Merge(const CharacterSkeletonSegmentData& other, float weight) override;
     /// @see CharacterSkeletonSegmentData::Apply
-    virtual void Apply(const Matrix3x4& rootTransform, CharacterSkeletonSegment& dest) override;
+    virtual void Apply(const Matrix3x4& rootTransform, const Matrix3x4& animTransform, CharacterSkeletonSegment& dest) override;
 
 };
 
@@ -134,7 +134,7 @@ public:
     /// @see CharacterSkeletonSegmentData::Merge
     virtual void Merge(const CharacterSkeletonSegmentData& other, float weight) override;
     /// @see CharacterSkeletonSegmentData::Apply
-    virtual void Apply(const Matrix3x4& rootTransform, CharacterSkeletonSegment& dest) override;
+    virtual void Apply(const Matrix3x4& rootTransform, const Matrix3x4& animTransform, CharacterSkeletonSegment& dest) override;
 };
 
 /// Character skeleton limb segment data.
@@ -158,7 +158,7 @@ public:
     /// @see CharacterSkeletonSegmentData::Merge
     virtual void Merge(const CharacterSkeletonSegmentData& other, float weight) override;
     /// @see CharacterSkeletonSegmentData::Apply
-    virtual void Apply(const Matrix3x4& rootTransform, CharacterSkeletonSegment& dest) override;
+    virtual void Apply(const Matrix3x4& rootTransform, const Matrix3x4& animTransform, CharacterSkeletonSegment& dest) override;
 };
 
 /// Character skeleton.

@@ -583,13 +583,13 @@ void CharacterSkeletonRootSegmentData::Merge(const CharacterSkeletonSegmentData&
     accumulatedWeight_ += weight;
 }
 
-void CharacterSkeletonRootSegmentData::Apply(const Matrix3x4& rootTransform, CharacterSkeletonSegment& dest)
+void CharacterSkeletonRootSegmentData::Apply(const Matrix3x4& rootTransform, const Matrix3x4& animTransform, CharacterSkeletonSegment& dest)
 {
-    const Vector3 localPosition = dest.globalPositions_[0] + position_;
-    const Quaternion localRotation = rotation_ * dest.globalRotations_[0];
-    const Matrix3x4 localTransform(localPosition, localRotation, dest.nodes_[0]->GetScale());
-    const Matrix3x4& parentTransform = dest.nodes_[0]->GetParent()->GetWorldTransform();
-    dest.nodes_[0]->SetTransform(parentTransform.Inverse() * rootTransform * localTransform);
+    const Quaternion animRotation = animTransform.Rotation();
+    const Vector3 position = rootTransform * (dest.globalPositions_[0] + animTransform * position_);
+    const Quaternion rotation = rootTransform.Rotation() * animRotation.Inverse() * rotation_ * animRotation * dest.globalRotations_[0];
+    dest.nodes_[0]->SetWorldPosition(position);
+    dest.nodes_[0]->SetWorldRotation(rotation);
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -612,10 +612,12 @@ void CharacterSkeletonChainSegmentData::Merge(const CharacterSkeletonSegmentData
     accumulatedWeight_ += weight;
 }
 
-void CharacterSkeletonChainSegmentData::Apply(const Matrix3x4& rootTransform, CharacterSkeletonSegment& dest)
+void CharacterSkeletonChainSegmentData::Apply(const Matrix3x4& rootTransform, const Matrix3x4& animTransform, CharacterSkeletonSegment& dest)
 {
+    const Quaternion animRotation = animTransform.Rotation();
     for (unsigned i = 0; i < dest.nodes_.Size(); ++i)
-        dest.nodes_[i]->SetWorldRotation(rootTransform.Rotation() * rotations_[i] * dest.globalRotations_[i]);
+        dest.nodes_[i]->SetWorldRotation(
+            rootTransform.Rotation() * animRotation.Inverse() * rotations_[i] * animRotation * dest.globalRotations_[i]);
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -641,8 +643,10 @@ void CharacterSkeletonLimbSegmentData::Merge(const CharacterSkeletonSegmentData&
     accumulatedWeight_ += weight;
 }
 
-void CharacterSkeletonLimbSegmentData::Apply(const Matrix3x4& rootTransform, CharacterSkeletonSegment& dest)
+void CharacterSkeletonLimbSegmentData::Apply(const Matrix3x4& rootTransform, const Matrix3x4& animTransform, CharacterSkeletonSegment& dest)
 {
+    const Quaternion animRotation = animTransform.Rotation();
+
     Node* node0 = dest.nodes_[0];
     Node* node1 = dest.nodes_[1];
     Node* node2 = dest.nodes_[2];
@@ -662,10 +666,10 @@ void CharacterSkeletonLimbSegmentData::Apply(const Matrix3x4& rootTransform, Cha
 
     // Resolve limb
     const Vector3 worldPos0 = node0->GetWorldPosition();
-    const Vector3 targetOffset = dest.globalAnimation_ ? Vector3::ZERO : worldPos0;
-    const Vector3 worldPos2 = ClampVector(rootTransform.ToMatrix3() * position_ + targetOffset, worldPos0, thighLength + calfLength);
+    const Vector3 targetOffset = dest.globalAnimation_ ? rootTransform.Translation() : worldPos0;
+    const Vector3 worldPos2 = ClampVector(rootTransform.ToMatrix3() * (animTransform * position_) + targetOffset, worldPos0, thighLength + calfLength);
     const Vector3 baseDirection = initialC.Translation() - initialA.Translation();
-    const Vector3 worldJointOrientation = ComputeJointOrientation(direction_, baseDirection, worldPos2 - worldPos0, rootTransform);
+    const Vector3 worldJointOrientation = ComputeJointOrientation(animRotation * direction_, baseDirection, worldPos2 - worldPos0, rootTransform);
     const Vector3 worldPos1 = ResolveKneePosition(worldPos0, worldPos2, worldJointOrientation, thighLength, calfLength);
 
     // Apply foot shape
@@ -676,7 +680,7 @@ void CharacterSkeletonLimbSegmentData::Apply(const Matrix3x4& rootTransform, Cha
         URHO3D_LOGWARNING("Failed to resolve calf-heel segment of foot animation");
 
     // Apply target rotation
-    node2->SetWorldRotation(rootTransform.Rotation() * rotationC_ * initialC.Rotation());
+    node2->SetWorldRotation(rootTransform.Rotation() * animRotation.Inverse() * rotationC_ * animRotation * initialC.Rotation());
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -1315,7 +1319,7 @@ void CharacterAnimationController::ApplyAnimation()
     // Apply animations
     for (CharacterSkeletonSegment& segment : segmentData_)
         if (segment.data_->GetAccumulatedWeight() > 1.0f - M_LARGE_EPSILON)
-            segment.data_->Apply(node_->GetWorldTransform(), segment);
+            segment.data_->Apply(node_->GetWorldTransform(), animationTransform_, segment);
 }
 
 void CharacterAnimationController::SetSkeleton(CharacterSkeleton* skeleton)
@@ -1347,7 +1351,7 @@ void CharacterAnimationController::UpdateHierarchy()
     if (!animatedModel_)
         return;
 
-    skeleton_->AllocateSegmentData(segmentData_, *animatedModelSkeleton_, animationTransform_);
+    skeleton_->AllocateSegmentData(segmentData_, *animatedModelSkeleton_, Matrix3x4::IDENTITY);
 }
 
 CharacterAnimation* CharacterAnimationController::GetCharacterAnimation(const String& animationName)
