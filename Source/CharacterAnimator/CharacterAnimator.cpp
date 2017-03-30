@@ -1,22 +1,25 @@
 #include "CharacterAnimator.h"
 
 #include <Urho3D/AngelScript/APITemplates.h>
-#include <Urho3D/Core/Context.h>
 #include <Urho3D/Container/Ptr.h>
+#include <Urho3D/Core/Context.h>
 #include <Urho3D/Graphics/AnimatedModel.h>
 #include <Urho3D/Graphics/Animation.h>
-#include <Urho3D/Graphics/AnimationState.h>
 #include <Urho3D/Graphics/AnimationController.h>
+#include <Urho3D/Graphics/AnimationState.h>
 #include <Urho3D/Graphics/DebugRenderer.h>
 #include <Urho3D/IO/Log.h>
 #include <Urho3D/Math/MathDefs.h>
 #include <Urho3D/Math/Sphere.h>
 #include <Urho3D/Resource/ResourceCache.h>
+#include <Urho3D/Scene/Serializable.h>
 
 #include <algorithm>
 
 namespace Urho3D
 {
+
+static const char* characterAnimatorCategory = "CharacterAnimator";
 
 SharedPtr<Animation> BlendAnimations(Model& model, CharacterSkeleton* skeleton,
     const PODVector<Animation*>& animations,
@@ -1228,6 +1231,20 @@ bool CharacterAnimation::Import(Animation& animation, Model& model, CharacterSke
 }
 
 //////////////////////////////////////////////////////////////////////////
+void CharacterSegmentController::RegisterObject(Context* context)
+{
+    URHO3D_COPY_BASE_ATTRIBUTES(Component);
+    URHO3D_ATTRIBUTE("Segment", String, segmentName_, String::EMPTY, AM_DEFAULT);
+}
+
+void CharacterSegmentController::OnNodeSet(Node* node)
+{
+    if (node)
+        if (CharacterAnimationController* animationController = node->GetParentComponent<CharacterAnimationController>(true))
+            animationController->AddController(this);
+}
+
+//////////////////////////////////////////////////////////////////////////
 CharacterAnimationController::CharacterAnimationController(Context* context)
     : AnimationController(context)
 {
@@ -1239,9 +1256,14 @@ CharacterAnimationController::~CharacterAnimationController()
 
 void CharacterAnimationController::RegisterObject(Context* context)
 {
-    context->RegisterFactory<CharacterAnimationController>();
+    context->RegisterFactory<CharacterAnimationController>(characterAnimatorCategory);
     URHO3D_COPY_BASE_ATTRIBUTES(AnimationController);
     URHO3D_MIXED_ACCESSOR_ATTRIBUTE("Skeleton", GetSkeletonAttr, SetSkeletonAttr, ResourceRef, ResourceRef(XMLFile::GetTypeStatic()), AM_DEFAULT);
+}
+
+void CharacterAnimationController::AddController(CharacterSegmentController* controller)
+{
+    segmentControllers_.Push(WeakPtr<CharacterSegmentController>(controller));
 }
 
 void CharacterAnimationController::SetAnimationTransform(const Matrix3x4& transform)
@@ -1457,6 +1479,23 @@ void CharacterAnimationController::UpdateSegment2(const CharacterSkeletonSegment
 }
 
 //////////////////////////////////////////////////////////////////////////
+void CharacterLimbController::RegisterObject(Context* context)
+{
+    context->RegisterFactory<CharacterLimbController>(characterAnimatorCategory);
+    URHO3D_COPY_BASE_ATTRIBUTES(CharacterSegmentController);
+}
+
+//////////////////////////////////////////////////////////////////////////
+void RegisterCharacterAnimator(Context* context)
+{
+    CharacterSkeleton::RegisterObject(context);
+    CharacterAnimation::RegisterObject(context);
+    CharacterAnimationController::RegisterObject(context);
+
+    CharacterSegmentController::RegisterObject(context);
+    CharacterLimbController::RegisterObject(context);
+}
+
 void CharacterAnimationController_SetTargetTransform(const String& segment, const Matrix3x4& transform,
     CharacterAnimationController* characterAnimationController)
 {

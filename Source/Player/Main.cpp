@@ -36,9 +36,7 @@ void FlexEnginePlayer::Start()
     GetSubsystem<Renderer>()->SetMinInstances(1);
     GetSubsystem<Renderer>()->SetNumExtraInstancingBufferElements(1);
 
-    CharacterSkeleton::RegisterObject(context_);
-    CharacterAnimation::RegisterObject(context_);
-    CharacterAnimationController::RegisterObject(context_);
+    RegisterCharacterAnimator(context_);
 
     Urho3DPlayer::Start();
 

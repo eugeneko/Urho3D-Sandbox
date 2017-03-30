@@ -5,10 +5,10 @@
 	<attribute name="Smoothing Constant" value="50" />
 	<attribute name="Snap Threshold" value="5" />
 	<attribute name="Elapsed Time" value="1.14192" />
-	<attribute name="Next Replicated Node ID" value="720" />
-	<attribute name="Next Replicated Component ID" value="91" />
-	<attribute name="Next Local Node ID" value="16778392" />
-	<attribute name="Next Local Component ID" value="16778920" />
+	<attribute name="Next Replicated Node ID" value="721" />
+	<attribute name="Next Replicated Component ID" value="93" />
+	<attribute name="Next Local Node ID" value="16778393" />
+	<attribute name="Next Local Component ID" value="16778932" />
 	<attribute name="Variables" />
 	<attribute name="Variable Names" value="" />
 	<component type="Octree" id="1" />
@@ -1292,6 +1292,22 @@
 					</node>
 				</node>
 			</node>
+		</node>
+		<node id="720">
+			<attribute name="Is Enabled" value="true" />
+			<attribute name="Name" value="LeftHand" />
+			<attribute name="Tags" />
+			<attribute name="Position" value="0.420037 0.986207 -0.364452" />
+			<attribute name="Rotation" value="1 0 0 0" />
+			<attribute name="Scale" value="0.1 0.1 0.1" />
+			<attribute name="Variables" />
+			<component type="CharacterLimbController" id="91">
+				<attribute name="Segment" value="LeftHand" />
+			</component>
+			<component type="StaticModel" id="92">
+				<attribute name="Model" value="Model;Models/Sphere.mdl" />
+				<attribute name="Material" value="Material;Materials/GreenTransparent.xml" />
+			</component>
 		</node>
 	</node>
 </scene>

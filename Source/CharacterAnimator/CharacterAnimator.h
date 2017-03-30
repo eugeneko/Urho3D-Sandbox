@@ -435,6 +435,28 @@ private:
     Vector<SharedPtr<CharacterAnimationTrack>> tracks_;
 };
 
+/// Character Segment Controller.
+class CharacterSegmentController : public Component
+{
+    URHO3D_OBJECT(CharacterSegmentController, Component);
+
+public:
+    /// Construct.
+    CharacterSegmentController(Context* context) : Component(context) {}
+    /// Destruct.
+    virtual ~CharacterSegmentController() {}
+    /// Register object factory.
+    static void RegisterObject(Context* context);
+
+private:
+    /// @see Component::OnNodeSet
+    virtual void OnNodeSet(Node* node) override;
+
+private:
+    /// Segment name.
+    String segmentName_;
+};
+
 /// Character Animation Controller.
 class CharacterAnimationController : public AnimationController
 {
@@ -448,6 +470,8 @@ public:
     /// Register object factory.
     static void RegisterObject(Context* context);
 
+    /// Add segment controller.
+    void AddController(CharacterSegmentController* controller);
     /// Set animation transform.
     void SetAnimationTransform(const Matrix3x4& transform);
     /// Set target transform of segment.
@@ -506,10 +530,28 @@ private:
     HashMap<StringHash, Segment2State> segment2states_;
     /// Animation transform.
     Matrix3x4 animationTransform_;
+    /// Segment controllers.
+    Vector<WeakPtr<CharacterSegmentController>> segmentControllers_;
+};
+
+/// Character Limb Segment Controller.
+class CharacterLimbController : public CharacterSegmentController
+{
+    URHO3D_OBJECT(CharacterLimbController, CharacterSegmentController);
+
+public:
+    /// Construct.
+    CharacterLimbController(Context* context) : CharacterSegmentController(context) {}
+    /// Destruct.
+    virtual ~CharacterLimbController() {}
+    /// Register object factory.
+    static void RegisterObject(Context* context);
 
 };
 
-/// Register script API
+/// Register classes.
+void RegisterCharacterAnimator(Context* context);
+/// Register script API.
 void RegisterCharacterAnimatorScriptAPI(asIScriptEngine* engine);
 
 }
