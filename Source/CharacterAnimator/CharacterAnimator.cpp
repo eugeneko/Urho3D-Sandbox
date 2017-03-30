@@ -1231,17 +1231,17 @@ bool CharacterAnimation::Import(Animation& animation, Model& model, CharacterSke
 }
 
 //////////////////////////////////////////////////////////////////////////
-void CharacterSegmentController::RegisterObject(Context* context)
+void CharacterEffector::RegisterObject(Context* context)
 {
     URHO3D_COPY_BASE_ATTRIBUTES(Component);
     URHO3D_ATTRIBUTE("Segment", String, segmentName_, String::EMPTY, AM_DEFAULT);
 }
 
-void CharacterSegmentController::OnNodeSet(Node* node)
+void CharacterEffector::OnNodeSet(Node* node)
 {
     if (node)
         if (CharacterAnimationController* animationController = node->GetParentComponent<CharacterAnimationController>(true))
-            animationController->AddController(this);
+            animationController->AddEffector(this);
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -1261,9 +1261,9 @@ void CharacterAnimationController::RegisterObject(Context* context)
     URHO3D_MIXED_ACCESSOR_ATTRIBUTE("Skeleton", GetSkeletonAttr, SetSkeletonAttr, ResourceRef, ResourceRef(XMLFile::GetTypeStatic()), AM_DEFAULT);
 }
 
-void CharacterAnimationController::AddController(CharacterSegmentController* controller)
+void CharacterAnimationController::AddEffector(CharacterEffector* effector)
 {
-    segmentControllers_.Push(WeakPtr<CharacterSegmentController>(controller));
+    effectors_.Push(WeakPtr<CharacterEffector>(effector));
 }
 
 void CharacterAnimationController::SetAnimationTransform(const Matrix3x4& transform)
@@ -1339,7 +1339,7 @@ void CharacterAnimationController::ApplyAnimation()
     }
 
     // Override animations
-    for (CharacterSegmentController* segmentController : segmentControllers_)
+    for (CharacterEffector* segmentController : effectors_)
         if (segmentController)
             if (CharacterSkeletonSegment* segment = GetSegment(segmentController->GetSegmentName()))
             {
@@ -1505,10 +1505,10 @@ void CharacterAnimationController::UpdateSegment2(const CharacterSkeletonSegment
 }
 
 //////////////////////////////////////////////////////////////////////////
-void CharacterLimbController::RegisterObject(Context* context)
+void CharacterLimbEffector::RegisterObject(Context* context)
 {
-    context->RegisterFactory<CharacterLimbController>(characterAnimatorCategory);
-    URHO3D_COPY_BASE_ATTRIBUTES(CharacterSegmentController);
+    context->RegisterFactory<CharacterLimbEffector>(characterAnimatorCategory);
+    URHO3D_COPY_BASE_ATTRIBUTES(CharacterEffector);
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -1518,8 +1518,8 @@ void RegisterCharacterAnimator(Context* context)
     CharacterAnimation::RegisterObject(context);
     CharacterAnimationController::RegisterObject(context);
 
-    CharacterSegmentController::RegisterObject(context);
-    CharacterLimbController::RegisterObject(context);
+    CharacterEffector::RegisterObject(context);
+    CharacterLimbEffector::RegisterObject(context);
 }
 
 void CharacterAnimationController_SetTargetTransform(const String& segment, const Matrix3x4& transform,

@@ -1301,7 +1301,7 @@
 			<attribute name="Rotation" value="1 0 0 0" />
 			<attribute name="Scale" value="0.1 0.1 0.1" />
 			<attribute name="Variables" />
-			<component type="CharacterLimbController" id="93">
+			<component type="CharacterLimbEffector" id="93">
 				<attribute name="Segment" value="LeftFoot" />
 			</component>
 			<component type="StaticModel" id="94">
@@ -1317,7 +1317,7 @@
 			<attribute name="Rotation" value="1 0 0 0" />
 			<attribute name="Scale" value="0.1 0.1 0.1" />
 			<attribute name="Variables" />
-			<component type="CharacterLimbController" id="95">
+			<component type="CharacterLimbEffector" id="95">
 				<attribute name="Segment" value="RightFoot" />
 			</component>
 			<component type="StaticModel" id="96">
@@ -1333,7 +1333,7 @@
 			<attribute name="Rotation" value="1 0 0 0" />
 			<attribute name="Scale" value="0.1 0.1 0.1" />
 			<attribute name="Variables" />
-			<component type="CharacterLimbController" id="97">
+			<component type="CharacterLimbEffector" id="97">
 				<attribute name="Segment" value="LeftHand" />
 			</component>
 			<component type="StaticModel" id="98">
@@ -1349,7 +1349,7 @@
 			<attribute name="Rotation" value="1 0 0 0" />
 			<attribute name="Scale" value="0.1 0.1 0.1" />
 			<attribute name="Variables" />
-			<component type="CharacterLimbController" id="99">
+			<component type="CharacterLimbEffector" id="99">
 				<attribute name="Segment" value="RightHand" />
 			</component>
 			<component type="StaticModel" id="100">

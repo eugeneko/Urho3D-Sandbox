@@ -435,16 +435,16 @@ private:
     Vector<SharedPtr<CharacterAnimationTrack>> tracks_;
 };
 
-/// Character Segment Controller.
-class CharacterSegmentController : public Component
+/// Character Segment Effector.
+class CharacterEffector : public Component
 {
-    URHO3D_OBJECT(CharacterSegmentController, Component);
+    URHO3D_OBJECT(CharacterEffector, Component);
 
 public:
     /// Construct.
-    CharacterSegmentController(Context* context) : Component(context) {}
+    CharacterEffector(Context* context) : Component(context) {}
     /// Destruct.
-    virtual ~CharacterSegmentController() {}
+    virtual ~CharacterEffector() {}
     /// Register object factory.
     static void RegisterObject(Context* context);
 
@@ -473,8 +473,8 @@ public:
     /// Register object factory.
     static void RegisterObject(Context* context);
 
-    /// Add segment controller.
-    void AddController(CharacterSegmentController* controller);
+    /// Add segment effector.
+    void AddEffector(CharacterEffector* effector);
     /// Set animation transform.
     void SetAnimationTransform(const Matrix3x4& transform);
     /// Set target transform of segment.
@@ -536,19 +536,19 @@ private:
     /// Animation transform.
     Matrix3x4 animationTransform_;
     /// Segment controllers.
-    Vector<WeakPtr<CharacterSegmentController>> segmentControllers_;
+    Vector<WeakPtr<CharacterEffector>> effectors_;
 };
 
-/// Character Limb Segment Controller.
-class CharacterLimbController : public CharacterSegmentController
+/// Character Limb Effector.
+class CharacterLimbEffector : public CharacterEffector
 {
-    URHO3D_OBJECT(CharacterLimbController, CharacterSegmentController);
+    URHO3D_OBJECT(CharacterLimbEffector, CharacterEffector);
 
 public:
     /// Construct.
-    CharacterLimbController(Context* context) : CharacterSegmentController(context) {}
+    CharacterLimbEffector(Context* context) : CharacterEffector(context) {}
     /// Destruct.
-    virtual ~CharacterLimbController() {}
+    virtual ~CharacterLimbEffector() {}
     /// Register object factory.
     static void RegisterObject(Context* context);
 
