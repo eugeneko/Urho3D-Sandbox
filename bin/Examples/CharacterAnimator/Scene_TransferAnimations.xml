@@ -5,10 +5,10 @@
 	<attribute name="Smoothing Constant" value="50" />
 	<attribute name="Snap Threshold" value="5" />
 	<attribute name="Elapsed Time" value="1.14192" />
-	<attribute name="Next Replicated Node ID" value="721" />
-	<attribute name="Next Replicated Component ID" value="93" />
-	<attribute name="Next Local Node ID" value="16778393" />
-	<attribute name="Next Local Component ID" value="16778932" />
+	<attribute name="Next Replicated Node ID" value="725" />
+	<attribute name="Next Replicated Component ID" value="101" />
+	<attribute name="Next Local Node ID" value="16778394" />
+	<attribute name="Next Local Component ID" value="16778944" />
 	<attribute name="Variables" />
 	<attribute name="Variable Names" value="" />
 	<component type="Octree" id="1" />
@@ -1293,7 +1293,39 @@
 				</node>
 			</node>
 		</node>
-		<node id="720">
+		<node id="721">
+			<attribute name="Is Enabled" value="true" />
+			<attribute name="Name" value="LeftFoot" />
+			<attribute name="Tags" />
+			<attribute name="Position" value="0.150606 0.184184 -0.0245735" />
+			<attribute name="Rotation" value="1 0 0 0" />
+			<attribute name="Scale" value="0.1 0.1 0.1" />
+			<attribute name="Variables" />
+			<component type="CharacterLimbController" id="93">
+				<attribute name="Segment" value="LeftFoot" />
+			</component>
+			<component type="StaticModel" id="94">
+				<attribute name="Model" value="Model;Models/Sphere.mdl" />
+				<attribute name="Material" value="Material;Materials/GreenTransparent.xml" />
+			</component>
+		</node>
+		<node id="722">
+			<attribute name="Is Enabled" value="true" />
+			<attribute name="Name" value="RightFoot" />
+			<attribute name="Tags" />
+			<attribute name="Position" value="-0.191447 0.137313 -0.0114309" />
+			<attribute name="Rotation" value="1 0 0 0" />
+			<attribute name="Scale" value="0.1 0.1 0.1" />
+			<attribute name="Variables" />
+			<component type="CharacterLimbController" id="95">
+				<attribute name="Segment" value="RightFoot" />
+			</component>
+			<component type="StaticModel" id="96">
+				<attribute name="Model" value="Model;Models/Sphere.mdl" />
+				<attribute name="Material" value="Material;Materials/GreenTransparent.xml" />
+			</component>
+		</node>
+		<node id="723">
 			<attribute name="Is Enabled" value="true" />
 			<attribute name="Name" value="LeftHand" />
 			<attribute name="Tags" />
@@ -1301,10 +1333,26 @@
 			<attribute name="Rotation" value="1 0 0 0" />
 			<attribute name="Scale" value="0.1 0.1 0.1" />
 			<attribute name="Variables" />
-			<component type="CharacterLimbController" id="91">
+			<component type="CharacterLimbController" id="97">
 				<attribute name="Segment" value="LeftHand" />
 			</component>
-			<component type="StaticModel" id="92">
+			<component type="StaticModel" id="98">
+				<attribute name="Model" value="Model;Models/Sphere.mdl" />
+				<attribute name="Material" value="Material;Materials/GreenTransparent.xml" />
+			</component>
+		</node>
+		<node id="724">
+			<attribute name="Is Enabled" value="true" />
+			<attribute name="Name" value="RightHand" />
+			<attribute name="Tags" />
+			<attribute name="Position" value="-0.297055 0.986207 -0.364452" />
+			<attribute name="Rotation" value="1 0 0 0" />
+			<attribute name="Scale" value="0.1 0.1 0.1" />
+			<attribute name="Variables" />
+			<component type="CharacterLimbController" id="99">
+				<attribute name="Segment" value="RightHand" />
+			</component>
+			<component type="StaticModel" id="100">
 				<attribute name="Model" value="Model;Models/Sphere.mdl" />
 				<attribute name="Material" value="Material;Materials/GreenTransparent.xml" />
 			</component>
