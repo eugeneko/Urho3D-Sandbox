@@ -448,6 +448,9 @@ public:
     /// Register object factory.
     static void RegisterObject(Context* context);
 
+    /// Get segment name.
+    const String& GetSegmentName() const { return segmentName_; }
+
 private:
     /// @see Component::OnNodeSet
     virtual void OnNodeSet(Node* node) override;
@@ -500,6 +503,8 @@ private:
     void UpdateHierarchy();
     /// Get character animation.
     CharacterAnimation* GetCharacterAnimation(const String& animationName);
+    /// Get segment by name.
+    CharacterSkeletonSegment* GetSegment(const String& segmentName);
 
     /// Update 2-segment.
     void UpdateSegment2(const CharacterSkeletonSegment2& segment);

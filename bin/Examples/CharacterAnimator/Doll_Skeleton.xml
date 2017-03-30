@@ -3,4 +3,6 @@
     <chain name="Spine"     bones="spine_01     spine_01    spine_02    neck_01"/>
     <limb  name="LeftFoot"  bones="thigh_l      calf_l      foot_l" global="1"/>
     <limb  name="RightFoot" bones="thigh_r      calf_r      foot_r" global="1"/>
+    <limb  name="LeftHand"  bones="upperarm_l   lowerarm_l  hand_l"/>
+    <limb  name="RightHand" bones="upperarm_r   lowerarm_r  hand_r"/>
 </skeleton>

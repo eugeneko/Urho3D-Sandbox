@@ -1338,6 +1338,24 @@ void CharacterAnimationController::ApplyAnimation()
                 track->MergeFrame(firstFrame, secondFrame, factor, animationState->GetWeight(), *segment.data_);
     }
 
+    // Override animations
+    for (CharacterSegmentController* segmentController : segmentControllers_)
+        if (segmentController)
+            if (CharacterSkeletonSegment* segment = GetSegment(segmentController->GetSegmentName()))
+            {
+                switch (segment->type_)
+                {
+                case CharacterSkeletonSegmentType::Limb:
+                    {
+                        // #TODO Refactor it
+                        CharacterSkeletonLimbSegmentData* data = static_cast<CharacterSkeletonLimbSegmentData*>(segment->data_.get());
+                        data->position_ = segmentController->GetNode()->GetWorldPosition() - segment->nodes_[0]->GetWorldPosition();
+                    }
+                default:
+                    break;
+                }
+            }
+
     // Apply animations
     for (CharacterSkeletonSegment& segment : segmentData_)
         if (segment.data_->GetAccumulatedWeight() > 1.0f - M_LARGE_EPSILON)
@@ -1385,6 +1403,14 @@ CharacterAnimation* CharacterAnimationController::GetCharacterAnimation(const St
     CharacterAnimation* characterAnimation = cache->GetResource<CharacterAnimation>(animationName.Replaced(".ani", ".xml", false));
     animationCache_[animationName] = characterAnimation;
     return characterAnimation;
+}
+
+CharacterSkeletonSegment* CharacterAnimationController::GetSegment(const String& segmentName)
+{
+    for (CharacterSkeletonSegment& segment : segmentData_)
+        if (segment.name_ == segmentName)
+            return &segment;
+    return nullptr;
 }
 
 void CharacterAnimationController::UpdateSegment2(const CharacterSkeletonSegment2& segment)
