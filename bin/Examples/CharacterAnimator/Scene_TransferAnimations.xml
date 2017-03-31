@@ -5,10 +5,10 @@
 	<attribute name="Smoothing Constant" value="50" />
 	<attribute name="Snap Threshold" value="5" />
 	<attribute name="Elapsed Time" value="1.14192" />
-	<attribute name="Next Replicated Node ID" value="725" />
-	<attribute name="Next Replicated Component ID" value="101" />
-	<attribute name="Next Local Node ID" value="16778394" />
-	<attribute name="Next Local Component ID" value="16778944" />
+	<attribute name="Next Replicated Node ID" value="727" />
+	<attribute name="Next Replicated Component ID" value="107" />
+	<attribute name="Next Local Node ID" value="16778396" />
+	<attribute name="Next Local Component ID" value="16778968" />
 	<attribute name="Variables" />
 	<attribute name="Variable Names" value="" />
 	<component type="Octree" id="1" />
@@ -1353,6 +1353,38 @@
 				<attribute name="Segment" value="RightHand" />
 			</component>
 			<component type="StaticModel" id="100">
+				<attribute name="Model" value="Model;Models/Sphere.mdl" />
+				<attribute name="Material" value="Material;Materials/GreenTransparent.xml" />
+			</component>
+		</node>
+		<node id="725">
+			<attribute name="Is Enabled" value="true" />
+			<attribute name="Name" value="Root" />
+			<attribute name="Tags" />
+			<attribute name="Position" value="-0.00275918 0.843116 -0.157051" />
+			<attribute name="Rotation" value="1 0 0 0" />
+			<attribute name="Scale" value="0.1 0.1 0.1" />
+			<attribute name="Variables" />
+			<component type="CharacterRootEffector" id="105">
+				<attribute name="Segment" value="Root" />
+			</component>
+			<component type="StaticModel" id="102">
+				<attribute name="Model" value="Model;Models/Sphere.mdl" />
+				<attribute name="Material" value="Material;Materials/GreenTransparent.xml" />
+			</component>
+		</node>
+		<node id="726">
+			<attribute name="Is Enabled" value="true" />
+			<attribute name="Name" value="Spine" />
+			<attribute name="Tags" />
+			<attribute name="Position" value="-0.00438897 1.27801 0.184105" />
+			<attribute name="Rotation" value="1 0 0 0" />
+			<attribute name="Scale" value="0.1 0.1 0.1" />
+			<attribute name="Variables" />
+			<component type="CharacterChainEffector" id="106">
+				<attribute name="Segment" value="Spine" />
+			</component>
+			<component type="StaticModel" id="104">
 				<attribute name="Model" value="Model;Models/Sphere.mdl" />
 				<attribute name="Material" value="Material;Materials/GreenTransparent.xml" />
 			</component>

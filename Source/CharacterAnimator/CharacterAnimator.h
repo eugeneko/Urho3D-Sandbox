@@ -505,6 +505,8 @@ private:
     CharacterAnimation* GetCharacterAnimation(const String& animationName);
     /// Get segment by name.
     CharacterSkeletonSegment* GetSegment(const String& segmentName);
+    /// Get effector by name.
+    CharacterEffector* GetEffector(const String& segmentName);
 
     /// Update 2-segment.
     void UpdateSegment2(const CharacterSkeletonSegment2& segment);
@@ -517,6 +519,16 @@ private:
         float targetRotationAmount_ = 0.0f;
         /// Adjusts balance between local and global rotation of target bone.
         float globalRotationFactor_ = 0.0f;
+    };
+    /// Cached animation data.
+    struct CachedAnimationData
+    {
+        /// Character animation.
+        CharacterAnimation* characterAnimation_ = nullptr;
+        /// Animation time.
+        float time_ = 0.0f;
+        /// Animation weight.
+        float weight_ = 0.0f;
     };
 
 private:
@@ -531,12 +543,30 @@ private:
 
     /// Cached animations.
     HashMap<StringHash, SharedPtr<CharacterAnimation>> animationCache_;
+    /// Current animation data.
+    Vector<CachedAnimationData> currentAnimationData_;
+    /// Current segments data.
+    Vector<Pair<CharacterEffector*, CharacterSkeletonSegment*>> currentSegmentsData_;
     /// States.
     HashMap<StringHash, Segment2State> segment2states_;
     /// Animation transform.
     Matrix3x4 animationTransform_;
     /// Segment controllers.
     Vector<WeakPtr<CharacterEffector>> effectors_;
+};
+
+/// Character Root Effector.
+class CharacterRootEffector : public CharacterEffector
+{
+    URHO3D_OBJECT(CharacterRootEffector, CharacterEffector);
+
+public:
+    /// Construct.
+    CharacterRootEffector(Context* context) : CharacterEffector(context) {}
+    /// Destruct.
+    virtual ~CharacterRootEffector() {}
+    /// Register object factory.
+    static void RegisterObject(Context* context);
 };
 
 /// Character Limb Effector.
@@ -551,7 +581,20 @@ public:
     virtual ~CharacterLimbEffector() {}
     /// Register object factory.
     static void RegisterObject(Context* context);
+};
 
+/// Character Chain Effector.
+class CharacterChainEffector : public CharacterEffector
+{
+    URHO3D_OBJECT(CharacterChainEffector, CharacterEffector);
+
+public:
+    /// Construct.
+    CharacterChainEffector(Context* context) : CharacterEffector(context) {}
+    /// Destruct.
+    virtual ~CharacterChainEffector() {}
+    /// Register object factory.
+    static void RegisterObject(Context* context);
 };
 
 /// Register classes.

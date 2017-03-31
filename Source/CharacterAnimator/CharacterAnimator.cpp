@@ -1310,9 +1310,39 @@ void CharacterAnimationController::Update(float timeStep)
 
 void CharacterAnimationController::ApplyAnimation()
 {
-    // Reset segments data
-    for (CharacterSkeletonSegment& segment : segmentData_)
+    // Gather animation data
+    currentAnimationData_.Clear();
+    for (const AnimationControl& animationControl : GetAnimations())
+        if (CharacterAnimation* characterAnimation = GetCharacterAnimation(animationControl.name_))
+            if (AnimationState* animationState = GetAnimationState(animationControl.name_))
+            {
+                CachedAnimationData data;
+                data.characterAnimation_ = characterAnimation;
+                data.time_ = animationState->GetTime();
+                data.weight_ = animationState->GetWeight();
+                currentAnimationData_.Push(data);
+            }
+
+    // Remove expired effectors
+    for (unsigned i = 0; i < effectors_.Size(); /*++i*/)
     {
+        if (!effectors_[i])
+            effectors_.EraseSwap(i);
+        else
+            ++i;
+    }
+
+    // Gather segments data
+    currentSegmentsData_.Clear();
+    for (CharacterSkeletonSegment& segment : segmentData_)
+        if (CharacterEffector* effector = GetEffector(segment.name_))
+            if (effector->IsEnabledEffective())
+                currentSegmentsData_.Push(MakePair(effector, &segment));
+
+    // Reset segments to initial pose
+    for (auto& item : currentSegmentsData_)
+    {
+        CharacterSkeletonSegment& segment = *item.second_;
         segment.data_->Reset();
         for (Bone* bone : segment.bones_)
             bone->node_->SetTransform(bone->initialPosition_, bone->initialRotation_, bone->initialScale_);
@@ -1413,6 +1443,14 @@ CharacterSkeletonSegment* CharacterAnimationController::GetSegment(const String&
     return nullptr;
 }
 
+CharacterEffector* CharacterAnimationController::GetEffector(const String& segmentName)
+{
+    for (CharacterEffector* effector : effectors_)
+        if (effector && effector->GetSegmentName() == segmentName)
+            return effector;
+    return nullptr;
+}
+
 void CharacterAnimationController::UpdateSegment2(const CharacterSkeletonSegment2& segment)
 {
     // Get nodes and bones
@@ -1505,9 +1543,23 @@ void CharacterAnimationController::UpdateSegment2(const CharacterSkeletonSegment
 }
 
 //////////////////////////////////////////////////////////////////////////
+void CharacterRootEffector::RegisterObject(Context* context)
+{
+    context->RegisterFactory<CharacterRootEffector>(characterAnimatorCategory);
+    URHO3D_COPY_BASE_ATTRIBUTES(CharacterEffector);
+}
+
+//////////////////////////////////////////////////////////////////////////
 void CharacterLimbEffector::RegisterObject(Context* context)
 {
     context->RegisterFactory<CharacterLimbEffector>(characterAnimatorCategory);
+    URHO3D_COPY_BASE_ATTRIBUTES(CharacterEffector);
+}
+
+//////////////////////////////////////////////////////////////////////////
+void CharacterChainEffector::RegisterObject(Context* context)
+{
+    context->RegisterFactory<CharacterChainEffector>(characterAnimatorCategory);
     URHO3D_COPY_BASE_ATTRIBUTES(CharacterEffector);
 }
 
@@ -1519,7 +1571,9 @@ void RegisterCharacterAnimator(Context* context)
     CharacterAnimationController::RegisterObject(context);
 
     CharacterEffector::RegisterObject(context);
+    CharacterRootEffector::RegisterObject(context);
     CharacterLimbEffector::RegisterObject(context);
+    CharacterChainEffector::RegisterObject(context);
 }
 
 void CharacterAnimationController_SetTargetTransform(const String& segment, const Matrix3x4& transform,
