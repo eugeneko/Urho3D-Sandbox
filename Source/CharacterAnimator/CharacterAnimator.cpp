@@ -660,6 +660,7 @@ void CharacterSkeletonLimbSegmentData::Apply(const Matrix3x4& rootTransform, con
 
     const float thighLength = (node0->GetWorldPosition() - node1->GetWorldPosition()).Length();
     const float calfLength = (node1->GetWorldPosition() - node2->GetWorldPosition()).Length();
+    const float lengthRescale = (thighLength + calfLength) / length_;
 
     // Apply rotation
     const Vector3 directionAB = (initialB.Translation() - initialA.Translation()).Normalized();
@@ -669,8 +670,8 @@ void CharacterSkeletonLimbSegmentData::Apply(const Matrix3x4& rootTransform, con
 
     // Resolve limb
     const Vector3 worldPos0 = node0->GetWorldPosition();
-    const Vector3 targetOffset = dest.globalAnimation_ ? rootTransform.Translation() : worldPos0;
-    const Vector3 worldPos2 = ClampVector(rootTransform.ToMatrix3() * (animTransform * position_) + targetOffset, worldPos0, thighLength + calfLength);
+    const Vector3 targetOffset = worldPos0;
+    const Vector3 worldPos2 = ClampVector(rootTransform.ToMatrix3() * (animTransform * (position_ * lengthRescale)) + targetOffset, worldPos0, thighLength + calfLength);
     const Vector3 baseDirection = initialC.Translation() - initialA.Translation();
     const Vector3 worldJointOrientation = ComputeJointOrientation(animRotation * direction_, baseDirection, worldPos2 - worldPos0, rootTransform);
     const Vector3 worldPos1 = ResolveKneePosition(worldPos0, worldPos2, worldJointOrientation, thighLength, calfLength);
@@ -708,7 +709,6 @@ bool CharacterSkeleton::LoadXML(const XMLElement& source)
         segment.name_ = child.GetAttribute("name");
         segment.type_ = GetCharacterSkeletonSegmentType(child.GetName());
         segment.boneNames_ = child.GetAttribute("bones").Split(' ');
-        segment.globalAnimation_ = child.GetBool("global");
         segments_.Push(segment);
     }
     return true;
@@ -882,8 +882,11 @@ void LimbAnimationTrack::DoImportFrame(CharacterSkeletonLimbSegmentData& frame, 
     const Matrix3x4& initialB = segment.initialTransforms_[1];
     const Matrix3x4& initialC = segment.initialTransforms_[2];
 
-    // Get relative or global position
-    frame.position_ = segment.globalAnimation_ ? transformC.Translation() : transformC.Translation() - transformA.Translation();
+    // Get position
+    const float firstLength = (transformB.Translation() - transformA.Translation()).Length();
+    const float secondLength = (transformC.Translation() - transformB.Translation()).Length();
+    frame.length_ = firstLength + secondLength;
+    frame.position_ = transformC.Translation() - transformA.Translation();
 
     // Get joint bending direction
     const Vector3 positionAproj = ProjectPointOntoSegment(transformB.Translation(), transformA.Translation(), transformC.Translation());
@@ -919,6 +922,7 @@ void LimbAnimationTrack::DoImportFrame(CharacterSkeletonLimbSegmentData& frame, 
 
 bool LimbAnimationTrack::SaveFrameXML(const CharacterSkeletonLimbSegmentData& frame, XMLElement& dest) const
 {
+    dest.SetFloat("length", frame.length_);
     dest.SetVector3("position", frame.position_);
     dest.SetVector3("direction", frame.direction_);
     dest.SetFloat("rotation0", frame.rotationA_);
@@ -929,6 +933,7 @@ bool LimbAnimationTrack::SaveFrameXML(const CharacterSkeletonLimbSegmentData& fr
 
 bool LimbAnimationTrack::LoadFrameXML(CharacterSkeletonLimbSegmentData& frame, const XMLElement& src) const
 {
+    frame.length_ = src.GetFloat("length");
     frame.position_ = src.GetVector3("position");
     frame.direction_ = src.GetVector3("direction");
     frame.rotationA_ = src.GetFloat("rotation0");
@@ -1484,6 +1489,7 @@ void CharacterLimbEffector::RegisterObject(Context* context)
 void CharacterLimbEffector::BlendAnimationFrames(
     CharacterSkeletonLimbSegmentData& first, const CharacterSkeletonLimbSegmentData& second, float factor)
 {
+    first.length_ = Lerp(first.length_, second.length_, factor);
     first.position_ = first.position_.Lerp(second.position_, factor);
     first.direction_ = first.direction_.Lerp(second.direction_, factor);
     first.rotationA_ = LerpAngle(first.rotationA_, second.rotationA_, factor);

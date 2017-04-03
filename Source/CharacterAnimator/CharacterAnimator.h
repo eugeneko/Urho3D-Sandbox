@@ -81,8 +81,6 @@ struct CharacterSkeletonSegment
     CharacterSkeletonSegmentType type_;
     /// Names of bones in segment.
     Vector<String> boneNames_;
-    /// Whether the segment animation is global.
-    bool globalAnimation_ = false;
 
     /// Bones of the segment.
     PODVector<Bone*> bones_;
@@ -153,6 +151,8 @@ public:
     static const CharacterSkeletonSegmentType Type = CharacterSkeletonSegmentType::Limb;
 
 public:
+    /// Total length of limb.
+    float length_ = 0.0f;
     /// Target position.
     Vector3 position_;
     /// Limb direction.
