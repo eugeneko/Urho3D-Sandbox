@@ -104,6 +104,10 @@ struct CharacterSkeletonSegment
 class CharacterSkeletonRootSegmentData : public CharacterSkeletonSegmentData
 {
 public:
+    /// Segment type
+    static const CharacterSkeletonSegmentType Type = CharacterSkeletonSegmentType::Root;
+
+public:
     /// Position.
     Vector3 position_;
     /// Rotation.
@@ -123,6 +127,10 @@ public:
 class CharacterSkeletonChainSegmentData : public CharacterSkeletonSegmentData
 {
 public:
+    /// Segment type
+    static const CharacterSkeletonSegmentType Type = CharacterSkeletonSegmentType::Chain;
+
+public:
     /// Target position.
     Vector3 position_;
     /// Segment rotations.
@@ -140,6 +148,10 @@ public:
 /// Character skeleton limb segment data.
 class CharacterSkeletonLimbSegmentData : public CharacterSkeletonSegmentData
 {
+public:
+    /// Segment type
+    static const CharacterSkeletonSegmentType Type = CharacterSkeletonSegmentType::Limb;
+
 public:
     /// Target position.
     Vector3 position_;
@@ -285,111 +297,175 @@ struct CharacterSkeletonBone
 };
 
 /// Character animation track base class.
-class CharacterAnimationTrack : public RefCounted
+class CharacterAnimationTrack : public Object
 {
+    URHO3D_OBJECT(CharacterAnimationTrack, Object);
+
+protected:
+    /// Construct.
+    CharacterAnimationTrack(Context* context, CharacterSkeletonSegmentType type) : Object(context), type_(type) {}
+
 public:
     /// Create track by type.
-    static SharedPtr<CharacterAnimationTrack> Create(CharacterSkeletonSegmentType type, const String& name);
-    /// Construct.
-    CharacterAnimationTrack(CharacterSkeletonSegmentType type, const String& name) : type_(type), name_(name) {}
+    static SharedPtr<CharacterAnimationTrack> Create(Context* context, CharacterSkeletonSegmentType type);
     /// Destruct.
     virtual ~CharacterAnimationTrack() {}
+
+    /// Set name.
+    void SetName(const String& name) { name_ = name; }
+    /// Get name.
+    String GetName() const { return name_; }
+
+    /// Get index of key frame.
+    void GetKeyFrameIndex(float time, unsigned& index) const;
+    /// Get index of key frame.
+    unsigned GetKeyFrameIndex(float time) const;
+    /// Get interpolated key frame indexes.
+    void GetKeyFrame(float time, unsigned& firstFrame, unsigned& secondFrame, float& factor) const;
+    /// Get animation length.
+    float GetLength() const;
+
     /// Import frame.
-    virtual void ImportFrame(const CharacterSkeletonSegment& segment) = 0;
-    /// Merge frame to destination with specified weight.
-    virtual void MergeFrame(unsigned firstFrame, unsigned secondFrame, float factor,
-        float weight, CharacterSkeletonSegmentData& dest) = 0;
+    virtual void ImportFrame(float time, const CharacterSkeletonSegment& segment) = 0;
     /// Save XML.
     virtual bool SaveXML(XMLElement& dest) const = 0;
     /// Load XML.
     virtual bool LoadXML(const XMLElement& source) = 0;
+
     /// Get type string.
     virtual String GetTypeString() const = 0;
     /// Check whether the number of bones is valid.
     virtual bool CheckNumberOfBones(unsigned numBones) const = 0;
-    /// Get name.
-    String GetName() const { return name_; }
 
 private:
     /// Track type.
     CharacterSkeletonSegmentType type_;
     /// Track name.
-    const String name_;
+    String name_;
+
+protected:
+    /// Time stamps.
+    PODVector<float> timeStamps_;
+};
+
+/// Character animation track template.
+template <class TAnimationFrame>
+class CharacterAnimationTrackT : public CharacterAnimationTrack
+{
+public:
+    /// Get animation frame by index.
+    const TAnimationFrame& GetFrame(unsigned index) const { return track_[index]; }
+
+    /// @see CharacterAnimationTrack::ImportFrame
+    virtual void ImportFrame(float time, const CharacterSkeletonSegment& segment) override final
+    {
+        TAnimationFrame frame;
+        DoImportFrame(frame, segment);
+        timeStamps_.Push(time);
+        track_.Push(frame);
+    }
+    /// @see CharacterAnimationTrack::SaveXML
+    virtual bool SaveXML(XMLElement& dest) const override final
+    {
+        assert(track_.Size() == timeStamps_.Size());
+        const unsigned numKeys = track_.Size();
+        for (unsigned i = 0; i < numKeys; ++i)
+        {
+            XMLElement child = dest.CreateChild("frame");
+            child.SetFloat("time", timeStamps_[i]);
+            if (!SaveFrameXML(track_[i], child))
+                return false;
+        }
+        return true;
+    }
+    /// @see CharacterAnimationTrack::LoadXML
+    virtual bool LoadXML(const XMLElement& source) override final
+    {
+        for (XMLElement child = source.GetChild("frame"); child; child = child.GetNext())
+        {
+            TAnimationFrame frame;
+            const float time = child.GetFloat("time");
+            if (!LoadFrameXML(frame, child))
+                return false;
+            timeStamps_.Push(time);
+            track_.Push(frame);
+        }
+        return true;
+    }
+
+protected:
+    /// Construct.
+    CharacterAnimationTrackT(Context* context) : CharacterAnimationTrack(context, TAnimationFrame::Type) {}
+    /// Import frame implementation.
+    virtual void DoImportFrame(TAnimationFrame& frame, const CharacterSkeletonSegment& segment) = 0;
+    /// Save frame to XML.
+    virtual bool SaveFrameXML(const TAnimationFrame& frame, XMLElement& dest) const = 0;
+    /// Load frame from XML.
+    virtual bool LoadFrameXML(TAnimationFrame& frame, const XMLElement& src) const = 0;
+
+protected:
+    /// Track frames.
+    Vector<TAnimationFrame> track_;
 };
 
 /// Root animation track.
-class RootAnimationTrack : public CharacterAnimationTrack
+class RootAnimationTrack : public CharacterAnimationTrackT<CharacterSkeletonRootSegmentData>
 {
 public:
     /// Construct.
-    RootAnimationTrack(const String& name) : CharacterAnimationTrack(CharacterSkeletonSegmentType::Root, name) {}
-    /// @see CharacterAnimationTrack::ImportFrame
-    virtual void ImportFrame(const CharacterSkeletonSegment& segment) override;
-    /// @see CharacterAnimationTrack::MergeFrame
-    virtual void MergeFrame(unsigned firstFrame, unsigned secondFrame, float factor,
-        float weight, CharacterSkeletonSegmentData& dest) override;
-    /// @see CharacterAnimationTrack::SaveXML
-    virtual bool SaveXML(XMLElement& dest) const override;
-    /// @see CharacterAnimationTrack::LoadXML
-    virtual bool LoadXML(const XMLElement& source) override;
+    RootAnimationTrack(Context* context) : CharacterAnimationTrackT<CharacterSkeletonRootSegmentData>(context) {}
     /// @see CharacterAnimationTrack::GetTypeString
     virtual String GetTypeString() const override { return "root"; }
     /// @see CharacterAnimationTrack::CheckNumberOfBones
     virtual bool CheckNumberOfBones(unsigned numBones) const override { return numBones == 1; }
 
-public:
-    /// Track.
-    Vector<CharacterSkeletonRootSegmentData> track_;
+protected:
+    /// @see CharacterAnimationTrackT::DoImportFrame
+    virtual void DoImportFrame(CharacterSkeletonRootSegmentData& frame, const CharacterSkeletonSegment& segment) override;
+    /// @see CharacterAnimationTrackT::SaveFrameXML
+    virtual bool SaveFrameXML(const CharacterSkeletonRootSegmentData& frame, XMLElement& dest) const override;
+    /// @see CharacterAnimationTrackT::LoadFrameXML
+    virtual bool LoadFrameXML(CharacterSkeletonRootSegmentData& frame, const XMLElement& src) const override;
 };
 
 /// Chain animation track.
-class ChainAnimationTrack : public CharacterAnimationTrack
+class ChainAnimationTrack : public CharacterAnimationTrackT<CharacterSkeletonChainSegmentData>
 {
 public:
     /// Construct.
-    ChainAnimationTrack(const String& name) : CharacterAnimationTrack(CharacterSkeletonSegmentType::Chain, name) {}
-    /// @see CharacterAnimationTrack::ImportFrame
-    virtual void ImportFrame(const CharacterSkeletonSegment& segment) override;
-    /// @see CharacterAnimationTrack::MergeFrame
-    virtual void MergeFrame(unsigned firstFrame, unsigned secondFrame, float factor,
-        float weight, CharacterSkeletonSegmentData& dest) override;
-    /// @see CharacterAnimationTrack::SaveXML
-    virtual bool SaveXML(XMLElement& dest) const override;
-    /// @see CharacterAnimationTrack::LoadXML
-    virtual bool LoadXML(const XMLElement& source) override;
+    ChainAnimationTrack(Context* context) : CharacterAnimationTrackT<CharacterSkeletonChainSegmentData>(context) {}
     /// @see CharacterAnimationTrack::GetTypeString
     virtual String GetTypeString() const override { return "chain"; }
     /// @see CharacterAnimationTrack::CheckNumberOfBones
     virtual bool CheckNumberOfBones(unsigned numBones) const override { return numBones > 2; }
 
-public:
-    /// Track.
-    Vector<CharacterSkeletonChainSegmentData> track_;
+protected:
+    /// @see CharacterAnimationTrackT::DoImportFrame
+    virtual void DoImportFrame(CharacterSkeletonChainSegmentData& frame, const CharacterSkeletonSegment& segment) override;
+    /// @see CharacterAnimationTrackT::SaveFrameXML
+    virtual bool SaveFrameXML(const CharacterSkeletonChainSegmentData& frame, XMLElement& dest) const override;
+    /// @see CharacterAnimationTrackT::LoadFrameXML
+    virtual bool LoadFrameXML(CharacterSkeletonChainSegmentData& frame, const XMLElement& src) const override;
 };
 
 /// Limb animation track.
-class LimbAnimationTrack : public CharacterAnimationTrack
+class LimbAnimationTrack : public CharacterAnimationTrackT<CharacterSkeletonLimbSegmentData>
 {
 public:
     /// Construct.
-    LimbAnimationTrack(const String& name) : CharacterAnimationTrack(CharacterSkeletonSegmentType::Limb, name) {}
-    /// @see CharacterAnimationTrack::ImportFrame
-    virtual void ImportFrame(const CharacterSkeletonSegment& segment) override;
-    /// @see CharacterAnimationTrack::MergeFrame
-    virtual void MergeFrame(unsigned firstFrame, unsigned secondFrame, float factor,
-        float weight, CharacterSkeletonSegmentData& dest) override;
-    /// @see CharacterAnimationTrack::SaveXML
-    virtual bool SaveXML(XMLElement& dest) const override;
-    /// @see CharacterAnimationTrack::LoadXML
-    virtual bool LoadXML(const XMLElement& source) override;
+    LimbAnimationTrack(Context* context) : CharacterAnimationTrackT<CharacterSkeletonLimbSegmentData>(context) {}
     /// @see CharacterAnimationTrack::GetTypeString
     virtual String GetTypeString() const override { return "limb"; }
     /// @see CharacterAnimationTrack::CheckNumberOfBones
     virtual bool CheckNumberOfBones(unsigned numBones) const override { return numBones > 2; }
 
-public:
-    /// Track.
-    Vector<CharacterSkeletonLimbSegmentData> track_;
+protected:
+    /// @see CharacterAnimationTrackT::DoImportFrame
+    virtual void DoImportFrame(CharacterSkeletonLimbSegmentData& frame,const CharacterSkeletonSegment& segment) override;
+    /// @see CharacterAnimationTrackT::SaveFrameXML
+    virtual bool SaveFrameXML(const CharacterSkeletonLimbSegmentData& frame, XMLElement& dest) const override;
+    /// @see CharacterAnimationTrackT::LoadFrameXML
+    virtual bool LoadFrameXML(CharacterSkeletonLimbSegmentData& frame, const XMLElement& src) const override;
 };
 
 /// Character Animation.
@@ -419,18 +495,8 @@ public:
     const Vector<SharedPtr<CharacterAnimationTrack>>& GetTracks() const { return tracks_; }
     /// Find track by name.
     CharacterAnimationTrack* FindTrack(const String& name) const;
-    /// Get index of key frame.
-    void GetKeyFrameIndex(float time, unsigned& index) const;
-    /// Get index of key frame.
-    unsigned GetKeyFrameIndex(float time) const;
-    /// Get interpolated key frame indexes.
-    void GetKeyFrame(float time, unsigned& firstFrame, unsigned& secondFrame, float& factor) const;
-    /// Get animation length.
-    float GetLength() const;
 
 private:
-    /// Time stamps.
-    PODVector<float> timeStamps_;
     /// Tracks.
     Vector<SharedPtr<CharacterAnimationTrack>> tracks_;
 };
@@ -448,6 +514,15 @@ public:
     /// Register object factory.
     static void RegisterObject(Context* context);
 
+    /// Reset transforms.
+    void ResetTransforms(CharacterSkeletonSegment& segment);
+    /// Reset animation state.
+    virtual void ResetAnimationState() = 0;
+    /// Apply animation track.
+    virtual void ApplyAnimationTrack(float weight, float time, CharacterAnimationTrack& animationTrack) = 0;
+    /// Resolve animations.
+    virtual void ResolveAnimations(const Matrix3x4& rootTransform, const Matrix3x4& animTransform, CharacterSkeletonSegment& dest) = 0;
+
     /// Get segment name.
     const String& GetSegmentName() const { return segmentName_; }
 
@@ -458,6 +533,54 @@ private:
 private:
     /// Segment name.
     String segmentName_;
+};
+
+/// Character Effector template.
+template <class TAnimationTrack, class TAnimationFrame>
+class CharacterEffectorT : public CharacterEffector
+{
+public:
+    /// @see CharacterEffector::ResetAnimationState
+    virtual void ResetAnimationState() override final
+    {
+        accumulatedWeight_ = 0.0f;
+    }
+    /// @see CharacterEffector::ApplyAnimationTrack
+    virtual void ApplyAnimationTrack(float weight, float time, CharacterAnimationTrack& animationTrack) override final
+    {
+        if (TAnimationTrack* track = dynamic_cast<TAnimationTrack*>(&animationTrack))
+        {
+            unsigned firstFrame;
+            unsigned secondFrame;
+            float factor;
+            track->GetKeyFrame(time, firstFrame, secondFrame, factor);
+
+            const float firstWeight = weight * (1 - factor);
+            const float secondWeight = weight * factor;
+
+            BlendAnimationFrames(frame_, track->GetFrame(firstFrame), firstWeight / (firstWeight + accumulatedWeight_));
+            accumulatedWeight_ += firstWeight;
+            BlendAnimationFrames(frame_, track->GetFrame(secondFrame), secondWeight / (secondWeight + accumulatedWeight_));
+            accumulatedWeight_ += secondWeight;
+        }
+    }
+    /// @see CharacterEffector::ResolveAnimations
+    virtual void ResolveAnimations(const Matrix3x4& rootTransform, const Matrix3x4& animTransform, CharacterSkeletonSegment& dest) override
+    {
+        frame_.Apply(rootTransform, animTransform, dest);
+    }
+
+protected:
+    /// Construct.
+    CharacterEffectorT(Context* context) : CharacterEffector(context) {}
+    /// Blend animation frames, result is written into first frame.
+    virtual void BlendAnimationFrames(TAnimationFrame& first, const TAnimationFrame& second, float factor) = 0;
+
+private:
+    /// Accumulated weight.
+    float accumulatedWeight_ = 0.0f;
+    /// Effector parameters.
+    TAnimationFrame frame_;
 };
 
 /// Character Animation Controller.
@@ -556,45 +679,57 @@ private:
 };
 
 /// Character Root Effector.
-class CharacterRootEffector : public CharacterEffector
+class CharacterRootEffector : public CharacterEffectorT<RootAnimationTrack, CharacterSkeletonRootSegmentData>
 {
     URHO3D_OBJECT(CharacterRootEffector, CharacterEffector);
 
 public:
     /// Construct.
-    CharacterRootEffector(Context* context) : CharacterEffector(context) {}
+    CharacterRootEffector(Context* context) : CharacterEffectorT<RootAnimationTrack, CharacterSkeletonRootSegmentData>(context) {}
     /// Destruct.
     virtual ~CharacterRootEffector() {}
     /// Register object factory.
     static void RegisterObject(Context* context);
+
+protected:
+    /// @see CharacterEffectorT::BlendAnimationFrames
+    virtual void BlendAnimationFrames(CharacterSkeletonRootSegmentData& first, const CharacterSkeletonRootSegmentData& second, float factor) override;
 };
 
 /// Character Limb Effector.
-class CharacterLimbEffector : public CharacterEffector
+class CharacterLimbEffector : public CharacterEffectorT<LimbAnimationTrack, CharacterSkeletonLimbSegmentData>
 {
     URHO3D_OBJECT(CharacterLimbEffector, CharacterEffector);
 
 public:
     /// Construct.
-    CharacterLimbEffector(Context* context) : CharacterEffector(context) {}
+    CharacterLimbEffector(Context* context) : CharacterEffectorT<LimbAnimationTrack, CharacterSkeletonLimbSegmentData>(context) {}
     /// Destruct.
     virtual ~CharacterLimbEffector() {}
     /// Register object factory.
     static void RegisterObject(Context* context);
+
+protected:
+    /// @see CharacterEffectorT::BlendAnimationFrames
+    virtual void BlendAnimationFrames(CharacterSkeletonLimbSegmentData& first, const CharacterSkeletonLimbSegmentData& second, float factor) override;
 };
 
 /// Character Chain Effector.
-class CharacterChainEffector : public CharacterEffector
+class CharacterChainEffector : public CharacterEffectorT<ChainAnimationTrack, CharacterSkeletonChainSegmentData>
 {
     URHO3D_OBJECT(CharacterChainEffector, CharacterEffector);
 
 public:
     /// Construct.
-    CharacterChainEffector(Context* context) : CharacterEffector(context) {}
+    CharacterChainEffector(Context* context) : CharacterEffectorT<ChainAnimationTrack, CharacterSkeletonChainSegmentData>(context) {}
     /// Destruct.
     virtual ~CharacterChainEffector() {}
     /// Register object factory.
     static void RegisterObject(Context* context);
+
+protected:
+    /// @see CharacterEffectorT::BlendAnimationFrames
+    virtual void BlendAnimationFrames(CharacterSkeletonChainSegmentData& first, const CharacterSkeletonChainSegmentData& second, float factor) override;
 };
 
 /// Register classes.

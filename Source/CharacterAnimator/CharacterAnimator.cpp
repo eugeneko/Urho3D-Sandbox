@@ -769,114 +769,107 @@ bool CharacterSkeleton::AllocateSegmentData(Vector<CharacterSkeletonSegment>& se
 }
 
 //////////////////////////////////////////////////////////////////////////
-SharedPtr<CharacterAnimationTrack> CharacterAnimationTrack::Create(CharacterSkeletonSegmentType type, const String& name)
+SharedPtr<CharacterAnimationTrack> CharacterAnimationTrack::Create(Context* context, CharacterSkeletonSegmentType type)
 {
     switch (type)
     {
     case Urho3D::CharacterSkeletonSegmentType::Root:
-        return MakeShared<RootAnimationTrack>(name);
+        return MakeShared<RootAnimationTrack>(context);
     case Urho3D::CharacterSkeletonSegmentType::Chain:
-        return MakeShared<ChainAnimationTrack>(name);
+        return MakeShared<ChainAnimationTrack>(context);
     case Urho3D::CharacterSkeletonSegmentType::Limb:
-        return MakeShared<LimbAnimationTrack>(name);
+        return MakeShared<LimbAnimationTrack>(context);
     default:
         return nullptr;
     }
 }
 
-//////////////////////////////////////////////////////////////////////////
-void RootAnimationTrack::ImportFrame(const CharacterSkeletonSegment& segment)
+void CharacterAnimationTrack::GetKeyFrameIndex(float time, unsigned& index) const
 {
-    CharacterSkeletonRootSegmentData frame;
+    if (time < 0.0f)
+        time = 0.0f;
+
+    if (index >= timeStamps_.Size())
+        index = timeStamps_.Size() - 1;
+
+    // Check for being too far ahead
+    while (index && time < timeStamps_[index])
+        --index;
+
+    // Check for being too far behind
+    while (index < timeStamps_.Size() - 1 && time >= timeStamps_[index + 1])
+        ++index;
+}
+
+unsigned CharacterAnimationTrack::GetKeyFrameIndex(float time) const
+{
+    unsigned index = 0;
+    GetKeyFrameIndex(time, index);
+    return index;
+}
+
+void CharacterAnimationTrack::GetKeyFrame(float time, unsigned& firstFrame, unsigned& secondFrame, float& factor) const
+{
+    firstFrame = GetKeyFrameIndex(time);
+    secondFrame = firstFrame + 1 < timeStamps_.Size() ? firstFrame + 1 : 0;
+    const float timeInterval = Max(0.0f, timeStamps_[secondFrame] - timeStamps_[firstFrame]);
+    factor = timeInterval > 0.0f ? (time - timeStamps_[firstFrame]) / timeInterval : 1.0f;
+}
+
+float CharacterAnimationTrack::GetLength() const
+{
+    return timeStamps_.Size() > 0 ? timeStamps_.Back() - timeStamps_.Front() : 0.0f;
+}
+
+//////////////////////////////////////////////////////////////////////////
+void RootAnimationTrack::DoImportFrame(CharacterSkeletonRootSegmentData& frame, const CharacterSkeletonSegment& segment)
+{
     frame.position_ = segment.nodes_[0]->GetWorldPosition() - segment.globalPositions_[0];
     frame.rotation_ = segment.nodes_[0]->GetWorldRotation() * segment.globalRotations_[0].Inverse();
-    track_.Push(frame);
 }
 
-void RootAnimationTrack::MergeFrame(unsigned firstFrame, unsigned secondFrame, float factor,
-    float weight, CharacterSkeletonSegmentData& dest)
+bool RootAnimationTrack::SaveFrameXML(const CharacterSkeletonRootSegmentData& frame, XMLElement& dest) const
 {
-    const CharacterSkeletonRootSegmentData& first = track_[firstFrame];
-    const CharacterSkeletonRootSegmentData& second = track_[secondFrame];
-    dest.Merge(first, weight * (1 - factor));
-    dest.Merge(second, weight * factor);
-}
-
-bool RootAnimationTrack::SaveXML(XMLElement& dest) const
-{
-    const unsigned numKeys = track_.Size();
-    for (unsigned i = 0; i < numKeys; ++i)
-    {
-        XMLElement child = dest.CreateChild("key");
-        child.SetVector3("position", track_[i].position_);
-        child.SetQuaternion("rotation", track_[i].rotation_);
-    }
+    dest.SetVector3("position", frame.position_);
+    dest.SetQuaternion("rotation", frame.rotation_);
     return true;
 }
 
-bool RootAnimationTrack::LoadXML(const XMLElement& source)
+bool RootAnimationTrack::LoadFrameXML(CharacterSkeletonRootSegmentData& frame, const XMLElement& src) const
 {
-    for (XMLElement child = source.GetChild("key"); child; child = child.GetNext())
-    {
-        CharacterSkeletonRootSegmentData frame;
-        frame.position_ = child.GetVector3("position");
-        frame.rotation_ = child.GetQuaternion("rotation");
-        track_.Push(frame);
-    }
+    frame.position_ = src.GetVector3("position");
+    frame.rotation_ = src.GetQuaternion("rotation");
     return true;
 }
 
 //////////////////////////////////////////////////////////////////////////
-void ChainAnimationTrack::ImportFrame(const CharacterSkeletonSegment& segment)
+void ChainAnimationTrack::DoImportFrame(CharacterSkeletonChainSegmentData& frame, const CharacterSkeletonSegment& segment)
 {
-    CharacterSkeletonChainSegmentData frame;
     frame.position_ = segment.nodes_.Back()->GetWorldPosition();
     frame.rotations_.Resize(segment.nodes_.Size());
     for (unsigned i = 0; i < segment.nodes_.Size(); ++i)
         frame.rotations_[i] = segment.nodes_[i]->GetWorldRotation() * segment.globalRotations_[i].Inverse();
-    track_.Push(frame);
 }
 
-void ChainAnimationTrack::MergeFrame(unsigned firstFrame, unsigned secondFrame, float factor,
-    float weight, CharacterSkeletonSegmentData& dest)
+bool ChainAnimationTrack::SaveFrameXML(const CharacterSkeletonChainSegmentData& frame, XMLElement& dest) const
 {
-    const CharacterSkeletonChainSegmentData& first = track_[firstFrame];
-    const CharacterSkeletonChainSegmentData& second = track_[secondFrame];
-    dest.Merge(first, weight * (1 - factor));
-    dest.Merge(second, weight * factor);
-}
-
-bool ChainAnimationTrack::SaveXML(XMLElement& dest) const
-{
-    const unsigned numKeys = track_.Size();
-    for (unsigned i = 0; i < numKeys; ++i)
-    {
-        XMLElement child = dest.CreateChild("frame");
-        child.SetVector3("position", track_[i].position_);
-        for (unsigned j = 0; j < track_[i].rotations_.Size(); ++j)
-            child.CreateChild("bone").SetQuaternion("rotation", track_[i].rotations_[j]);
-    }
+    dest.SetVector3("position", frame.position_);
+    for (unsigned j = 0; j < frame.rotations_.Size(); ++j)
+        dest.CreateChild("bone").SetQuaternion("rotation", frame.rotations_[j]);
     return true;
 }
 
-bool ChainAnimationTrack::LoadXML(const XMLElement& source)
+bool ChainAnimationTrack::LoadFrameXML(CharacterSkeletonChainSegmentData& frame, const XMLElement& src) const
 {
-    for (XMLElement child = source.GetChild("frame"); child; child = child.GetNext())
-    {
-        CharacterSkeletonChainSegmentData frame;
-        frame.position_ = child.GetVector3("position");
-        for (XMLElement bone = child.GetChild("bone"); bone; bone = bone.GetNext())
-            frame.rotations_.Push(bone.GetQuaternion("rotation"));
-        track_.Push(frame);
-    }
+    frame.position_ = src.GetVector3("position");
+    for (XMLElement bone = src.GetChild("bone"); bone; bone = bone.GetNext())
+        frame.rotations_.Push(bone.GetQuaternion("rotation"));
     return true;
 }
 
 //////////////////////////////////////////////////////////////////////////
-void LimbAnimationTrack::ImportFrame(const CharacterSkeletonSegment& segment)
+void LimbAnimationTrack::DoImportFrame(CharacterSkeletonLimbSegmentData& frame, const CharacterSkeletonSegment& segment)
 {
-    CharacterSkeletonLimbSegmentData frame;
-
     Node* nodeA = segment.nodes_[0];
     Node* nodeB = segment.nodes_[1];
     Node* nodeC = segment.nodes_[2];
@@ -922,46 +915,25 @@ void LimbAnimationTrack::ImportFrame(const CharacterSkeletonSegment& segment)
 
     frame.rotationA_ *= Sign(directionAB.DotProduct(axisAB));
     frame.rotationB_ *= Sign(directionBC.DotProduct(axisBC));
-
-    track_.Push(frame);
 }
 
-void LimbAnimationTrack::MergeFrame(unsigned firstFrame, unsigned secondFrame, float factor,
-    float weight, CharacterSkeletonSegmentData& dest)
+bool LimbAnimationTrack::SaveFrameXML(const CharacterSkeletonLimbSegmentData& frame, XMLElement& dest) const
 {
-    const CharacterSkeletonLimbSegmentData& first = track_[firstFrame];
-    const CharacterSkeletonLimbSegmentData& second = track_[secondFrame];
-    dest.Merge(first, weight * (1 - factor));
-    dest.Merge(second, weight * factor);
-}
-
-bool LimbAnimationTrack::SaveXML(XMLElement& dest) const
-{
-    const unsigned numKeys = track_.Size();
-    for (unsigned i = 0; i < numKeys; ++i)
-    {
-        XMLElement child = dest.CreateChild("frame");
-        child.SetVector3("position", track_[i].position_);
-        child.SetVector3("direction", track_[i].direction_);
-        child.SetFloat("rotation0", track_[i].rotationA_);
-        child.SetFloat("rotation1", track_[i].rotationB_);
-        child.SetQuaternion("rotation2", track_[i].rotationC_);
-    }
+    dest.SetVector3("position", frame.position_);
+    dest.SetVector3("direction", frame.direction_);
+    dest.SetFloat("rotation0", frame.rotationA_);
+    dest.SetFloat("rotation1", frame.rotationB_);
+    dest.SetQuaternion("rotation2", frame.rotationC_);
     return true;
 }
 
-bool LimbAnimationTrack::LoadXML(const XMLElement& source)
+bool LimbAnimationTrack::LoadFrameXML(CharacterSkeletonLimbSegmentData& frame, const XMLElement& src) const
 {
-    for (XMLElement child = source.GetChild("frame"); child; child = child.GetNext())
-    {
-        CharacterSkeletonLimbSegmentData frame;
-        frame.position_ = child.GetVector3("position");
-        frame.direction_ = child.GetVector3("direction");
-        frame.rotationA_ = child.GetFloat("rotation0");
-        frame.rotationB_ = child.GetFloat("rotation1");
-        frame.rotationC_ = child.GetQuaternion("rotation2");
-        track_.Push(frame);
-    }
+    frame.position_ = src.GetVector3("position");
+    frame.direction_ = src.GetVector3("direction");
+    frame.rotationA_ = src.GetFloat("rotation0");
+    frame.rotationB_ = src.GetFloat("rotation1");
+    frame.rotationC_ = src.GetQuaternion("rotation2");
     return true;
 }
 
@@ -981,40 +953,28 @@ bool CharacterAnimation::BeginLoad(Deserializer& source)
 
 bool CharacterAnimation::LoadXML(const XMLElement& source)
 {
-    // Read timestamps
-    if (XMLElement timestampsNode = source.GetChild("timestamps"))
-        for (XMLElement child = timestampsNode.GetChild("frame"); child; child = child.GetNext())
-            timeStamps_.Push(child.GetFloat("time"));
-
-    // Read tracks
     for (XMLElement child = source.GetChild(); child; child = child.GetNext())
-        if (child.GetName() != "timestamps")
+    {
+        const CharacterSkeletonSegmentType type = GetCharacterSkeletonSegmentType(child.GetName());
+        if (SharedPtr<CharacterAnimationTrack> track = CharacterAnimationTrack::Create(context_, type))
         {
-            const CharacterSkeletonSegmentType type = GetCharacterSkeletonSegmentType(child.GetName());
-            if (SharedPtr<CharacterAnimationTrack> track = CharacterAnimationTrack::Create(type, child.GetAttribute("name")))
-            {
-                track->LoadXML(child);
-                tracks_.Push(track);
-            }
+            track->SetName(child.GetAttribute("name"));
+            if (!track->LoadXML(child))
+                return false;
+            tracks_.Push(track);
         }
+    }
     return true;
 }
 
 bool CharacterAnimation::SaveXML(XMLElement& dest) const
 {
-    unsigned numFrames = timeStamps_.Size();
-
-    // Save timestamps
-    if (XMLElement node = dest.CreateChild("timestamps"))
-        for (unsigned i = 0; i < numFrames; ++i)
-            node.CreateChild("frame").SetFloat("time", timeStamps_[i]);
-
-    // Save tracks
     for (CharacterAnimationTrack* track : tracks_)
     {
         XMLElement node = dest.CreateChild(track->GetTypeString());
         node.SetAttribute("name", track->GetName());
-        track->SaveXML(node);
+        if (!track->SaveXML(node))
+            return false;
     }
 
     return true;
@@ -1026,43 +986,6 @@ CharacterAnimationTrack* CharacterAnimation::FindTrack(const String& name) const
         if (track->GetName() == name)
             return track;
     return nullptr;
-}
-
-void CharacterAnimation::GetKeyFrameIndex(float time, unsigned& index) const
-{
-    if (time < 0.0f)
-        time = 0.0f;
-
-    if (index >= timeStamps_.Size())
-        index = timeStamps_.Size() - 1;
-
-    // Check for being too far ahead
-    while (index && time < timeStamps_[index])
-        --index;
-
-    // Check for being too far behind
-    while (index < timeStamps_.Size() - 1 && time >= timeStamps_[index + 1])
-        ++index;
-}
-
-unsigned CharacterAnimation::GetKeyFrameIndex(float time) const
-{
-    unsigned index = 0;
-    GetKeyFrameIndex(time, index);
-    return index;
-}
-
-void CharacterAnimation::GetKeyFrame(float time, unsigned& firstFrame, unsigned& secondFrame, float& factor) const
-{
-    firstFrame = GetKeyFrameIndex(time);
-    secondFrame = firstFrame + 1 < timeStamps_.Size() ? firstFrame + 1 : 0;
-    const float timeInterval = Max(0.0f, timeStamps_[secondFrame] - timeStamps_[firstFrame]);
-    factor = timeInterval > 0.0f ? (time - timeStamps_[firstFrame]) / timeInterval : 1.0f;
-}
-
-float CharacterAnimation::GetLength() const
-{
-    return timeStamps_.Size() > 0 ? timeStamps_.Back() - timeStamps_.Front() : 0.0f;
 }
 
 bool CharacterAnimation::Save(Serializer& dest) const
@@ -1171,6 +1094,7 @@ bool CharacterAnimation::ImportAnimation(CharacterSkeleton& characterSkeleton, M
 bool CharacterAnimation::Import(Animation& animation, Model& model, CharacterSkeleton& rig, const Matrix3x4& transform)
 {
     // Read timestamps
+    PODVector<float> timeStamps;
     unsigned numFrames = 0;
     for (const auto& item : animation.GetTracks())
     {
@@ -1184,9 +1108,9 @@ bool CharacterAnimation::Import(Animation& animation, Model& model, CharacterSke
         numFrames = track.keyFrames_.Size();
         if (numFrames > 0)
         {
-            timeStamps_.Resize(numFrames);
+            timeStamps.Resize(numFrames);
             for (unsigned i = 0; i < track.GetNumKeyFrames(); ++i)
-                timeStamps_[i] = track.keyFrames_[i].time_;
+                timeStamps[i] = track.keyFrames_[i].time_;
         }
     }
     if (numFrames == 0)
@@ -1206,7 +1130,10 @@ bool CharacterAnimation::Import(Animation& animation, Model& model, CharacterSke
 
     // Create tracks
     for (const CharacterSkeletonSegment& segment : rig.GetSegments())
-        tracks_.Push(CharacterAnimationTrack::Create(segment.type_, segment.name_));
+    {
+        tracks_.Push(CharacterAnimationTrack::Create(context_, segment.type_));
+        tracks_.Back()->SetName(segment.name_);
+    }
 
     // Gather segments data
     Vector<CharacterSkeletonSegment> segmentData;
@@ -1216,14 +1143,14 @@ bool CharacterAnimation::Import(Animation& animation, Model& model, CharacterSke
     for (unsigned i = 0; i < numFrames; ++i)
     {
         // Play animation
-        animationState->SetTime(timeStamps_[i]);
+        animationState->SetTime(timeStamps[i]);
         animationState->Apply();
         node.MarkDirty();
 
         // Read tracks
         for (unsigned j = 0; j < segmentData.Size(); ++j)
             if (tracks_[j])
-                tracks_[j]->ImportFrame(segmentData[j]);
+                tracks_[j]->ImportFrame(timeStamps[i], segmentData[j]);
         // #TODO Backup
     }
 
@@ -1235,6 +1162,13 @@ void CharacterEffector::RegisterObject(Context* context)
 {
     URHO3D_COPY_BASE_ATTRIBUTES(Component);
     URHO3D_ATTRIBUTE("Segment", String, segmentName_, String::EMPTY, AM_DEFAULT);
+}
+
+void CharacterEffector::ResetTransforms(CharacterSkeletonSegment& segment)
+{
+    segment.data_->Reset();
+    for (Bone* bone : segment.bones_)
+        bone->node_->SetTransform(bone->initialPosition_, bone->initialRotation_, bone->initialScale_);
 }
 
 void CharacterEffector::OnNodeSet(Node* node)
@@ -1339,33 +1273,17 @@ void CharacterAnimationController::ApplyAnimation()
             if (effector->IsEnabledEffective())
                 currentSegmentsData_.Push(MakePair(effector, &segment));
 
-    // Reset segments to initial pose
-    for (auto& item : currentSegmentsData_)
-    {
-        CharacterSkeletonSegment& segment = *item.second_;
-        segment.data_->Reset();
-        for (Bone* bone : segment.bones_)
-            bone->node_->SetTransform(bone->initialPosition_, bone->initialRotation_, bone->initialScale_);
-    }
-
     // Animate segments
-    for (const AnimationControl& animationControl : GetAnimations())
+    for (auto& segmentData : currentSegmentsData_)
     {
-        CharacterAnimation* characterAnimation = GetCharacterAnimation(animationControl.name_);
-        if (!characterAnimation)
-            continue;
-        AnimationState* animationState = GetAnimationState(animationControl.name_);
-        if (!animationState)
-            continue;
-
-        unsigned firstFrame;
-        unsigned secondFrame;
-        float factor;
-        characterAnimation->GetKeyFrame(animationState->GetTime(), firstFrame, secondFrame, factor);
-
-        for (CharacterSkeletonSegment& segment : segmentData_)
-            if (CharacterAnimationTrack* track = characterAnimation->FindTrack(segment.name_))
-                track->MergeFrame(firstFrame, secondFrame, factor, animationState->GetWeight(), *segment.data_);
+        CharacterEffector& effector = *segmentData.first_;
+        CharacterSkeletonSegment& segment = *segmentData.second_;
+        effector.ResetTransforms(segment);
+        effector.ResetAnimationState();
+        for (auto& animationData : currentAnimationData_)
+            if (CharacterAnimationTrack* track = animationData.characterAnimation_->FindTrack(segment.name_))
+                effector.ApplyAnimationTrack(animationData.weight_, animationData.time_, *track);
+        effector.ResolveAnimations(node_->GetWorldTransform(), animationTransform_, segment);
     }
 
     // Override animations
@@ -1549,6 +1467,13 @@ void CharacterRootEffector::RegisterObject(Context* context)
     URHO3D_COPY_BASE_ATTRIBUTES(CharacterEffector);
 }
 
+void CharacterRootEffector::BlendAnimationFrames(
+    CharacterSkeletonRootSegmentData& first, const CharacterSkeletonRootSegmentData& second, float factor)
+{
+    first.position_ = first.position_.Lerp(second.position_, factor);
+    first.rotation_ = first.rotation_.Slerp(second.rotation_, factor);
+}
+
 //////////////////////////////////////////////////////////////////////////
 void CharacterLimbEffector::RegisterObject(Context* context)
 {
@@ -1556,11 +1481,30 @@ void CharacterLimbEffector::RegisterObject(Context* context)
     URHO3D_COPY_BASE_ATTRIBUTES(CharacterEffector);
 }
 
+void CharacterLimbEffector::BlendAnimationFrames(
+    CharacterSkeletonLimbSegmentData& first, const CharacterSkeletonLimbSegmentData& second, float factor)
+{
+    first.position_ = first.position_.Lerp(second.position_, factor);
+    first.direction_ = first.direction_.Lerp(second.direction_, factor);
+    first.rotationA_ = LerpAngle(first.rotationA_, second.rotationA_, factor);
+    first.rotationB_ = LerpAngle(first.rotationB_, second.rotationB_, factor);
+    first.rotationC_ = first.rotationC_.Slerp(second.rotationC_, factor);
+}
+
 //////////////////////////////////////////////////////////////////////////
 void CharacterChainEffector::RegisterObject(Context* context)
 {
     context->RegisterFactory<CharacterChainEffector>(characterAnimatorCategory);
     URHO3D_COPY_BASE_ATTRIBUTES(CharacterEffector);
+}
+
+void CharacterChainEffector::BlendAnimationFrames(
+    CharacterSkeletonChainSegmentData& first, const CharacterSkeletonChainSegmentData& second, float factor)
+{
+    first.position_ = first.position_.Lerp(second.position_, factor);
+    first.rotations_.Resize(second.rotations_.Size());
+    for (unsigned i = 0; i < first.rotations_.Size(); ++i)
+        first.rotations_[i] = first.rotations_[i].Slerp(second.rotations_[i], factor);
 }
 
 //////////////////////////////////////////////////////////////////////////
