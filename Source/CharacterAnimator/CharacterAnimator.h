@@ -50,28 +50,6 @@ CharacterSkeletonSegmentType GetCharacterSkeletonSegmentType(const String& name)
 
 struct CharacterSkeletonSegment;
 
-/// Character skeleton segment data.
-class CharacterSkeletonSegmentData
-{
-public:
-    /// Create by type.
-    static CharacterSkeletonSegmentData* Create(CharacterSkeletonSegmentType type);
-    /// Destruct.
-    virtual ~CharacterSkeletonSegmentData() {}
-    /// Reset state.
-    virtual void Reset();
-    /// Merge state with specified weight to this.
-    virtual void Merge(const CharacterSkeletonSegmentData& other, float weight) = 0;
-    /// Apply segment animations to segment.
-    virtual void Apply(const Matrix3x4& rootTransform, const Matrix3x4& animTransform, CharacterSkeletonSegment& dest) = 0;
-    /// Get accumulated weight.
-    virtual float GetAccumulatedWeight() const { return accumulatedWeight_; }
-
-protected:
-    /// Weight.
-    float accumulatedWeight_ = 0.0f;
-};
-
 /// Character skeleton segment.
 struct CharacterSkeletonSegment
 {
@@ -93,13 +71,10 @@ struct CharacterSkeletonSegment
     PODVector<Vector3> globalPositions_;
     /// Global initial rotations.
     PODVector<Quaternion> globalRotations_;
-
-    /// Data.
-    std::shared_ptr<CharacterSkeletonSegmentData> data_;
 };
 
 /// Character skeleton root segment data.
-class CharacterSkeletonRootSegmentData : public CharacterSkeletonSegmentData
+class CharacterSkeletonRootSegmentData
 {
 public:
     /// Segment type
@@ -113,16 +88,16 @@ public:
 
 public:
     /// @see CharacterSkeletonSegmentData::Reset
-    virtual void Reset() override;
+    void Reset();
     /// @see CharacterSkeletonSegmentData::Merge
-    virtual void Merge(const CharacterSkeletonSegmentData& other, float weight) override;
+    void Merge(const CharacterSkeletonRootSegmentData& other, float weight);
     /// @see CharacterSkeletonSegmentData::Apply
-    virtual void Apply(const Matrix3x4& rootTransform, const Matrix3x4& animTransform, CharacterSkeletonSegment& dest) override;
+    void Apply(const Matrix3x4& rootTransform, const Matrix3x4& animTransform, CharacterSkeletonSegment& dest);
 
 };
 
 /// Character skeleton chain segment data.
-class CharacterSkeletonChainSegmentData : public CharacterSkeletonSegmentData
+class CharacterSkeletonChainSegmentData
 {
 public:
     /// Segment type
@@ -136,15 +111,15 @@ public:
 
 public:
     /// @see CharacterSkeletonSegmentData::Reset
-    virtual void Reset() override;
+    void Reset();
     /// @see CharacterSkeletonSegmentData::Merge
-    virtual void Merge(const CharacterSkeletonSegmentData& other, float weight) override;
+    void Merge(const CharacterSkeletonChainSegmentData& other, float weight);
     /// @see CharacterSkeletonSegmentData::Apply
-    virtual void Apply(const Matrix3x4& rootTransform, const Matrix3x4& animTransform, CharacterSkeletonSegment& dest) override;
+    void Apply(const Matrix3x4& rootTransform, const Matrix3x4& animTransform, CharacterSkeletonSegment& dest);
 };
 
 /// Character skeleton limb segment data.
-class CharacterSkeletonLimbSegmentData : public CharacterSkeletonSegmentData
+class CharacterSkeletonLimbSegmentData
 {
 public:
     /// Segment type
@@ -166,11 +141,11 @@ public:
 
 public:
     /// @see CharacterSkeletonSegmentData::Reset
-    virtual void Reset() override;
+    void Reset();
     /// @see CharacterSkeletonSegmentData::Merge
-    virtual void Merge(const CharacterSkeletonSegmentData& other, float weight) override;
+    void Merge(const CharacterSkeletonLimbSegmentData& other, float weight);
     /// @see CharacterSkeletonSegmentData::Apply
-    virtual void Apply(const Matrix3x4& rootTransform, const Matrix3x4& animTransform, CharacterSkeletonSegment& dest) override;
+    void Apply(const Matrix3x4& rootTransform, const Matrix3x4& animTransform, CharacterSkeletonSegment& dest);
 };
 
 /// Character skeleton.
@@ -544,6 +519,7 @@ public:
     virtual void ResetAnimationState() override final
     {
         accumulatedWeight_ = 0.0f;
+        frame_.Reset();
     }
     /// @see CharacterEffector::ApplyAnimationTrack
     virtual void ApplyAnimationTrack(float weight, float time, CharacterAnimationTrack& animationTrack) override final

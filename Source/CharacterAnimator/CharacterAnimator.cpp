@@ -549,41 +549,16 @@ CharacterSkeletonSegmentType GetCharacterSkeletonSegmentType(const String& name)
 }
 
 //////////////////////////////////////////////////////////////////////////
-CharacterSkeletonSegmentData* CharacterSkeletonSegmentData::Create(CharacterSkeletonSegmentType type)
-{
-    switch (type)
-    {
-    case CharacterSkeletonSegmentType::Root:
-        return new CharacterSkeletonRootSegmentData();
-    case CharacterSkeletonSegmentType::Chain:
-        return new CharacterSkeletonChainSegmentData();
-    case CharacterSkeletonSegmentType::Limb:
-        return new CharacterSkeletonLimbSegmentData();
-    default:
-        return nullptr;
-    }
-}
-
-void CharacterSkeletonSegmentData::Reset()
-{
-    accumulatedWeight_ = 0.0f;
-}
-
-//////////////////////////////////////////////////////////////////////////
 void CharacterSkeletonRootSegmentData::Reset()
 {
-    CharacterSkeletonSegmentData::Reset();
     position_ = Vector3::ZERO;
     rotation_ = Quaternion::IDENTITY;
 }
 
-void CharacterSkeletonRootSegmentData::Merge(const CharacterSkeletonSegmentData& other, float weight)
+void CharacterSkeletonRootSegmentData::Merge(const CharacterSkeletonRootSegmentData& other, float weight)
 {
-    const CharacterSkeletonRootSegmentData& rhs = static_cast<const CharacterSkeletonRootSegmentData&>(other);
-    const float balance = weight / (weight + accumulatedWeight_);
-    position_ = position_.Lerp(rhs.position_, balance);
-    rotation_ = rotation_.Slerp(rhs.rotation_, balance);
-    accumulatedWeight_ += weight;
+    position_ = position_.Lerp(other.position_, weight);
+    rotation_ = rotation_.Slerp(other.rotation_, weight);
 }
 
 void CharacterSkeletonRootSegmentData::Apply(const Matrix3x4& rootTransform, const Matrix3x4& animTransform, CharacterSkeletonSegment& dest)
@@ -598,21 +573,17 @@ void CharacterSkeletonRootSegmentData::Apply(const Matrix3x4& rootTransform, con
 //////////////////////////////////////////////////////////////////////////
 void CharacterSkeletonChainSegmentData::Reset()
 {
-    CharacterSkeletonSegmentData::Reset();
     position_ = Vector3::ZERO;
     for (Quaternion& rotation : rotations_)
         rotation = Quaternion::IDENTITY;
 }
 
-void CharacterSkeletonChainSegmentData::Merge(const CharacterSkeletonSegmentData& other, float weight)
+void CharacterSkeletonChainSegmentData::Merge(const CharacterSkeletonChainSegmentData& other, float weight)
 {
-    const CharacterSkeletonChainSegmentData& rhs = static_cast<const CharacterSkeletonChainSegmentData&>(other);
-    const float balance = weight / (weight + accumulatedWeight_);
-    position_ = position_.Lerp(rhs.position_, balance);
-    rotations_.Resize(rhs.rotations_.Size());
+    position_ = position_.Lerp(other.position_, weight);
+    rotations_.Resize(other.rotations_.Size());
     for (unsigned i = 0; i < rotations_.Size(); ++i)
-        rotations_[i] = rotations_[i].Slerp(rhs.rotations_[i], balance);
-    accumulatedWeight_ += weight;
+        rotations_[i] = rotations_[i].Slerp(other.rotations_[i], weight);
 }
 
 void CharacterSkeletonChainSegmentData::Apply(const Matrix3x4& rootTransform, const Matrix3x4& animTransform, CharacterSkeletonSegment& dest)
@@ -626,7 +597,6 @@ void CharacterSkeletonChainSegmentData::Apply(const Matrix3x4& rootTransform, co
 //////////////////////////////////////////////////////////////////////////
 void CharacterSkeletonLimbSegmentData::Reset()
 {
-    CharacterSkeletonSegmentData::Reset();
     position_ = Vector3::ZERO;
     direction_ = Vector3::ZERO;
     rotationA_ = 0.0f;
@@ -634,16 +604,13 @@ void CharacterSkeletonLimbSegmentData::Reset()
     rotationC_ = Quaternion::IDENTITY;
 }
 
-void CharacterSkeletonLimbSegmentData::Merge(const CharacterSkeletonSegmentData& other, float weight)
+void CharacterSkeletonLimbSegmentData::Merge(const CharacterSkeletonLimbSegmentData& other, float weight)
 {
-    const CharacterSkeletonLimbSegmentData& rhs = static_cast<const CharacterSkeletonLimbSegmentData&>(other);
-    const float balance = weight / (weight + accumulatedWeight_);
-    position_ = position_.Lerp(rhs.position_, balance);
-    direction_ = direction_.Lerp(rhs.direction_, balance);
-    rotationA_ = LerpAngle(rotationA_, rhs.rotationA_, balance);
-    rotationB_ = LerpAngle(rotationB_, rhs.rotationB_, balance);
-    rotationC_ = rotationC_.Slerp(rhs.rotationC_, balance);
-    accumulatedWeight_ += weight;
+    position_ = position_.Lerp(other.position_, weight);
+    direction_ = direction_.Lerp(other.direction_, weight);
+    rotationA_ = LerpAngle(rotationA_, other.rotationA_, weight);
+    rotationB_ = LerpAngle(rotationB_, other.rotationB_, weight);
+    rotationC_ = rotationC_.Slerp(other.rotationC_, weight);
 }
 
 void CharacterSkeletonLimbSegmentData::Apply(const Matrix3x4& rootTransform, const Matrix3x4& animTransform, CharacterSkeletonSegment& dest)
@@ -734,12 +701,6 @@ bool CharacterSkeleton::AllocateSegmentData(Vector<CharacterSkeletonSegment>& se
         // Allocate segment
         const CharacterSkeletonSegment& segment = segments_[i];
         segmentsData[i] = segment;
-        segmentsData[i].data_.reset(CharacterSkeletonSegmentData::Create(segment.type_));
-        if (!segmentsData[i].data_)
-        {
-            URHO3D_LOGERRORF("Cannot initialize data of segment %s", segment.name_.CString());
-            return false;
-        }
 
         // Fill bone data
         const unsigned numBones = segment.boneNames_.Size();
@@ -1171,7 +1132,6 @@ void CharacterEffector::RegisterObject(Context* context)
 
 void CharacterEffector::ResetTransforms(CharacterSkeletonSegment& segment)
 {
-    segment.data_->Reset();
     for (Bone* bone : segment.bones_)
         bone->node_->SetTransform(bone->initialPosition_, bone->initialRotation_, bone->initialScale_);
 }
@@ -1290,29 +1250,6 @@ void CharacterAnimationController::ApplyAnimation()
                 effector.ApplyAnimationTrack(animationData.weight_, animationData.time_, *track);
         effector.ResolveAnimations(node_->GetWorldTransform(), animationTransform_, segment);
     }
-
-    // Override animations
-    for (CharacterEffector* segmentController : effectors_)
-        if (segmentController)
-            if (CharacterSkeletonSegment* segment = GetSegment(segmentController->GetSegmentName()))
-            {
-                switch (segment->type_)
-                {
-                case CharacterSkeletonSegmentType::Limb:
-                    {
-                        // #TODO Refactor it
-                        CharacterSkeletonLimbSegmentData* data = static_cast<CharacterSkeletonLimbSegmentData*>(segment->data_.get());
-                        data->position_ = segmentController->GetNode()->GetWorldPosition() - segment->nodes_[0]->GetWorldPosition();
-                    }
-                default:
-                    break;
-                }
-            }
-
-    // Apply animations
-    for (CharacterSkeletonSegment& segment : segmentData_)
-        if (segment.data_->GetAccumulatedWeight() > 1.0f - M_LARGE_EPSILON)
-            segment.data_->Apply(node_->GetWorldTransform(), animationTransform_, segment);
 }
 
 void CharacterAnimationController::SetSkeleton(CharacterSkeleton* skeleton)
