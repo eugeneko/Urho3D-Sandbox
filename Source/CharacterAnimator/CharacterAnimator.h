@@ -5,6 +5,7 @@
 #include <Urho3D/Resource/Resource.h>
 #include <Urho3D/Resource/XMLFile.h>
 #include <Urho3D/Scene/LogicComponent.h>
+#include <Urho3D/Scene/Node.h>
 #include <memory>
 
 class asIScriptEngine;
@@ -95,7 +96,8 @@ public:
     /// Blend state with another.
     void Blend(const CharacterRootSegmentData& other, float weight);
     /// Render state from animation space to world space.
-    void Render(const Matrix3x4& rootTransform, const Matrix3x4& animTransform, const CharacterSkeletonSegment& segment);
+    void Render(const Matrix3x4& rootTransform, const Matrix3x4& animTransform,
+        const Vector3& basePosition, const Quaternion& baseRotation);
     /// Import state from nodes.
     void Import(const CharacterSkeletonSegment& src);
     /// Export state to nodes.
@@ -482,7 +484,7 @@ public:
     /// Apply animation track.
     virtual void ApplyAnimationTrack(float weight, float time, CharacterAnimationTrack& animationTrack) = 0;
     /// Resolve animations.
-    virtual void ResolveAnimations(const Matrix3x4& rootTransform, const Matrix3x4& animTransform, CharacterSkeletonSegment& dest) = 0;
+    virtual void ResolveAnimations(Node& rootNode, const Matrix3x4& animTransform, CharacterSkeletonSegment& dest) = 0;
 
     /// Get segment name.
     const String& GetSegmentName() const { return segmentName_; }
@@ -527,25 +529,18 @@ public:
         }
     }
     /// @see CharacterEffector::ResolveAnimations
-    virtual void ResolveAnimations(const Matrix3x4& rootTransform, const Matrix3x4& animTransform, CharacterSkeletonSegment& dest) override
+    virtual void ResolveAnimations(Node& rootNode, const Matrix3x4& animTransform, CharacterSkeletonSegment& dest) override
     {
-        UpdateAnimationState(animationState_);
-        animationState_.Render(rootTransform, animTransform, dest);
-        UpdateEffectorState(effectorState_, animationState_, dest);
-        effectorState_.Export(rootTransform, animTransform, dest);
+        ResolveAnimationState(effectorState_, animationState_, rootNode, animTransform, dest);
+        effectorState_.Export(rootNode.GetWorldTransform(), animTransform, dest);
     }
 
 protected:
     /// Construct.
     CharacterEffectorT(Context* context) : CharacterEffector(context) {}
-    /// Update animation state.
-    virtual void UpdateAnimationState(TAnimationFrame& animationState) { (void)animationState; }
-    /// Update effector state. Animation state is already rendered into world space.
-    virtual void UpdateEffectorState(TAnimationFrame& effectorState, const TAnimationFrame& animationState,
-        const CharacterSkeletonSegment& segment)
-    {
-        effectorState = animationState;
-    }
+    /// Resolve animation state.
+    virtual void ResolveAnimationState(TAnimationFrame& effectorState, TAnimationFrame& animationState,
+        Node& rootNode, const Matrix3x4& animTransform, const CharacterSkeletonSegment& segment) = 0;
 
 private:
     /// Accumulated weight.
@@ -665,8 +660,9 @@ public:
     static void RegisterObject(Context* context);
 
 private:
-    /// @see CharacterEffectorT::UpdateAnimationState
-    virtual void UpdateAnimationState(CharacterRootSegmentData& animationState) override;
+    /// @see CharacterEffectorT::ResolveAnimationState
+    virtual void ResolveAnimationState(CharacterRootSegmentData& effectorState, CharacterRootSegmentData& animationState,
+        Node& rootNode, const Matrix3x4& animTransform, const CharacterSkeletonSegment& segment) override;
 
 private:
     /// Multiplier of root offset during animation.
@@ -689,9 +685,9 @@ public:
     static void RegisterObject(Context* context);
 
 private:
-    /// @see CharacterEffectorT::UpdateEffectorState
-    virtual void UpdateEffectorState(CharacterLimbSegmentData& effectorState, const CharacterLimbSegmentData& animationState,
-        const CharacterSkeletonSegment& segment) override;
+    /// @see CharacterEffectorT::ResolveAnimationState
+    virtual void ResolveAnimationState(CharacterLimbSegmentData& effectorState, CharacterLimbSegmentData& animationState,
+        Node& rootNode, const Matrix3x4& animTransform, const CharacterSkeletonSegment& segment) override;
 
 private:
     /// Whether to animate limb target position.
@@ -712,6 +708,15 @@ public:
     virtual ~CharacterChainEffector() {}
     /// Register object factory.
     static void RegisterObject(Context* context);
+
+private:
+    /// @see CharacterEffectorT::ResolveAnimationState
+    virtual void ResolveAnimationState(CharacterChainSegmentData& effectorState, CharacterChainSegmentData& animationState,
+        Node& rootNode, const Matrix3x4& animTransform, const CharacterSkeletonSegment& segment)
+    {
+        animationState.Render(rootNode.GetWorldTransform(), animTransform, segment);
+        effectorState = animationState;
+    }
 };
 
 /// Register classes.

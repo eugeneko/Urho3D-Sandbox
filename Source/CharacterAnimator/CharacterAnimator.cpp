@@ -561,12 +561,12 @@ void CharacterRootSegmentData::Blend(const CharacterRootSegmentData& other, floa
     rotation_ = rotation_.Slerp(other.rotation_, weight);
 }
 
-void CharacterRootSegmentData::Render(
-    const Matrix3x4& rootTransform, const Matrix3x4& animTransform, const CharacterSkeletonSegment& segment)
+void CharacterRootSegmentData::Render(const Matrix3x4& rootTransform, const Matrix3x4& animTransform,
+    const Vector3& basePosition, const Quaternion& baseRotation)
 {
     const Quaternion animRotation = animTransform.Rotation();
-    position_ = rootTransform * (segment.initialPose_[0].Translation() + animTransform * position_);
-    rotation_ = rootTransform.Rotation() * animRotation.Inverse() * rotation_ * animRotation * segment.initialPose_[0].Rotation();
+    position_ = rootTransform * (basePosition + animTransform * position_);
+    rotation_ = rootTransform.Rotation() * animRotation.Inverse() * rotation_ * animRotation * baseRotation;
 }
 
 void CharacterRootSegmentData::Import(const CharacterSkeletonSegment& src)
@@ -1284,7 +1284,7 @@ void CharacterAnimationController::ApplyAnimation()
         for (auto& animationData : currentAnimationData_)
             if (CharacterAnimationTrack* track = animationData.characterAnimation_->FindTrack(segment.name_))
                 effector.ApplyAnimationTrack(animationData.weight_, animationData.time_, *track);
-        effector.ResolveAnimations(node_->GetWorldTransform(), animationTransform_, segment);
+        effector.ResolveAnimations(*node_, animationTransform_, segment);
     }
 }
 
@@ -1447,10 +1447,18 @@ void CharacterRootEffector::RegisterObject(Context* context)
     URHO3D_ATTRIBUTE("Rotation Factor", float, rotationFactor_, 1.0f, AM_DEFAULT);
 }
 
-void CharacterRootEffector::UpdateAnimationState(CharacterRootSegmentData& animationState)
+void CharacterRootEffector::ResolveAnimationState(CharacterRootSegmentData& effectorState, CharacterRootSegmentData& animationState,
+    Node& rootNode, const Matrix3x4& animTransform, const CharacterSkeletonSegment& segment)
 {
+    const Matrix3x4 baseTransform = rootNode.GetWorldTransform().Inverse() * GetNode()->GetWorldTransform();
+    const Vector3 basePosition = baseTransform.Translation();
+    const Quaternion baseRotation = baseTransform.Rotation() * segment.initialPose_[0].Rotation();
+
     animationState.position_ *= offsetFactor_;
     animationState.rotation_ = Quaternion().Slerp(animationState.rotation_, rotationFactor_);
+    animationState.Render(rootNode.GetWorldTransform(), animTransform, basePosition, baseRotation);
+
+    effectorState = animationState;
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -1462,9 +1470,11 @@ void CharacterLimbEffector::RegisterObject(Context* context)
     URHO3D_ATTRIBUTE("Is Rotation Animated", bool, animateTargetRotation_, false, AM_DEFAULT);
 }
 
-void CharacterLimbEffector::UpdateEffectorState(CharacterLimbSegmentData& effectorState, const CharacterLimbSegmentData& animationState,
-    const CharacterSkeletonSegment& segment)
+void CharacterLimbEffector::ResolveAnimationState(CharacterLimbSegmentData& effectorState, CharacterLimbSegmentData& animationState,
+    Node& rootNode, const Matrix3x4& animTransform, const CharacterSkeletonSegment& segment)
 {
+    animationState.Render(rootNode.GetWorldTransform(), animTransform, segment);
+
     if (animateTargetPosition_)
         effectorState.position_ = animationState.position_;
     else

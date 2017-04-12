@@ -7,8 +7,8 @@
 	<attribute name="Elapsed Time" value="1.14192" />
 	<attribute name="Next Replicated Node ID" value="727" />
 	<attribute name="Next Replicated Component ID" value="107" />
-	<attribute name="Next Local Node ID" value="16778398" />
-	<attribute name="Next Local Component ID" value="16778992" />
+	<attribute name="Next Local Node ID" value="16778400" />
+	<attribute name="Next Local Component ID" value="16779016" />
 	<attribute name="Variables" />
 	<attribute name="Variable Names" value="" />
 	<component type="Octree" id="1" />
@@ -1293,6 +1293,40 @@
 				</node>
 			</node>
 		</node>
+		<node id="725">
+			<attribute name="Is Enabled" value="true" />
+			<attribute name="Name" value="Root" />
+			<attribute name="Tags" />
+			<attribute name="Position" value="1.11022e-16 0.82576 -0.01739" />
+			<attribute name="Rotation" value="1 -1.86265e-08 8.4155e-08 -4.92656e-08" />
+			<attribute name="Scale" value="0.1 0.1 0.1" />
+			<attribute name="Variables" />
+			<component type="CharacterRootEffector" id="105">
+				<attribute name="Segment" value="Root" />
+				<attribute name="Offset Factor" value="0.7" />
+				<attribute name="Rotation Factor" value="0.7" />
+			</component>
+			<component type="StaticModel" id="102">
+				<attribute name="Model" value="Model;Models/Sphere.mdl" />
+				<attribute name="Material" value="Material;Materials/GreenTransparent.xml" />
+			</component>
+			<node id="726">
+				<attribute name="Is Enabled" value="true" />
+				<attribute name="Name" value="Spine" />
+				<attribute name="Tags" />
+				<attribute name="Position" value="-0.0438905 4.5225 2.01495" />
+				<attribute name="Rotation" value="1 1.86265e-08 -8.4155e-08 4.92656e-08" />
+				<attribute name="Scale" value="1 1 1" />
+				<attribute name="Variables" />
+				<component type="CharacterChainEffector" id="106">
+					<attribute name="Segment" value="Spine" />
+				</component>
+				<component type="StaticModel" id="104">
+					<attribute name="Model" value="Model;Models/Sphere.mdl" />
+					<attribute name="Material" value="Material;Materials/GreenTransparent.xml" />
+				</component>
+			</node>
+		</node>
 		<node id="721">
 			<attribute name="Is Enabled" value="true" />
 			<attribute name="Name" value="LeftFoot" />
@@ -1359,40 +1393,6 @@
 				<attribute name="Is Position Animated" value="true" />
 			</component>
 			<component type="StaticModel" id="100">
-				<attribute name="Model" value="Model;Models/Sphere.mdl" />
-				<attribute name="Material" value="Material;Materials/GreenTransparent.xml" />
-			</component>
-		</node>
-		<node id="725">
-			<attribute name="Is Enabled" value="true" />
-			<attribute name="Name" value="Root" />
-			<attribute name="Tags" />
-			<attribute name="Position" value="-0.00275918 0.843116 -0.157051" />
-			<attribute name="Rotation" value="1 0 0 0" />
-			<attribute name="Scale" value="0.1 0.1 0.1" />
-			<attribute name="Variables" />
-			<component type="CharacterRootEffector" id="105">
-				<attribute name="Segment" value="Root" />
-				<attribute name="Offset Factor" value="0.7" />
-				<attribute name="Rotation Factor" value="0.7" />
-			</component>
-			<component type="StaticModel" id="102">
-				<attribute name="Model" value="Model;Models/Sphere.mdl" />
-				<attribute name="Material" value="Material;Materials/GreenTransparent.xml" />
-			</component>
-		</node>
-		<node id="726">
-			<attribute name="Is Enabled" value="true" />
-			<attribute name="Name" value="Spine" />
-			<attribute name="Tags" />
-			<attribute name="Position" value="-0.00438897 1.27801 0.184105" />
-			<attribute name="Rotation" value="1 0 0 0" />
-			<attribute name="Scale" value="0.1 0.1 0.1" />
-			<attribute name="Variables" />
-			<component type="CharacterChainEffector" id="106">
-				<attribute name="Segment" value="Spine" />
-			</component>
-			<component type="StaticModel" id="104">
 				<attribute name="Model" value="Model;Models/Sphere.mdl" />
 				<attribute name="Material" value="Material;Materials/GreenTransparent.xml" />
 			</component>
