@@ -475,8 +475,6 @@ public:
     /// Register object factory.
     static void RegisterObject(Context* context);
 
-    // /// Return whether the animation is played.
-    // virtual bool IsAnimated() const { return true; }
     /// Reset transforms.
     void ResetTransforms(CharacterSkeletonSegment& segment);
     /// Reset animation state.
@@ -690,10 +688,10 @@ private:
         Node& rootNode, const Matrix3x4& animTransform, const CharacterSkeletonSegment& segment) override;
 
 private:
-    /// Whether to animate limb target position.
-    bool animateTargetPosition_ = false;
-    /// Whether to animate limb target rotation.
-    bool animateTargetRotation_ = false;
+    /// Factor of target position animation.
+    float animateTargetPosition_ = 0.0f;
+    /// Factor of target rotation animation.
+    float animateTargetRotation_ = 0.0f;
 };
 
 /// Character Chain Effector.

@@ -1466,8 +1466,8 @@ void CharacterLimbEffector::RegisterObject(Context* context)
 {
     context->RegisterFactory<CharacterLimbEffector>(characterAnimatorCategory);
     URHO3D_COPY_BASE_ATTRIBUTES(CharacterEffector);
-    URHO3D_ATTRIBUTE("Is Position Animated", bool, animateTargetPosition_, false, AM_DEFAULT);
-    URHO3D_ATTRIBUTE("Is Rotation Animated", bool, animateTargetRotation_, false, AM_DEFAULT);
+    URHO3D_ATTRIBUTE("Animate Position", float, animateTargetPosition_, 0.0f, AM_DEFAULT);
+    URHO3D_ATTRIBUTE("Animate Rotation", float, animateTargetRotation_, 0.0f, AM_DEFAULT);
 }
 
 void CharacterLimbEffector::ResolveAnimationState(CharacterLimbSegmentData& effectorState, CharacterLimbSegmentData& animationState,
@@ -1475,15 +1475,8 @@ void CharacterLimbEffector::ResolveAnimationState(CharacterLimbSegmentData& effe
 {
     animationState.Render(rootNode.GetWorldTransform(), animTransform, segment);
 
-    if (animateTargetPosition_)
-        effectorState.position_ = animationState.position_;
-    else
-        effectorState.position_ = GetNode()->GetWorldPosition();
-
-    if (animateTargetRotation_)
-        effectorState.rotationC_ = animationState.rotationC_;
-    else
-        effectorState.rotationC_ = Quaternion();
+    effectorState.position_ = Lerp(GetNode()->GetWorldPosition(), animationState.position_, animateTargetPosition_);
+    effectorState.rotationC_ = Quaternion().Slerp(animationState.rotationC_, animateTargetRotation_);
 
     effectorState.direction_ = animationState.direction_;
     effectorState.rotationA_ = animationState.rotationA_;

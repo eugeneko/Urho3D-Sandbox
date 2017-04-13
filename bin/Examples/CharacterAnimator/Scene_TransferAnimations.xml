@@ -7,8 +7,8 @@
 	<attribute name="Elapsed Time" value="1.14192" />
 	<attribute name="Next Replicated Node ID" value="727" />
 	<attribute name="Next Replicated Component ID" value="107" />
-	<attribute name="Next Local Node ID" value="16778400" />
-	<attribute name="Next Local Component ID" value="16779016" />
+	<attribute name="Next Local Node ID" value="16778401" />
+	<attribute name="Next Local Component ID" value="16779028" />
 	<attribute name="Variables" />
 	<attribute name="Variable Names" value="" />
 	<component type="Octree" id="1" />
@@ -1337,8 +1337,8 @@
 			<attribute name="Variables" />
 			<component type="CharacterLimbEffector" id="93">
 				<attribute name="Segment" value="LeftFoot" />
-				<attribute name="Is Position Animated" value="true" />
-				<attribute name="Is Rotation Animated" value="true" />
+				<attribute name="Animate Position" value="1" />
+				<attribute name="Animate Rotation" value="1" />
 			</component>
 			<component type="StaticModel" id="94">
 				<attribute name="Model" value="Model;Models/Sphere.mdl" />
@@ -1355,8 +1355,8 @@
 			<attribute name="Variables" />
 			<component type="CharacterLimbEffector" id="95">
 				<attribute name="Segment" value="RightFoot" />
-				<attribute name="Is Position Animated" value="true" />
-				<attribute name="Is Rotation Animated" value="true" />
+				<attribute name="Animate Position" value="1" />
+				<attribute name="Animate Rotation" value="1" />
 			</component>
 			<component type="StaticModel" id="96">
 				<attribute name="Model" value="Model;Models/Sphere.mdl" />
@@ -1373,7 +1373,8 @@
 			<attribute name="Variables" />
 			<component type="CharacterLimbEffector" id="97">
 				<attribute name="Segment" value="LeftHand" />
-				<attribute name="Is Position Animated" value="true" />
+				<attribute name="Animate Position" value="1" />
+				<attribute name="Animate Rotation" value="1" />
 			</component>
 			<component type="StaticModel" id="98">
 				<attribute name="Model" value="Model;Models/Sphere.mdl" />
@@ -1390,7 +1391,8 @@
 			<attribute name="Variables" />
 			<component type="CharacterLimbEffector" id="99">
 				<attribute name="Segment" value="RightHand" />
-				<attribute name="Is Position Animated" value="true" />
+				<attribute name="Animate Position" value="1" />
+				<attribute name="Animate Rotation" value="1" />
 			</component>
 			<component type="StaticModel" id="100">
 				<attribute name="Model" value="Model;Models/Sphere.mdl" />
