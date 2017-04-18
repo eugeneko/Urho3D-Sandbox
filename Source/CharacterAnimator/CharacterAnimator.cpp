@@ -826,7 +826,7 @@ void CharacterLimbSegmentData::Export(
     const Vector3 currentDirection = position_ - nodeA.GetWorldPosition();
     const Quaternion limbRotation(initialDirection, currentDirection);
     const Vector3 bendDirection = OrthogonalizeVector(
-        limbRotation * animTransform.Rotation() * nodeA.GetWorldRotation() * initialA.Rotation().Inverse() * dest.jointDirection_, currentDirection);
+        limbRotation * rootTransform.Rotation() * dest.jointDirection_, currentDirection);
 
     // Resolve limb
     const Vector3 worldPos0 = nodeA.GetWorldPosition();
@@ -932,7 +932,7 @@ HashMap<String, Vector3> CharacterSkeleton::ComputeDirections(Animation& animati
             const Quaternion initialRotationA = segment.initialPose_[0].Rotation();
             const Vector3 projB = ProjectPointOntoSegment(nodeB.GetWorldPosition(), nodeA.GetWorldPosition(), nodeC.GetWorldPosition());
             const Vector3 direction = nodeB.GetWorldPosition() - projB;
-            directions[segment.name_] += initialRotationA * nodeA.GetWorldRotation() * direction.Normalized();
+            directions[segment.name_] += initialRotationA * nodeA.GetWorldRotation().Inverse() * direction.Normalized();
         }
     }
     for (auto& segment : directions)
