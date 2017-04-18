@@ -49,8 +49,6 @@ enum class CharacterSkeletonSegmentType
 /// Get character skeleton segment type by name.
 CharacterSkeletonSegmentType GetCharacterSkeletonSegmentType(const String& name);
 
-struct CharacterSkeletonSegment;
-
 /// Character skeleton segment.
 struct CharacterSkeletonSegment
 {
@@ -60,6 +58,8 @@ struct CharacterSkeletonSegment
     CharacterSkeletonSegmentType type_;
     /// Names of bones in segment.
     Vector<String> boneNames_;
+    /// Joint direction.
+    Vector3 jointDirection_;
 
     /// Bones of the segment.
     PODVector<Bone*> bones_;
@@ -140,8 +140,8 @@ struct CharacterLimbSegmentData : public CharacterSegmentDataT<CharacterSkeleton
     float length_ = 0.0f;
     /// Target position.
     Vector3 position_;
-    /// Limb direction.
-    Vector3 direction_;
+    /// Limb rotation.
+    float rotation_;
     /// First segment rotation.
     float rotationA_ = 0.0f;
     /// Second segment rotation.
@@ -182,6 +182,9 @@ public:
     virtual bool BeginLoad(Deserializer& source);
     /// Load from an XML element. Return true if successful.
     bool LoadXML(const XMLElement& source);
+    /// Compute segment directions from animation.
+    // #TODO Implement it
+    HashMap<String, Vector3> ComputeDirections(Animation& animation, Model& model) const;
 
     /// Get segments.
     const Vector<CharacterSkeletonSegment>& GetSegments() const { return segments_; }
@@ -189,7 +192,7 @@ public:
     const CharacterSkeletonSegment* FindSegment(const String& name) const;
 
     /// Allocate segment data.
-    bool AllocateSegmentData(Vector<CharacterSkeletonSegment>& segmentsData, Skeleton& skeleton, const Matrix3x4& baseTransform);
+    bool AllocateSegmentData(Vector<CharacterSkeletonSegment>& segmentsData, Skeleton& skeleton, const Matrix3x4& baseTransform) const;
 
 private:
     /// Segments.
