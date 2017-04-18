@@ -747,20 +747,21 @@ void CharacterLimbSegmentData::Import(const CharacterSkeletonSegment& src)
     position_ = transformC.Translation() - initialA.Translation();
 
     // Get reference bend direction
-    const Vector3 limbDirection = transformC.Translation() - transformA.Translation();
+    const Vector3 initialDirection = initialC.Translation() - initialA.Translation();
+    const Vector3 currentDirection = transformC.Translation() - transformA.Translation();
     const Vector3 referenceBendDirection = OrthogonalizeVector(
-        transformA.Rotation() * initialA.Rotation().Inverse() * src.jointDirection_, limbDirection);
+        Quaternion(initialDirection, currentDirection) * src.jointDirection_, currentDirection);
 
     // Get actual bend direction
     const Vector3 positionBproj = ProjectPointOntoSegment(
         transformB.Translation(), transformA.Translation(), transformC.Translation());
     const Vector3 actualBendDirection = OrthogonalizeVector(
-        transformB.Translation() - positionBproj, limbDirection);
+        transformB.Translation() - positionBproj, currentDirection);
 
     // Compute and revert limb rotation
     const Quaternion bendDirectionRotation(referenceBendDirection, actualBendDirection);
     rotation_ = GetAngle(bendDirectionRotation);
-    rotation_ *= Sign(limbDirection.DotProduct(GetAxis(bendDirectionRotation)));
+    rotation_ *= Sign(currentDirection.DotProduct(GetAxis(bendDirectionRotation)));
     nodeA->SetWorldRotation(bendDirectionRotation.Inverse() * nodeA->GetWorldRotation());
 
     // Revert transforms to initial pose
