@@ -542,6 +542,27 @@ float LerpAngle(float lhs, float rhs, float t)
             : Lerp(lhs, rhs - 360, t);
 }
 
+/**
+Decompose the rotation on to 2 parts.
+1. Twist - rotation around the "direction" vector
+2. Swing - rotation around axis that is perpendicular to "direction" vector
+The rotation can be composed back by 
+rotation = swing * twist
+
+has singularity in case of swing_rotation close to 180 degrees rotation.
+if the input quaternion is of non-unit length, the outputs are non-unit as well
+otherwise, outputs are both unit
+
+http://stackoverflow.com/questions/3684269/component-of-a-quaternion-rotation-around-an-axis
+*/
+void GetSwingTwist(const Quaternion& rotation, const Vector3& direction, Quaternion& swing, Quaternion& twist)
+{
+    Vector3 ra( rotation.x_, rotation.y_, rotation.z_ ); // rotation axis
+    Vector3 p = ra.ProjectOntoAxis(direction) * ra; // return projection v1 on to v2  (parallel component)
+    twist = Quaternion(rotation.w_, p.x_, p.y_, p.z_).Normalized();
+    swing = rotation * twist.Conjugate();
+}
+
 /// Compute timestamps of animation.
 PODVector<float> GatherTimeStamps(Animation& animation)
 {
@@ -732,6 +753,10 @@ void CharacterLimbSegmentData::Import(const CharacterSkeletonSegment& src)
     Node* nodeB = src.nodes_[1];
     Node* nodeC = src.nodes_[2];
 
+    const Bone& boneA = *src.bones_[0];
+    const Bone& boneB = *src.bones_[1];
+    const Bone& boneC = *src.bones_[2];
+
     const Matrix3x4 transformA = nodeA->GetWorldTransform();
     const Matrix3x4 transformB = nodeB->GetWorldTransform();
     const Matrix3x4 transformC = nodeC->GetWorldTransform();
@@ -765,29 +790,69 @@ void CharacterLimbSegmentData::Import(const CharacterSkeletonSegment& src)
     nodeA->SetWorldRotation(bendDirectionRotation.Inverse() * nodeA->GetWorldRotation());
 
     // Revert transforms to initial pose
-    const Vector3 zeroDelta = nodeA->GetWorldPosition() - initialA.Translation();
-    if (!MatchChildPosition(*nodeA, *nodeB, initialB.Translation() + zeroDelta))
+    const Matrix3x4 adjustedInitialA = nodeA->GetParent()->GetWorldTransform()
+        * Matrix3x4(boneA.initialPosition_, boneA.initialRotation_, boneA.initialScale_);
+    const Matrix3x4 adjustedInitialB = adjustedInitialA
+        * Matrix3x4(boneB.initialPosition_, boneB.initialRotation_, boneB.initialScale_);
+    const Matrix3x4 adjustedInitialC = adjustedInitialB
+        * Matrix3x4(boneC.initialPosition_, boneC.initialRotation_, boneC.initialScale_);
+
+    if (!MatchChildPosition(*nodeA, *nodeB, adjustedInitialB.Translation()))
         URHO3D_LOGWARNING("Failed to resolve thigh-calf segment of foot animation");
-    if (!MatchChildPosition(*nodeB, *nodeC, initialC.Translation() + zeroDelta))
+    if (!MatchChildPosition(*nodeB, *nodeC, adjustedInitialC.Translation()))
         URHO3D_LOGWARNING("Failed to resolve calf-heel segment of foot animation");
 
     // Gather local rotations
-    const Quaternion pureRotationA = nodeA->GetWorldRotation() * initialA.Rotation().Inverse();
-    const Quaternion pureRotationB = nodeB->GetWorldRotation() * initialB.Rotation().Inverse();
-    const Quaternion pureRotationC = nodeC->GetWorldRotation() * initialC.Rotation().Inverse();
+    const Quaternion beforeA = nodeA->GetWorldRotation();
+    const Quaternion beforeB = nodeB->GetWorldRotation();
+
+    const Quaternion pureRotationA = nodeA->GetRotation() * boneA.initialRotation_.Inverse();
+    const Quaternion pureRotationB = nodeB->GetRotation() * boneB.initialRotation_.Inverse();
 
     rotationA_ = GetAngle(pureRotationA);
     rotationB_ = GetAngle(pureRotationB);
     rotationC_ = transformC.Rotation() * initialC.Rotation().Inverse();
 
     // Flip angles if needed
-    const Vector3 directionAB = (nodeB->GetWorldPosition() - nodeA->GetWorldPosition()).Normalized();
-    const Vector3 directionBC = (nodeC->GetWorldPosition() - nodeB->GetWorldPosition()).Normalized();
+    const Vector3 directionAB = nodeB->GetPosition().Normalized();
+    const Vector3 directionBC = nodeC->GetPosition().Normalized();
     const Vector3 axisAB = GetAxis(pureRotationA);
     const Vector3 axisBC = GetAxis(pureRotationB);
 
-    rotationA_ *= Sign(directionAB.DotProduct(axisAB));
-    rotationB_ *= Sign(directionBC.DotProduct(axisBC));
+//     Quaternion swingA, twistA, swingB, twistB;
+//     GetSwingTwist(pureRotationA, directionAB, swingA, twistA);
+//     GetSwingTwist(pureRotationB, directionBC, swingB, twistB);
+//     rotationA_ = GetAngle(twistA);
+//     rotationB_ = GetAngle(twistB);
+
+    rotationA_ *= Sign(axisAB.DotProduct(directionAB));
+    rotationB_ *= Sign(axisBC.DotProduct(directionBC));
+
+    // #TODO
+    {
+        CharacterSkeletonSegment& dest = const_cast<CharacterSkeletonSegment&>(src);
+
+        // Revert nodes to initial pose
+        nodeA->SetRotation(Quaternion(rotationA_, boneB.initialPosition_) * boneA.initialRotation_);
+        nodeB->SetRotation(Quaternion(rotationB_, boneC.initialPosition_) * boneB.initialRotation_);
+        nodeC->SetRotation(boneC.initialRotation_);
+//         nodeA->SetWorldRotation(initialA.Rotation());
+//         nodeB->SetWorldRotation(initialB.Rotation());
+//         nodeC->SetWorldRotation(initialC.Rotation());
+
+        // Apply local segment rotations
+//         const Vector3 directionAB = (nodeB->GetWorldPosition() - nodeA->GetWorldPosition()).Normalized();
+//         const Vector3 directionBC = (nodeC->GetWorldPosition() - nodeB->GetWorldPosition()).Normalized();
+//         const Quaternion worldRotationA = Quaternion(rotationA_, directionAB) * nodeA->GetWorldRotation();
+//         const Quaternion worldRotationB = Quaternion(rotationB_, directionBC) * nodeB->GetWorldRotation();
+//         nodeA->SetWorldRotation(worldRotationA);
+//         nodeB->SetWorldRotation(worldRotationB);
+
+        const Quaternion afterA = nodeA->GetWorldRotation();
+        const Quaternion afterB = nodeB->GetWorldRotation();
+
+        int t = 0;
+    }
 }
 
 void CharacterLimbSegmentData::Export(
@@ -810,17 +875,19 @@ void CharacterLimbSegmentData::Export(
     const float lengthRescale = (thighLength + calfLength) / length_;
 
     // Revert nodes to initial pose
-    nodeA.SetRotation(boneA.initialRotation_);
-    nodeB.SetRotation(boneB.initialRotation_);
+//     nodeA.SetRotation(boneA.initialRotation_);
+//     nodeB.SetRotation(boneB.initialRotation_);
+    nodeA.SetRotation(Quaternion(rotationA_, boneB.initialPosition_) * boneA.initialRotation_);
+    nodeB.SetRotation(Quaternion(rotationB_, boneC.initialPosition_) * boneB.initialRotation_);
     nodeC.SetRotation(boneC.initialRotation_);
 
     // Apply local segment rotations
-    const Vector3 directionAB = (nodeB.GetWorldPosition() - nodeA.GetWorldPosition()).Normalized();
-    const Vector3 directionBC = (nodeC.GetWorldPosition() - nodeB.GetWorldPosition()).Normalized();
-    const Quaternion worldRotationA = Quaternion(rotationA_, directionAB) * nodeA.GetWorldRotation();
-    const Quaternion worldRotationB = Quaternion(rotationB_, directionBC) * nodeB.GetWorldRotation();
-    nodeA.SetWorldRotation(worldRotationA);
-    nodeB.SetWorldRotation(worldRotationB);
+//     const Vector3 directionAB = (nodeB.GetWorldPosition() - nodeA.GetWorldPosition()).Normalized();
+//     const Vector3 directionBC = (nodeC.GetWorldPosition() - nodeB.GetWorldPosition()).Normalized();
+//     const Quaternion worldRotationA = Quaternion(rotationA_, directionAB) * nodeA.GetWorldRotation();
+//     const Quaternion worldRotationB = Quaternion(rotationB_, directionBC) * nodeB.GetWorldRotation();
+//     nodeA.SetWorldRotation(worldRotationA);
+//     nodeB.SetWorldRotation(worldRotationB);
 
     // Compute bend direction
     const Vector3 initialDirection = rootTransform.RotationMatrix() * (initialC.Translation() - initialA.Translation());
