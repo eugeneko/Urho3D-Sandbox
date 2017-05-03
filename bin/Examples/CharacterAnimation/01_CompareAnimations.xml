@@ -7,8 +7,8 @@
 	<attribute name="Elapsed Time" value="0" />
 	<attribute name="Next Replicated Node ID" value="725" />
 	<attribute name="Next Replicated Component ID" value="95" />
-	<attribute name="Next Local Node ID" value="16778132" />
-	<attribute name="Next Local Component ID" value="16778824" />
+	<attribute name="Next Local Node ID" value="16778133" />
+	<attribute name="Next Local Component ID" value="16778836" />
 	<attribute name="Variables" />
 	<attribute name="Variable Names" value="" />
 	<component type="Octree" id="1" />
@@ -48,7 +48,7 @@
 		<attribute name="Scale" value="1 1 1" />
 		<attribute name="Variables" />
 		<component type="AnimatedModel" id="68">
-			<attribute name="Model" value="Model;CharacterAnimator/Swat.mdl" />
+			<attribute name="Model" value="Model;Models/Swat.mdl" />
 			<attribute name="Material" value="Material;Materials/GreenTransparent.xml;Materials/GreenTransparent.xml;Materials/GreenTransparent.xml" />
 			<attribute name="Cast Shadows" value="true" />
 			<attribute name="Bone Animation Enabled">
@@ -115,7 +115,7 @@
 		</component>
 		<component type="ScriptInstance" id="70">
 			<attribute name="Delayed Method Calls" value="0" />
-			<attribute name="Script File" value="ScriptFile;CharacterAnimator/Script_CompareAnimations.as" />
+			<attribute name="Script File" value="ScriptFile;CharacterAnimation/01_CompareAnimations.as" />
 			<attribute name="Class Name" value="Animator" />
 			<attribute name="rotation" value="0" />
 		</component>
@@ -638,7 +638,7 @@
 		<attribute name="Scale" value="1 1 1" />
 		<attribute name="Variables" />
 		<component type="AnimatedModel" id="72">
-			<attribute name="Model" value="Model;CharacterAnimator/Swat.mdl" />
+			<attribute name="Model" value="Model;Models/Swat.mdl" />
 			<attribute name="Material" value="Material;Materials/DefaultGrey.xml;Materials/DefaultGrey.xml;Materials/DefaultGrey.xml" />
 			<attribute name="Cast Shadows" value="true" />
 			<attribute name="Bone Animation Enabled">
@@ -707,11 +707,11 @@
 			<attribute name="Node Animation States">
 				<variant type="Int" value="0" />
 			</attribute>
-			<attribute name="Skeleton" value="XMLFile;CharacterAnimator/Swat_Skeleton.xml" />
+			<attribute name="Skeleton" value="XMLFile;Models/Swat_Skeleton.xml" />
 		</component>
 		<component type="ScriptInstance" id="74">
 			<attribute name="Delayed Method Calls" value="0" />
-			<attribute name="Script File" value="ScriptFile;CharacterAnimator/Script_CompareAnimations.as" />
+			<attribute name="Script File" value="ScriptFile;CharacterAnimation/01_CompareAnimations.as" />
 			<attribute name="Class Name" value="Animator" />
 			<attribute name="rotation" value="-180" />
 		</component>

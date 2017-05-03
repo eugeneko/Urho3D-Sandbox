@@ -7,8 +7,8 @@
 	<attribute name="Elapsed Time" value="1.14192" />
 	<attribute name="Next Replicated Node ID" value="727" />
 	<attribute name="Next Replicated Component ID" value="107" />
-	<attribute name="Next Local Node ID" value="16778401" />
-	<attribute name="Next Local Component ID" value="16779028" />
+	<attribute name="Next Local Node ID" value="16778405" />
+	<attribute name="Next Local Component ID" value="16779076" />
 	<attribute name="Variables" />
 	<attribute name="Variable Names" value="" />
 	<component type="Octree" id="1" />
@@ -123,18 +123,11 @@
 		</component>
 		<component type="ScriptInstance" id="70">
 			<attribute name="Delayed Method Calls" value="0" />
-			<attribute name="Script File" value="ScriptFile;Script_TransferAnimations.as" />
+			<attribute name="Script File" value="ScriptFile;CharacterAnimation/02_TransferAnimations.as" />
 			<attribute name="Class Name" value="Animator" />
 			<attribute name="rotation" value="0" />
 		</component>
 		<component type="AnimationController" id="76">
-			<attribute name="Animations">
-				<variant type="String" value="CharacterAnimator/Swat_WalkFwd.ani" />
-				<variant type="Float" value="1" />
-				<variant type="Float" value="1" />
-				<variant type="Float" value="0" />
-				<variant type="Float" value="0" />
-			</attribute>
 			<attribute name="Node Animation States">
 				<variant type="Int" value="0" />
 			</attribute>
@@ -725,7 +718,7 @@
 		<attribute name="Scale" value="1 1 1" />
 		<attribute name="Variables" />
 		<component type="AnimatedModel" id="88">
-			<attribute name="Model" value="Model;Doll.mdl" />
+			<attribute name="Model" value="Model;Models/Doll.mdl" />
 			<attribute name="Material" value="Material;Materials/DefaultGrey.xml;Materials/DefaultGrey.xml" />
 			<attribute name="Cast Shadows" value="true" />
 			<attribute name="Bone Animation Enabled">
@@ -790,7 +783,7 @@
 		</component>
 		<component type="ScriptInstance" id="89">
 			<attribute name="Delayed Method Calls" value="0" />
-			<attribute name="Script File" value="ScriptFile;Script_TransferAnimations.as" />
+			<attribute name="Script File" value="ScriptFile;CharacterAnimation/02_TransferAnimations.as" />
 			<attribute name="Class Name" value="Animator" />
 			<attribute name="rotation" value="180" />
 		</component>
@@ -805,7 +798,7 @@
 			<attribute name="Node Animation States">
 				<variant type="Int" value="0" />
 			</attribute>
-			<attribute name="Skeleton" value="XMLFile;Doll_Skeleton.xml" />
+			<attribute name="Skeleton" value="XMLFile;Models/Doll_Skeleton.xml" />
 		</component>
 		<node id="16778262">
 			<attribute name="Is Enabled" value="true" />

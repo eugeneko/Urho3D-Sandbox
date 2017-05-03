@@ -1019,6 +1019,7 @@ const CharacterSkeletonSegment* CharacterSkeleton::FindSegment(const String& nam
 bool CharacterSkeleton::AllocateSegmentData(Vector<CharacterSkeletonSegment>& segmentsData,
     Skeleton& skeleton, const Matrix3x4& baseTransform) const
 {
+    // #TODO Prevent crashes if AllocateSegmentData returns false
     const PODVector<Matrix3x4> globalTransforms = ComputeGlobalTransforms(skeleton, baseTransform);
 
     const unsigned numSegments = segments_.Size();
