@@ -92,7 +92,7 @@ struct CharacterRootSegmentData : public CharacterSegmentDataT<CharacterSkeleton
 
 public:
     /// Reset state.
-    void Reset();
+    void Reset(const CharacterSkeletonSegment& segment);
     /// Blend state with another.
     void Blend(const CharacterRootSegmentData& other, float weight);
     /// Render state from animation space to world space.
@@ -118,7 +118,7 @@ struct CharacterChainSegmentData : public CharacterSegmentDataT<CharacterSkeleto
 
 public:
     /// Reset state.
-    void Reset();
+    void Reset(const CharacterSkeletonSegment& segment);
     /// Blend state with another.
     void Blend(const CharacterChainSegmentData& other, float weight);
     /// Render state from animation space to world space.
@@ -151,7 +151,7 @@ struct CharacterLimbSegmentData : public CharacterSegmentDataT<CharacterSkeleton
 
 public:
     /// Reset state.
-    void Reset();
+    void Reset(const CharacterSkeletonSegment& segment);
     /// Blend state with another.
     void Blend(const CharacterLimbSegmentData& other, float weight);
     /// Render state from animation space to world space.
@@ -481,7 +481,8 @@ public:
     /// Reset transforms.
     void ResetTransforms(CharacterSkeletonSegment& segment);
     /// Reset animation state.
-    virtual void ResetAnimationState() = 0;
+    // #TODO Don't pass segment here
+    virtual void ResetAnimationState(const CharacterSkeletonSegment& segment) = 0;
     /// Apply animation track.
     virtual void ApplyAnimationTrack(float weight, float time, CharacterAnimationTrack& animationTrack) = 0;
     /// Resolve animations.
@@ -505,10 +506,10 @@ class CharacterEffectorT : public CharacterEffector
 {
 public:
     /// @see CharacterEffector::ResetAnimationState
-    virtual void ResetAnimationState() override final
+    virtual void ResetAnimationState(const CharacterSkeletonSegment& segment) override final
     {
         accumulatedWeight_ = 0.0f;
-        animationState_.Reset();
+        animationState_.Reset(segment);
     }
     /// @see CharacterEffector::ApplyAnimationTrack
     virtual void ApplyAnimationTrack(float weight, float time, CharacterAnimationTrack& animationTrack) override final
@@ -523,10 +524,16 @@ public:
             const float firstWeight = weight * (1 - factor);
             const float secondWeight = weight * factor;
 
-            animationState_.Blend(track->GetFrame(firstFrame), firstWeight / (firstWeight + accumulatedWeight_));
-            accumulatedWeight_ += firstWeight;
-            animationState_.Blend(track->GetFrame(secondFrame), secondWeight / (secondWeight + accumulatedWeight_));
-            accumulatedWeight_ += secondWeight;
+            if (firstWeight > M_EPSILON)
+            {
+                animationState_.Blend(track->GetFrame(firstFrame), firstWeight / (firstWeight + accumulatedWeight_));
+                accumulatedWeight_ += firstWeight;
+            }
+            if (secondWeight > M_EPSILON)
+            {
+                animationState_.Blend(track->GetFrame(secondFrame), secondWeight / (secondWeight + accumulatedWeight_));
+                accumulatedWeight_ += secondWeight;
+            }
         }
     }
     /// @see CharacterEffector::ResolveAnimations

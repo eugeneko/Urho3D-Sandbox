@@ -601,7 +601,7 @@ CharacterSkeletonSegmentType GetCharacterSkeletonSegmentType(const String& name)
 }
 
 //////////////////////////////////////////////////////////////////////////
-void CharacterRootSegmentData::Reset()
+void CharacterRootSegmentData::Reset(const CharacterSkeletonSegment& /*segment*/)
 {
     position_ = Vector3::ZERO;
     rotation_ = Quaternion::IDENTITY;
@@ -650,9 +650,10 @@ bool CharacterRootSegmentData::Load(const XMLElement& src)
 }
 
 //////////////////////////////////////////////////////////////////////////
-void CharacterChainSegmentData::Reset()
+void CharacterChainSegmentData::Reset(const CharacterSkeletonSegment& segment)
 {
     position_ = Vector3::ZERO;
+    rotations_.Resize(segment.bones_.Size());
     for (Quaternion& rotation : rotations_)
         rotation = Quaternion::IDENTITY;
 }
@@ -708,7 +709,7 @@ bool CharacterChainSegmentData::Load(const XMLElement& src)
 }
 
 //////////////////////////////////////////////////////////////////////////
-void CharacterLimbSegmentData::Reset()
+void CharacterLimbSegmentData::Reset(const CharacterSkeletonSegment& segment)
 {
     position_ = Vector3::ZERO;
     rotation_ = 0.0f;
@@ -1431,7 +1432,7 @@ void CharacterAnimationController::ApplyAnimation()
         CharacterEffector& effector = *segmentData.first_;
         CharacterSkeletonSegment& segment = *segmentData.second_;
         effector.ResetTransforms(segment);
-        effector.ResetAnimationState();
+        effector.ResetAnimationState(segment);
         for (auto& animationData : currentAnimationData_)
             if (CharacterAnimationTrack* track = animationData.characterAnimation_->FindTrack(segment.name_))
                 effector.ApplyAnimationTrack(animationData.weight_, animationData.time_, *track);
