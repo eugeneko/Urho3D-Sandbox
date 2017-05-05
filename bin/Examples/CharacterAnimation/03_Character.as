@@ -1,3 +1,9 @@
+const int CTRL_FORWARD = 1;
+const int CTRL_BACK = 2;
+const int CTRL_LEFT = 4;
+const int CTRL_RIGHT = 8;
+const int CTRL_JUMP = 16;
+
 enum State
 {
     Initial,
@@ -47,7 +53,7 @@ class Controller
     {
         _aboutToJump = true;
     }
-    void Update(CharacterAnimationController@ characterController, float deltaTime)
+    void Update(CharacterAnimationController@ characterController, float timeStep)
     {
         characterController.SetAnimationTransform(Matrix3x4(Quaternion(_animationRotationY, Vector3(0, 1, 0)).rotationMatrix));
         AnimationController@ animController = characterController;
@@ -74,7 +80,7 @@ class Controller
             animController.SetSpeed(_walkAnimation, Abs(_velocityX / _walkBaseVelocity));
             if (!movingX)
             {
-                _idleTimer += deltaTime;
+                _idleTimer += timeStep;
                 if (_idleTimer >= _idleThreshold)
                 {
                     _idleTimer = 0;
@@ -86,61 +92,48 @@ class Controller
     }
 }
 
-class MockPlayer
-{
-    float _time = 0.0;
-    Controller@ _controller;
-    
-    MockPlayer(Controller@ controller, Node@ node)
-    {
-        @_controller = @controller;        
-        _controller.walkAnimation = "Animations/Kachujin_Walk.ani";
-        _controller.idleAnimation = "Animations/Kachujin_Idle.ani";
-    }
-    void Update(float deltaTime, Node@ node)
-    {
-        _time += deltaTime;
-        if (_time < 1.0)
-        {
-            _controller.velocityX = 0;
-        }
-        else if (_time < 5.0)
-        {
-            _controller.velocityX = 1;
-            node.position = node.position + Vector3(0, 0, 1) * deltaTime;
-        }
-        else if (_time < 6.0)
-        {
-            _controller.velocityX = 0;
-        }
-        else
-        {
-            _time = 0;
-            _controller.velocityX = 0;
-            node.position = Vector3(0, 0, 0);
-        }
-
-        CharacterAnimationController@ characterController = node.GetComponent("CharacterAnimationController");
-        _controller.Update(characterController, deltaTime);
-    }
-}
-
 class Main : ScriptObject
 {
+    Controls _controls;
+    Vector3 _previousPosition;
+    Vector3 _velocity;
     Controller@ _controller;
-    MockPlayer@ _player;
     void DelayedStart()
     {
         @_controller = Controller();
-        _player = MockPlayer(_controller, node);
+        _controller.walkAnimation = "Animations/Kachujin_Walk.ani";
+        _controller.idleAnimation = "Animations/Kachujin_Idle.ani";
+        _previousPosition = node.worldPosition;
     }
-    void Stop()
+    void FixedUpdate(float timeStep)
     {
-        @_controller = null;
-        @_player = null;
+        const float walkSpeed = 1.8;
+        float walkDirection = 0;
+        if (_controls.IsDown(CTRL_LEFT))
+            walkDirection += -1;
+        if (_controls.IsDown(CTRL_RIGHT))
+            walkDirection += 1;
+        _previousPosition = node.worldPosition;
+        node.worldPosition = node.worldPosition + Vector3(1, 0, 0) * timeStep * walkSpeed * walkDirection;
+        _velocity = (node.worldPosition - _previousPosition) / timeStep;
+        _controller.velocityX = _velocity.x;
     }
-    void Update(float deltaTime)
+    void Update(float timeStep)
     {
-        _player.Update(deltaTime, node);
+        _controls.Set(CTRL_FORWARD | CTRL_BACK | CTRL_LEFT | CTRL_RIGHT | CTRL_JUMP, false);
+        if (ui.focusElement is null)
+        {
+            _controls.Set(CTRL_FORWARD, input.keyDown[KEY_I]);
+            _controls.Set(CTRL_BACK, input.keyDown[KEY_K]);
+            _controls.Set(CTRL_LEFT, input.keyDown[KEY_J]);
+            _controls.Set(CTRL_RIGHT, input.keyDown[KEY_L]);
+            _controls.Set(CTRL_JUMP, input.keyDown[KEY_SPACE]);
+
+            _controls.yaw = input.mousePosition.x;
+            _controls.pitch = input.mousePosition.y;
+        }
+
+        CharacterAnimationController@ characterController = node.GetComponent("CharacterAnimationController");
+        _controller.Update(characterController, timeStep);
     }
 }
