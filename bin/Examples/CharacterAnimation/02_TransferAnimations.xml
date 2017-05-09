@@ -1296,6 +1296,7 @@
 			<attribute name="Variables" />
 			<component type="CharacterRootEffector" id="105">
 				<attribute name="Segment" value="Root" />
+				<attribute name="Is Animated" value="true" />
 				<attribute name="Offset Factor" value="0.7" />
 				<attribute name="Rotation Factor" value="0.7" />
 			</component>
@@ -1313,6 +1314,7 @@
 				<attribute name="Variables" />
 				<component type="CharacterChainEffector" id="106">
 					<attribute name="Segment" value="Spine" />
+					<attribute name="Is Animated" value="true" />
 				</component>
 				<component type="StaticModel" id="104">
 					<attribute name="Model" value="Model;Models/Sphere.mdl" />
@@ -1330,6 +1332,7 @@
 			<attribute name="Variables" />
 			<component type="CharacterLimbEffector" id="93">
 				<attribute name="Segment" value="LeftFoot" />
+				<attribute name="Is Animated" value="true" />
 				<attribute name="Animate Position" value="1" />
 				<attribute name="Animate Rotation" value="1" />
 			</component>
@@ -1348,6 +1351,7 @@
 			<attribute name="Variables" />
 			<component type="CharacterLimbEffector" id="95">
 				<attribute name="Segment" value="RightFoot" />
+				<attribute name="Is Animated" value="true" />
 				<attribute name="Animate Position" value="1" />
 				<attribute name="Animate Rotation" value="1" />
 			</component>
@@ -1366,6 +1370,7 @@
 			<attribute name="Variables" />
 			<component type="CharacterLimbEffector" id="97">
 				<attribute name="Segment" value="LeftHand" />
+				<attribute name="Is Animated" value="true" />
 				<attribute name="Animate Position" value="1" />
 				<attribute name="Animate Rotation" value="1" />
 			</component>
@@ -1384,6 +1389,7 @@
 			<attribute name="Variables" />
 			<component type="CharacterLimbEffector" id="99">
 				<attribute name="Segment" value="RightHand" />
+				<attribute name="Is Animated" value="true" />
 				<attribute name="Animate Position" value="1" />
 				<attribute name="Animate Rotation" value="1" />
 			</component>

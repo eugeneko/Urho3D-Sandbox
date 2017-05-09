@@ -67,11 +67,6 @@ struct CharacterSkeletonSegment
     PODVector<Node*> nodes_;
     /// Initial transforms.
     PODVector<Matrix3x4> initialPose_;
-    // #TODO Fix duplicate
-    /// Global initial positions.
-    PODVector<Vector3> globalPositions_;
-    /// Global initial rotations.
-    PODVector<Quaternion> globalRotations_;
 };
 
 /// Character segment data template.
@@ -95,9 +90,6 @@ public:
     void Reset(const CharacterSkeletonSegment& segment);
     /// Blend state with another.
     void Blend(const CharacterRootSegmentData& other, float weight);
-    /// Render state from animation space to world space.
-    void Render(const Matrix3x4& rootTransform, const Matrix3x4& animTransform,
-        const Vector3& basePosition, const Quaternion& baseRotation);
     /// Import state from nodes.
     void Import(const CharacterSkeletonSegment& src);
     /// Export state to nodes.
@@ -121,8 +113,6 @@ public:
     void Reset(const CharacterSkeletonSegment& segment);
     /// Blend state with another.
     void Blend(const CharacterChainSegmentData& other, float weight);
-    /// Render state from animation space to world space.
-    void Render(const Matrix3x4& rootTransform, const Matrix3x4& animTransform, const CharacterSkeletonSegment& segment);
     /// Import state from nodes.
     void Import(const CharacterSkeletonSegment& src);
     /// Export state to nodes.
@@ -136,8 +126,6 @@ public:
 /// Character limb segment data.
 struct CharacterLimbSegmentData : public CharacterSegmentDataT<CharacterSkeletonSegmentType::Limb>
 {
-    /// Total length of limb.
-    float length_ = 0.0f;
     /// Target position.
     Vector3 position_;
     /// Limb rotation.
@@ -154,8 +142,6 @@ public:
     void Reset(const CharacterSkeletonSegment& segment);
     /// Blend state with another.
     void Blend(const CharacterLimbSegmentData& other, float weight);
-    /// Render state from animation space to world space.
-    void Render(const Matrix3x4& rootTransform, const Matrix3x4& animTransform, const CharacterSkeletonSegment& segment);
     /// Import state from nodes.
     void Import(const CharacterSkeletonSegment& src);
     /// Export state to nodes.
@@ -465,6 +451,8 @@ private:
     Vector<SharedPtr<CharacterAnimationTrack>> tracks_;
 };
 
+class CharacterAnimationController;
+
 /// Character Segment Effector.
 class CharacterEffector : public Component
 {
@@ -480,83 +468,32 @@ public:
 
     /// Reset transforms.
     void ResetTransforms(CharacterSkeletonSegment& segment);
-    /// Reset animation state.
+    /// Reset effector state to zero.
     // #TODO Don't pass segment here
-    virtual void ResetAnimationState(const CharacterSkeletonSegment& segment) = 0;
+    virtual void ResetEffector(const CharacterSkeletonSegment& segment) = 0;
     /// Apply animation track.
-    virtual void ApplyAnimationTrack(float weight, float time, CharacterAnimationTrack& animationTrack) = 0;
-    /// Resolve animations.
-    virtual void ResolveAnimations(Node& rootNode, const Matrix3x4& animTransform, CharacterSkeletonSegment& dest) = 0;
+    virtual void ApplyAnimation(float weight, float time, CharacterAnimationTrack& animationTrack) = 0;
+    /// Resolve effector.
+    virtual void ResolveEffector(CharacterAnimationController& controller, CharacterSkeletonSegment& dest) = 0;
 
     /// Get segment name.
     const String& GetSegmentName() const { return segmentName_; }
+    /// Is this segment animated?
+    bool IsAnimated() const { return animated_; }
 
 private:
     /// @see Component::OnNodeSet
     virtual void OnNodeSet(Node* node) override;
 
+protected:
+    /// Controller.
+    WeakPtr<CharacterAnimationController> controller_;
+
 private:
     /// Segment name.
     String segmentName_;
-};
-
-/// Character Effector template.
-template <class TAnimationTrack, class TAnimationFrame>
-class CharacterEffectorT : public CharacterEffector
-{
-public:
-    /// @see CharacterEffector::ResetAnimationState
-    virtual void ResetAnimationState(const CharacterSkeletonSegment& segment) override final
-    {
-        accumulatedWeight_ = 0.0f;
-        animationState_.Reset(segment);
-    }
-    /// @see CharacterEffector::ApplyAnimationTrack
-    virtual void ApplyAnimationTrack(float weight, float time, CharacterAnimationTrack& animationTrack) override final
-    {
-        if (TAnimationTrack* track = dynamic_cast<TAnimationTrack*>(&animationTrack))
-        {
-            unsigned firstFrame;
-            unsigned secondFrame;
-            float factor;
-            track->GetKeyFrame(time, firstFrame, secondFrame, factor);
-
-            const float firstWeight = weight * (1 - factor);
-            const float secondWeight = weight * factor;
-
-            if (firstWeight > M_EPSILON)
-            {
-                animationState_.Blend(track->GetFrame(firstFrame), firstWeight / (firstWeight + accumulatedWeight_));
-                accumulatedWeight_ += firstWeight;
-            }
-            if (secondWeight > M_EPSILON)
-            {
-                animationState_.Blend(track->GetFrame(secondFrame), secondWeight / (secondWeight + accumulatedWeight_));
-                accumulatedWeight_ += secondWeight;
-            }
-        }
-    }
-    /// @see CharacterEffector::ResolveAnimations
-    virtual void ResolveAnimations(Node& rootNode, const Matrix3x4& animTransform, CharacterSkeletonSegment& dest) override
-    {
-        ResolveAnimationState(effectorState_, animationState_, rootNode, animTransform, dest);
-        effectorState_.Export(rootNode.GetWorldTransform(), animTransform, dest);
-    }
-
-protected:
-    /// Construct.
-    CharacterEffectorT(Context* context) : CharacterEffector(context) {}
-    /// Resolve animation state.
-    virtual void ResolveAnimationState(TAnimationFrame& effectorState, TAnimationFrame& animationState,
-        Node& rootNode, const Matrix3x4& animTransform, const CharacterSkeletonSegment& segment) = 0;
-
-private:
-    /// Accumulated weight.
-    float accumulatedWeight_ = 0.0f;
-    /// Current animation state.
-    TAnimationFrame animationState_;
-    /// Effector state.
-    TAnimationFrame effectorState_;
+    /// Whether the segment is animated.
+    bool animated_ = false;
 };
 
 /// Character Animation Controller.
@@ -576,6 +513,8 @@ public:
     void AddEffector(CharacterEffector* effector);
     /// Set animation transform.
     void SetAnimationTransform(const Matrix3x4& transform);
+    /// Get animation transform.
+    const Matrix3x4& GetAnimationTransform() const { return animationTransform_; }
     /// Set target transform of segment.
     void SetTargetTransform(StringHash segment, const Matrix3x4& transform);
     /// Set amount of transformation applied to rotation of target bone.
@@ -654,6 +593,76 @@ private:
     Vector<WeakPtr<CharacterEffector>> effectors_;
 };
 
+/// Character Effector template.
+template <class TAnimationTrack, class TAnimationFrame>
+class CharacterEffectorT : public CharacterEffector
+{
+public:
+    /// @see CharacterEffector::ResetEffector
+    virtual void ResetEffector(const CharacterSkeletonSegment& segment) override final
+    {
+        accumulatedWeight_ = 0.0f;
+        effectorState_.Reset(segment);
+    }
+    /// @see CharacterEffector::ApplyAnimation
+    virtual void ApplyAnimation(float weight, float time, CharacterAnimationTrack& animationTrack) override final
+    {
+        if (TAnimationTrack* track = dynamic_cast<TAnimationTrack*>(&animationTrack))
+        {
+            unsigned firstFrame;
+            unsigned secondFrame;
+            float factor;
+            track->GetKeyFrame(time, firstFrame, secondFrame, factor);
+
+            const float firstWeight = weight * (1 - factor);
+            const float secondWeight = weight * factor;
+
+            if (firstWeight > M_EPSILON)
+            {
+                effectorState_.Blend(track->GetFrame(firstFrame), firstWeight / (firstWeight + accumulatedWeight_));
+                accumulatedWeight_ += firstWeight;
+            }
+            if (secondWeight > M_EPSILON)
+            {
+                effectorState_.Blend(track->GetFrame(secondFrame), secondWeight / (secondWeight + accumulatedWeight_));
+                accumulatedWeight_ += secondWeight;
+            }
+        }
+    }
+    /// @see CharacterEffector::ResolveEffector
+    virtual void ResolveEffector(CharacterAnimationController& controller, CharacterSkeletonSegment& dest) override
+    {
+        if (IsAnimated())
+            ExportEffectorState();
+        else
+            ImportNodeTransform();
+
+        ResolveAnimationState(effectorState_, controller, dest);
+        effectorState_.Export(controller.GetNode()->GetWorldTransform(), controller.GetAnimationTransform(), dest);
+    }
+
+protected:
+    /// Construct.
+    CharacterEffectorT(Context* context) : CharacterEffector(context) {}
+    /// Resolve animation state.
+    virtual void ResolveAnimationState(TAnimationFrame& effectorState,
+        CharacterAnimationController& controller, const CharacterSkeletonSegment& segment) = 0;
+
+    // #TODO Use node transform for animation
+    /// Import node transform to effector state.
+    virtual void ImportNodeTransform() { }
+    /// Export effector state to node transform.
+    virtual void ExportEffectorState() { }
+
+private:
+    /// Accumulated weight.
+    float accumulatedWeight_ = 0.0f;
+
+protected:
+    /// Effector state.
+    TAnimationFrame effectorState_;
+};
+
 /// Character Root Effector.
 class CharacterRootEffector : public CharacterEffectorT<RootAnimationTrack, CharacterRootSegmentData>
 {
@@ -669,8 +678,8 @@ public:
 
 private:
     /// @see CharacterEffectorT::ResolveAnimationState
-    virtual void ResolveAnimationState(CharacterRootSegmentData& effectorState, CharacterRootSegmentData& animationState,
-        Node& rootNode, const Matrix3x4& animTransform, const CharacterSkeletonSegment& segment) override;
+    virtual void ResolveAnimationState(CharacterRootSegmentData& effectorState,
+        CharacterAnimationController& controller, const CharacterSkeletonSegment& segment) override;
 
 private:
     /// Multiplier of root offset during animation.
@@ -694,14 +703,8 @@ public:
 
 private:
     /// @see CharacterEffectorT::ResolveAnimationState
-    virtual void ResolveAnimationState(CharacterLimbSegmentData& effectorState, CharacterLimbSegmentData& animationState,
-        Node& rootNode, const Matrix3x4& animTransform, const CharacterSkeletonSegment& segment) override;
-
-private:
-    /// Factor of target position animation.
-    float animateTargetPosition_ = 0.0f;
-    /// Factor of target rotation animation.
-    float animateTargetRotation_ = 0.0f;
+    virtual void ResolveAnimationState(CharacterLimbSegmentData& effectorState,
+        CharacterAnimationController& controller, const CharacterSkeletonSegment& segment) override;
 };
 
 /// Character Chain Effector.
@@ -719,11 +722,9 @@ public:
 
 private:
     /// @see CharacterEffectorT::ResolveAnimationState
-    virtual void ResolveAnimationState(CharacterChainSegmentData& effectorState, CharacterChainSegmentData& animationState,
-        Node& rootNode, const Matrix3x4& animTransform, const CharacterSkeletonSegment& segment)
+    virtual void ResolveAnimationState(CharacterChainSegmentData& effectorState,
+        CharacterAnimationController& controller, const CharacterSkeletonSegment& segment)
     {
-        animationState.Render(rootNode.GetWorldTransform(), animTransform, segment);
-        effectorState = animationState;
     }
 };
 

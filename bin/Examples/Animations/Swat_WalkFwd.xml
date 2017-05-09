@@ -222,135 +222,135 @@
 		</frame>
 	</chain>
 	<limb name="LeftFoot">
-		<frame time="0" length="0.80965" position="-0.0227639 -0.706944 -0.0101555" rotation="-7.09381" rotation0="34.5724" rotation1="-3.34866" rotation2="0.946211 0.31512 0.0721978 -0.0130956" />
-		<frame time="0.0333333" length="0.80965" position="-0.0210105 -0.710863 0.0886774" rotation="-9.52131" rotation0="38.3616" rotation1="-4.09014" rotation2="0.976021 0.198424 0.0847868 -0.0286621" />
-		<frame time="0.0666667" length="0.80965" position="-0.0148416 -0.717991 0.183575" rotation="-12.6399" rotation0="41.4815" rotation1="-5.58114" rotation2="0.992486 0.0698668 0.0959443 -0.0297503" />
-		<frame time="0.1" length="0.80965" position="-0.00579664 -0.72725 0.280585" rotation="-15.6152" rotation0="43.5015" rotation1="-3.34866" rotation2="0.990994 -0.0497957 0.120306 -0.0312518" />
-		<frame time="0.133333" length="0.80965" position="0.00449145 -0.738047 0.359655" rotation="-16.9955" rotation0="44.9667" rotation1="-2.87988" rotation2="0.978706 -0.146436 0.140038 -0.0328607" />
-		<frame time="0.166667" length="0.80965" position="0.0128351 -0.750028 0.414862" rotation="-16.9227" rotation0="45.8439" rotation1="-2.31246" rotation2="0.962813 -0.218717 0.153793 -0.0387609" />
-		<frame time="0.2" length="0.80965" position="0.0106306 -0.762622 0.439734" rotation="-14.6327" rotation0="45.2518" rotation1="1.69577" rotation2="0.948922 -0.266957 0.159158 -0.0543113" />
-		<frame time="0.233333" length="0.80965" position="0.00730442 -0.774662 0.435466" rotation="-13.0392" rotation0="44.3666" rotation1="1.78219" rotation2="0.944535 -0.280277 0.156992 -0.0681988" />
-		<frame time="0.266667" length="0.80965" position="0.00248595 -0.789149 0.417681" rotation="-11.4782" rotation0="42.8296" rotation1="2.05511" rotation2="0.971253 -0.172012 0.150462 -0.0666323" />
-		<frame time="0.3" length="0.80965" position="0.00329456 -0.800569 0.386124" rotation="-10.8938" rotation0="42.1423" rotation1="-1.89087" rotation2="0.98633 -0.0530851 0.149838 -0.0434115" />
-		<frame time="0.333333" length="0.80965" position="0.00412548 -0.805626 0.337563" rotation="-11.2086" rotation0="41.6359" rotation1="-1.72142" rotation2="0.989823 -0.00399519 0.139358 -0.0285299" />
-		<frame time="0.366667" length="0.80965" position="0.00420918 -0.805585 0.275559" rotation="-12.1435" rotation0="40.9948" rotation1="-1.59835" rotation2="0.989689 -0.00411237 0.140167 -0.0291857" />
-		<frame time="0.4" length="0.80965" position="0.00419431 -0.805583 0.217891" rotation="-12.1114" rotation0="38.4778" rotation1="-1.44723" rotation2="0.989688 -0.00411556 0.140171 -0.0292071" />
-		<frame time="0.433333" length="0.80965" position="0.00417674 -0.805595 0.166589" rotation="-11.3436" rotation0="35.2756" rotation1="2.37029" rotation2="0.989694 -0.00409213 0.140165 -0.029043" />
-		<frame time="0.466667" length="0.80965" position="0.00416961 -0.805598 0.11587" rotation="-9.9648" rotation0="31.5103" rotation1="3.71482" rotation2="0.989697 -0.00408524 0.140154 -0.0289995" />
-		<frame time="0.5" length="0.80965" position="0.00405081 -0.80561 0.0670834" rotation="-8.27167" rotation0="27.7621" rotation1="4.63867" rotation2="0.989701 -0.00406096 0.140156 -0.0288265" />
-		<frame time="0.533333" length="0.80965" position="0.00408503 -0.805617 0.0195085" rotation="-6.42118" rotation0="24.235" rotation1="4.36836" rotation2="0.9897 -0.00404699 0.140187 -0.0287216" />
-		<frame time="0.566667" length="0.80965" position="0.00405225 -0.805635 -0.0323031" rotation="-4.59544" rotation0="20.9959" rotation1="4.16656" rotation2="0.989709 -0.00400969 0.140177 -0.0284624" />
-		<frame time="0.6" length="0.80965" position="0.00407816 -0.805628 -0.0850054" rotation="-2.69685" rotation0="18.4131" rotation1="3.03395" rotation2="0.989708 -0.00402081 0.140168 -0.0285421" />
-		<frame time="0.633333" length="0.80965" position="0.0040728 -0.805627 -0.139285" rotation="-0.96184" rotation0="16.5505" rotation1="1.70176" rotation2="0.989708 -0.00401825 0.14017 -0.0285256" />
-		<frame time="0.666667" length="0.80965" position="0.00402442 -0.805641 -0.1958" rotation="0.576071" rotation0="14.9604" rotation1="0.631798" rotation2="0.989714 -0.00398619 0.140177 -0.0282993" />
-		<frame time="0.7" length="0.80965" position="0.00392284 -0.805674 -0.257582" rotation="1.80184" rotation0="12.9256" rotation1="-0.642851" rotation2="0.989761 -0.00390176 0.139957 -0.0277489" />
-		<frame time="0.733333" length="0.80965" position="0.00507827 -0.804223 -0.332691" rotation="2.46801" rotation0="8.19316" rotation1="1.97073" rotation2="0.988246 -1.24602e-05 0.148421 -0.0366176" />
-		<frame time="0.766667" length="0.80965" position="0.00678258 -0.798351 -0.399264" rotation="3.35823" rotation0="3.41211" rotation1="1.10428" rotation2="0.98584 0.0372744 0.157841 -0.0426257" />
-		<frame time="0.8" length="0.80965" position="0.00407585 -0.78443 -0.441169" rotation="2.27458" rotation0="2.16816" rotation1="2.12882" rotation2="0.96433 0.188722 0.184741 -0.0179744" />
-		<frame time="0.833333" length="0.80965" position="-0.00929442 -0.756391 -0.391813" rotation="-1.23668" rotation0="11.9045" rotation1="-3.65277" rotation2="0.86512 0.465755 0.161341 0.0927867" />
-		<frame time="0.866667" length="0.80965" position="-0.0153836 -0.730455 -0.330464" rotation="-2.09957" rotation0="20.7823" rotation1="-5.89446" rotation2="0.819075 0.564657 0.0878164 0.0506586" />
-		<frame time="0.9" length="0.80965" position="-0.0193737 -0.715654 -0.260202" rotation="-3.18205" rotation0="25.6585" rotation1="-5.48748" rotation2="0.847458 0.526848 0.0516985 0.0396693" />
-		<frame time="0.933333" length="0.80965" position="-0.0215957 -0.710044 -0.188319" rotation="-4.39177" rotation0="29.1495" rotation1="-5.72217" rotation2="0.888486 0.452361 0.070972 0.0304191" />
-		<frame time="0.966667" length="0.80965" position="-0.0225674 -0.707277 -0.0979798" rotation="-5.54058" rotation0="32.3585" rotation1="-4.82644" rotation2="0.923224 0.377783 0.0699896 0.0062695" />
-		<frame time="1" length="0.80965" position="-0.0227655 -0.706945 -0.0101541" rotation="-7.09414" rotation0="34.5725" rotation1="-3.34889" rotation2="0.94621 0.315122 0.0721997 -0.013096" />
+		<frame time="0" position="-0.0281157 -0.873147 -0.0125431" rotation="-7.09381" rotation0="34.5724" rotation1="-3.34866" rotation2="0.946211 0.31512 0.0721978 -0.0130956" />
+		<frame time="0.0333333" position="-0.0259501 -0.877989 0.109526" rotation="-9.52131" rotation0="38.3616" rotation1="-4.09014" rotation2="0.976021 0.198424 0.0847868 -0.0286621" />
+		<frame time="0.0666667" position="-0.0183309 -0.886792 0.226734" rotation="-12.6399" rotation0="41.4815" rotation1="-5.58114" rotation2="0.992486 0.0698668 0.0959443 -0.0297503" />
+		<frame time="0.1" position="-0.00715944 -0.898228 0.346551" rotation="-15.6152" rotation0="43.5015" rotation1="-3.34866" rotation2="0.990994 -0.0497957 0.120306 -0.0312518" />
+		<frame time="0.133333" position="0.00554739 -0.911563 0.444211" rotation="-16.9955" rotation0="44.9667" rotation1="-2.87988" rotation2="0.978706 -0.146436 0.140038 -0.0328607" />
+		<frame time="0.166667" position="0.0158526 -0.92636 0.512397" rotation="-16.9227" rotation0="45.8439" rotation1="-2.31246" rotation2="0.962813 -0.218717 0.153793 -0.0387609" />
+		<frame time="0.2" position="0.0131298 -0.941916 0.543116" rotation="-14.6327" rotation0="45.2518" rotation1="1.69577" rotation2="0.948922 -0.266957 0.159158 -0.0543113" />
+		<frame time="0.233333" position="0.0090217 -0.956787 0.537845" rotation="-13.0392" rotation0="44.3666" rotation1="1.78219" rotation2="0.944535 -0.280277 0.156992 -0.0681988" />
+		<frame time="0.266667" position="0.0030704 -0.974679 0.515878" rotation="-11.4782" rotation0="42.8296" rotation1="2.05511" rotation2="0.971253 -0.172012 0.150462 -0.0666323" />
+		<frame time="0.3" position="0.00406911 -0.988784 0.476902" rotation="-10.8938" rotation0="42.1423" rotation1="-1.89087" rotation2="0.98633 -0.0530851 0.149838 -0.0434115" />
+		<frame time="0.333333" position="0.00509539 -0.995029 0.416925" rotation="-11.2086" rotation0="41.6359" rotation1="-1.72142" rotation2="0.989823 -0.00399519 0.139358 -0.0285299" />
+		<frame time="0.366667" position="0.00519876 -0.994979 0.340343" rotation="-12.1435" rotation0="40.9948" rotation1="-1.59835" rotation2="0.989689 -0.00411237 0.140167 -0.0291857" />
+		<frame time="0.4" position="0.0051804 -0.994977 0.269117" rotation="-12.1114" rotation0="38.4778" rotation1="-1.44723" rotation2="0.989688 -0.00411556 0.140171 -0.0292071" />
+		<frame time="0.433333" position="0.00515869 -0.994992 0.205754" rotation="-11.3436" rotation0="35.2756" rotation1="2.37029" rotation2="0.989694 -0.00409213 0.140165 -0.029043" />
+		<frame time="0.466667" position="0.00514989 -0.994995 0.143111" rotation="-9.9648" rotation0="31.5103" rotation1="3.71482" rotation2="0.989697 -0.00408524 0.140154 -0.0289995" />
+		<frame time="0.5" position="0.00500316 -0.99501 0.0828548" rotation="-8.27167" rotation0="27.7621" rotation1="4.63867" rotation2="0.989701 -0.00406096 0.140156 -0.0288265" />
+		<frame time="0.533333" position="0.00504542 -0.995019 0.024095" rotation="-6.42118" rotation0="24.235" rotation1="4.36836" rotation2="0.9897 -0.00404699 0.140187 -0.0287216" />
+		<frame time="0.566667" position="0.00500494 -0.995041 -0.0398976" rotation="-4.59544" rotation0="20.9959" rotation1="4.16656" rotation2="0.989709 -0.00400969 0.140177 -0.0284624" />
+		<frame time="0.6" position="0.00503695 -0.995032 -0.10499" rotation="-2.69685" rotation0="18.4131" rotation1="3.03395" rotation2="0.989708 -0.00402081 0.140168 -0.0285421" />
+		<frame time="0.633333" position="0.00503032 -0.995031 -0.172031" rotation="-0.96184" rotation0="16.5505" rotation1="1.70176" rotation2="0.989708 -0.00401825 0.14017 -0.0285256" />
+		<frame time="0.666667" position="0.00497056 -0.995048 -0.241833" rotation="0.576071" rotation0="14.9604" rotation1="0.631798" rotation2="0.989714 -0.00398619 0.140177 -0.0282993" />
+		<frame time="0.7" position="0.00484511 -0.995089 -0.318139" rotation="1.80184" rotation0="12.9256" rotation1="-0.642851" rotation2="0.989761 -0.00390176 0.139957 -0.0277489" />
+		<frame time="0.733333" position="0.00627218 -0.993297 -0.410907" rotation="2.46801" rotation0="8.19316" rotation1="1.97073" rotation2="0.988246 -1.24602e-05 0.148421 -0.0366176" />
+		<frame time="0.766667" position="0.00837717 -0.986044 -0.493131" rotation="3.35823" rotation0="3.41211" rotation1="1.10428" rotation2="0.98584 0.0372744 0.157841 -0.0426257" />
+		<frame time="0.8" position="0.00503408 -0.968851 -0.544888" rotation="2.27458" rotation0="2.16816" rotation1="2.12882" rotation2="0.96433 0.188722 0.184741 -0.0179744" />
+		<frame time="0.833333" position="-0.0114796 -0.93422 -0.483929" rotation="-1.23668" rotation0="11.9045" rotation1="-3.65277" rotation2="0.86512 0.465755 0.161341 0.0927867" />
+		<frame time="0.866667" position="-0.0190003 -0.902187 -0.408157" rotation="-2.09957" rotation0="20.7823" rotation1="-5.89446" rotation2="0.819075 0.564657 0.0878164 0.0506586" />
+		<frame time="0.9" position="-0.0239285 -0.883905 -0.321376" rotation="-3.18205" rotation0="25.6585" rotation1="-5.48748" rotation2="0.847458 0.526848 0.0516985 0.0396693" />
+		<frame time="0.933333" position="-0.0266728 -0.876976 -0.232593" rotation="-4.39177" rotation0="29.1495" rotation1="-5.72217" rotation2="0.888486 0.452361 0.070972 0.0304191" />
+		<frame time="0.966667" position="-0.027873 -0.873558 -0.121015" rotation="-5.54058" rotation0="32.3585" rotation1="-4.82644" rotation2="0.923224 0.377783 0.0699896 0.0062695" />
+		<frame time="1" position="-0.0281177 -0.873148 -0.0125413" rotation="-7.09414" rotation0="34.5725" rotation1="-3.34889" rotation2="0.94621 0.315122 0.0721997 -0.013096" />
 	</limb>
 	<limb name="RightFoot">
-		<frame time="0" length="0.80965" position="-0.025196 -0.806457 0.0163953" rotation="-34.8309" rotation0="33.661" rotation1="4.74299" rotation2="0.965364 0.000103204 0.260905 -2.37194e-05" />
-		<frame time="0.0333333" length="0.80965" position="-0.0251939 -0.806479 -0.0321992" rotation="-37.2243" rotation0="35.6411" rotation1="7.51447" rotation2="0.965364 0.000102752 0.260908 -2.86098e-05" />
-		<frame time="0.0666667" length="0.80965" position="-0.0251936 -0.806468 -0.0839334" rotation="-38.0586" rotation0="37.6549" rotation1="6.99475" rotation2="0.965364 0.000100364 0.260908 -2.10214e-05" />
-		<frame time="0.1" length="0.80965" position="-0.0252055 -0.80653 -0.137292" rotation="-37.8989" rotation0="39.7047" rotation1="6.30873" rotation2="0.965364 0.000100279 0.260907 -2.08691e-05" />
-		<frame time="0.133333" length="0.80965" position="-0.0251882 -0.806495 -0.191114" rotation="-37.3824" rotation0="41.5922" rotation1="5.23317" rotation2="0.965362 0.000101172 0.260913 -2.22379e-05" />
-		<frame time="0.166667" length="0.80965" position="-0.0251899 -0.806749 -0.248259" rotation="-37.2618" rotation0="43.2733" rotation1="5.85461" rotation2="0.965363 0.000137651 0.26091 -4.58333e-05" />
-		<frame time="0.2" length="0.80965" position="-0.0251915 -0.806871 -0.307948" rotation="-37.5931" rotation0="43.9825" rotation1="7.06505" rotation2="0.965351 -0.000143668 0.260955 -0.000108155" />
-		<frame time="0.233333" length="0.80965" position="-0.0255279 -0.803178 -0.371177" rotation="-37.3301" rotation0="42.4068" rotation1="12.4606" rotation2="0.967078 0.0236238 0.253123 0.0114335" />
-		<frame time="0.266667" length="0.80965" position="-0.0268348 -0.791243 -0.423934" rotation="-36.2563" rotation0="39.1495" rotation1="14.2307" rotation2="0.965421 0.0908471 0.241307 0.0384836" />
-		<frame time="0.3" length="0.80965" position="-0.0271759 -0.77959 -0.456619" rotation="-35.2191" rotation0="35.4786" rotation1="14.38" rotation2="0.941973 0.218914 0.244871 0.0692892" />
-		<frame time="0.333333" length="0.80965" position="-0.0262342 -0.767693 -0.476465" rotation="-34.957" rotation0="32.353" rotation1="13.9098" rotation2="0.898606 0.349405 0.246641 0.0979396" />
-		<frame time="0.366667" length="0.80965" position="-0.0245607 -0.751365 -0.477429" rotation="-35.4305" rotation0="30.6215" rotation1="15.0408" rotation2="0.847407 0.463535 0.227948 0.122789" />
-		<frame time="0.4" length="0.80965" position="-0.0240128 -0.717739 -0.433097" rotation="-38.1077" rotation0="31.4831" rotation1="15.7414" rotation2="0.821922 0.505518 0.222606 0.139074" />
-		<frame time="0.433333" length="0.80965" position="-0.0232613 -0.699458 -0.348801" rotation="-39.8338" rotation0="32.0488" rotation1="14.9108" rotation2="0.842556 0.454567 0.249188 0.146199" />
-		<frame time="0.466667" length="0.80965" position="-0.0222342 -0.706693 -0.267852" rotation="-39.359" rotation0="31.7519" rotation1="10.2157" rotation2="0.868638 0.373221 0.292371 0.143855" />
-		<frame time="0.5" length="0.80965" position="-0.0208855 -0.724542 -0.168626" rotation="-38.1278" rotation0="31.7215" rotation1="6.4937" rotation2="0.907912 0.249122 0.314579 0.121136" />
-		<frame time="0.533333" length="0.80965" position="-0.0188765 -0.746578 -0.0655999" rotation="-36.0988" rotation0="31.7846" rotation1="4.88801" rotation2="0.935748 0.127235 0.31436 0.0967756" />
-		<frame time="0.566667" length="0.80965" position="-0.0149616 -0.756916 0.0304171" rotation="-34.2476" rotation0="32.0721" rotation1="3.0218" rotation2="0.948814 0.0143751 0.310692 0.0549156" />
-		<frame time="0.6" length="0.80965" position="-0.00833446 -0.761581 0.121341" rotation="-33.2457" rotation0="32.5202" rotation1="2.16383" rotation2="0.952504 -0.0867311 0.291689 -0.0114979" />
-		<frame time="0.633333" length="0.80965" position="-0.0021106 -0.764417 0.200539" rotation="-33.1383" rotation0="32.7983" rotation1="-1.51229" rotation2="0.937759 -0.175112 0.287996 -0.0836755" />
-		<frame time="0.666667" length="0.80965" position="-0.00107981 -0.767228 0.292379" rotation="-33.4132" rotation0="32.5978" rotation1="-3.22966" rotation2="0.91271 -0.254628 0.29454 -0.123978" />
-		<frame time="0.7" length="0.80965" position="-0.00616834 -0.768271 0.372988" rotation="-33.7269" rotation0="31.8933" rotation1="-4.64576" rotation2="0.885181 -0.315465 0.310672 -0.142895" />
-		<frame time="0.733333" length="0.80965" position="-0.0115058 -0.7741 0.427611" rotation="-31.4821" rotation0="30.4882" rotation1="-3.40453" rotation2="0.905407 -0.275775 0.285286 -0.150989" />
-		<frame time="0.766667" length="0.80965" position="-0.0170283 -0.787078 0.447818" rotation="-26.9628" rotation0="28.0652" rotation1="-1.06971" rotation2="0.95427 -0.158749 0.223532 -0.119171" />
-		<frame time="0.8" length="0.80965" position="-0.0237383 -0.800326 0.435259" rotation="-23.1158" rotation0="25.0384" rotation1="1.74715" rotation2="0.967553 -0.0609187 0.241466 -0.0427189" />
-		<frame time="0.833333" length="0.80965" position="-0.025174 -0.807749 0.377911" rotation="-23.6956" rotation0="23.4903" rotation1="0.91085" rotation2="0.965556 -8.22053e-07 0.260197 1.95695e-07" />
-		<frame time="0.866667" length="0.80965" position="-0.0251924 -0.807795 0.309509" rotation="-23.3831" rotation0="24.7407" rotation1="-0.993856" rotation2="0.965366 -8.43152e-07 0.260898 2.78646e-07" />
-		<frame time="0.9" length="0.80965" position="-0.0252019 -0.807807 0.243956" rotation="-24.8948" rotation0="26.809" rotation1="-1.02028" rotation2="0.965365 -7.919e-07 0.260902 2.37852e-07" />
-		<frame time="0.933333" length="0.80965" position="-0.0252024 -0.807812 0.170498" rotation="-27.4772" rotation0="29.1014" rotation1="1.53439" rotation2="0.965365 -8.6727e-07 0.260905 1.53437e-07" />
-		<frame time="0.966667" length="0.80965" position="-0.0251986 -0.807814 0.0928973" rotation="-30.9248" rotation0="31.3959" rotation1="2.50015" rotation2="0.965363 -8.49181e-07 0.260909 2.39359e-07" />
-		<frame time="1" length="0.80965" position="-0.0251957 -0.806456 0.0163901" rotation="-34.7396" rotation0="33.6272" rotation1="4.94185" rotation2="0.965365 9.26217e-05 0.260905 -2.25955e-05" />
+		<frame time="0" position="-0.0311196 -0.996056 0.0202499" rotation="-34.8309" rotation0="33.661" rotation1="4.74299" rotation2="0.965364 0.000103204 0.260905 -2.37194e-05" />
+		<frame time="0.0333333" position="-0.031117 -0.996084 -0.0397693" rotation="-37.2243" rotation0="35.6411" rotation1="7.51447" rotation2="0.965364 0.000102752 0.260908 -2.86098e-05" />
+		<frame time="0.0666667" position="-0.0311166 -0.99607 -0.103666" rotation="-38.0586" rotation0="37.6549" rotation1="6.99475" rotation2="0.965364 0.000100364 0.260908 -2.10214e-05" />
+		<frame time="0.1" position="-0.0311314 -0.996146 -0.169569" rotation="-37.8989" rotation0="39.7047" rotation1="6.30873" rotation2="0.965364 0.000100279 0.260907 -2.08691e-05" />
+		<frame time="0.133333" position="-0.03111 -0.996103 -0.236045" rotation="-37.3824" rotation0="41.5922" rotation1="5.23317" rotation2="0.965362 0.000101172 0.260913 -2.22379e-05" />
+		<frame time="0.166667" position="-0.0311121 -0.996417 -0.306625" rotation="-37.2618" rotation0="43.2733" rotation1="5.85461" rotation2="0.965363 0.000137651 0.26091 -4.58333e-05" />
+		<frame time="0.2" position="-0.0311141 -0.996568 -0.380347" rotation="-37.5931" rotation0="43.9825" rotation1="7.06505" rotation2="0.965351 -0.000143668 0.260955 -0.000108155" />
+		<frame time="0.233333" position="-0.0315296 -0.992006 -0.458441" rotation="-37.3301" rotation0="42.4068" rotation1="12.4606" rotation2="0.967078 0.0236238 0.253123 0.0114335" />
+		<frame time="0.266667" position="-0.0331437 -0.977266 -0.523601" rotation="-36.2563" rotation0="39.1495" rotation1="14.2307" rotation2="0.965421 0.0908471 0.241307 0.0384836" />
+		<frame time="0.3" position="-0.033565 -0.962873 -0.56397" rotation="-35.2191" rotation0="35.4786" rotation1="14.38" rotation2="0.941973 0.218914 0.244871 0.0692892" />
+		<frame time="0.333333" position="-0.0324019 -0.948179 -0.588483" rotation="-34.957" rotation0="32.353" rotation1="13.9098" rotation2="0.898606 0.349405 0.246641 0.0979396" />
+		<frame time="0.366667" position="-0.030335 -0.928012 -0.589673" rotation="-35.4305" rotation0="30.6215" rotation1="15.0408" rotation2="0.847407 0.463535 0.227948 0.122789" />
+		<frame time="0.4" position="-0.0296582 -0.88648 -0.534918" rotation="-38.1077" rotation0="31.4831" rotation1="15.7414" rotation2="0.821922 0.505518 0.222606 0.139074" />
+		<frame time="0.433333" position="-0.0287301 -0.863902 -0.430804" rotation="-39.8338" rotation0="32.0488" rotation1="14.9108" rotation2="0.842556 0.454567 0.249188 0.146199" />
+		<frame time="0.466667" position="-0.0274615 -0.872838 -0.330824" rotation="-39.359" rotation0="31.7519" rotation1="10.2157" rotation2="0.868638 0.373221 0.292371 0.143855" />
+		<frame time="0.5" position="-0.0257957 -0.894883 -0.20827" rotation="-38.1278" rotation0="31.7215" rotation1="6.4937" rotation2="0.907912 0.249122 0.314579 0.121136" />
+		<frame time="0.533333" position="-0.0233143 -0.9221 -0.0810226" rotation="-36.0988" rotation0="31.7846" rotation1="4.88801" rotation2="0.935748 0.127235 0.31436 0.0967756" />
+		<frame time="0.566667" position="-0.0184791 -0.934868 0.0375682" rotation="-34.2476" rotation0="32.0721" rotation1="3.0218" rotation2="0.948814 0.0143751 0.310692 0.0549156" />
+		<frame time="0.6" position="-0.0102939 -0.94063 0.149869" rotation="-33.2457" rotation0="32.5202" rotation1="2.16383" rotation2="0.952504 -0.0867311 0.291689 -0.0114979" />
+		<frame time="0.633333" position="-0.00260681 -0.944132 0.247687" rotation="-33.1383" rotation0="32.7983" rotation1="-1.51229" rotation2="0.937759 -0.175112 0.287996 -0.0836755" />
+		<frame time="0.666667" position="-0.00133367 -0.947604 0.361117" rotation="-33.4132" rotation0="32.5978" rotation1="-3.22966" rotation2="0.91271 -0.254628 0.29454 -0.123978" />
+		<frame time="0.7" position="-0.00761852 -0.948893 0.460678" rotation="-33.7269" rotation0="31.8933" rotation1="-4.64576" rotation2="0.885181 -0.315465 0.310672 -0.142895" />
+		<frame time="0.733333" position="-0.0142108 -0.956092 0.528143" rotation="-31.4821" rotation0="30.4882" rotation1="-3.40453" rotation2="0.905407 -0.275775 0.285286 -0.150989" />
+		<frame time="0.766667" position="-0.0210316 -0.972121 0.553101" rotation="-26.9628" rotation0="28.0652" rotation1="-1.06971" rotation2="0.95427 -0.158749 0.223532 -0.119171" />
+		<frame time="0.8" position="-0.0293192 -0.988484 0.537589" rotation="-23.1158" rotation0="25.0384" rotation1="1.74715" rotation2="0.967553 -0.0609187 0.241466 -0.0427189" />
+		<frame time="0.833333" position="-0.0310924 -0.997652 0.466758" rotation="-23.6956" rotation0="23.4903" rotation1="0.91085" rotation2="0.965556 -8.22053e-07 0.260197 1.95695e-07" />
+		<frame time="0.866667" position="-0.0311152 -0.997709 0.382275" rotation="-23.3831" rotation0="24.7407" rotation1="-0.993856" rotation2="0.965366 -8.43152e-07 0.260898 2.78646e-07" />
+		<frame time="0.9" position="-0.0311269 -0.997723 0.301311" rotation="-24.8948" rotation0="26.809" rotation1="-1.02028" rotation2="0.965365 -7.919e-07 0.260902 2.37852e-07" />
+		<frame time="0.933333" position="-0.0311275 -0.99773 0.210583" rotation="-27.4772" rotation0="29.1014" rotation1="1.53439" rotation2="0.965365 -8.6727e-07 0.260905 1.53437e-07" />
+		<frame time="0.966667" position="-0.0311228 -0.997732 0.114738" rotation="-30.9248" rotation0="31.3959" rotation1="2.50015" rotation2="0.965363 -8.49181e-07 0.260909 2.39359e-07" />
+		<frame time="1" position="-0.0311193 -0.996055 0.0202434" rotation="-34.7396" rotation0="33.6272" rotation1="4.94185" rotation2="0.965365 9.26217e-05 0.260905 -2.25955e-05" />
 	</limb>
 	<limb name="LeftHand">
-		<frame time="0" length="0.555608" position="0.292426 -0.302062 0.579745" rotation="22.0795" rotation0="38.9893" rotation1="-252.756" rotation2="0.0989116 0.282243 0.0984418 -0.949139" />
-		<frame time="0.0333333" length="0.555608" position="0.292528 -0.295913 0.580139" rotation="21.4752" rotation0="39.2178" rotation1="-249.345" rotation2="0.100043 0.28164 0.098762 -0.949166" />
-		<frame time="0.0666667" length="0.555608" position="0.292502 -0.288022 0.580259" rotation="22.372" rotation0="38.1095" rotation1="-253.824" rotation2="0.101504 0.28098 0.0991518 -0.949166" />
-		<frame time="0.1" length="0.555608" position="0.292447 -0.282536 0.580261" rotation="22.4883" rotation0="38.1672" rotation1="-248.443" rotation2="0.102563 0.28033 0.0995039 -0.949207" />
-		<frame time="0.133333" length="0.555608" position="0.29217 -0.281074 0.580156" rotation="23.0243" rotation0="37.478" rotation1="-247.971" rotation2="0.103971 0.279622 0.0999046 -0.949221" />
-		<frame time="0.166667" length="0.555608" position="0.291626 -0.282248 0.580188" rotation="23.424" rotation0="36.859" rotation1="-247.696" rotation2="0.105421 0.278923 0.100309 -0.949224" />
-		<frame time="0.2" length="0.555608" position="0.290794 -0.287844 0.580365" rotation="23.8963" rotation0="35.791" rotation1="-249.899" rotation2="0.1067 0.278268 0.100674 -0.949235" />
-		<frame time="0.233333" length="0.555608" position="0.29007 -0.296466 0.580918" rotation="22.8639" rotation0="36.5026" rotation1="-248.366" rotation2="0.108011 0.277681 0.101035 -0.94922" />
-		<frame time="0.266667" length="0.555608" position="0.288977 -0.307343 0.582051" rotation="22.1869" rotation0="36.9591" rotation1="-248.571" rotation2="0.109032 0.277147 0.101303 -0.949231" />
-		<frame time="0.3" length="0.555608" position="0.287961 -0.319976 0.583793" rotation="20.5323" rotation0="38.491" rotation1="-247.231" rotation2="0.109474 0.276786 0.101473 -0.949267" />
-		<frame time="0.333333" length="0.555608" position="0.286849 -0.33422 0.586379" rotation="19.1145" rotation0="39.7557" rotation1="-246.787" rotation2="0.110028 0.27652 0.101631 -0.949264" />
-		<frame time="0.366667" length="0.555608" position="0.285643 -0.338068 0.589631" rotation="18.1024" rotation0="40.9041" rotation1="-246.212" rotation2="0.110249 0.276398 0.101706 -0.949266" />
-		<frame time="0.4" length="0.555608" position="0.284596 -0.336063 0.593413" rotation="16.2968" rotation0="42.2329" rotation1="-245.162" rotation2="0.110245 0.276372 0.101727 -0.949271" />
-		<frame time="0.433333" length="0.555608" position="0.283496 -0.328525 0.597451" rotation="15.7728" rotation0="42.6396" rotation1="-244.678" rotation2="0.11022 0.276426 0.101761 -0.949255" />
-		<frame time="0.466667" length="0.555608" position="0.282021 -0.317293 0.601448" rotation="15.7808" rotation0="42.555" rotation1="-244.204" rotation2="0.11007 0.276546 0.101746 -0.949239" />
-		<frame time="0.5" length="0.555608" position="0.280267 -0.30557 0.605178" rotation="16.6054" rotation0="41.9968" rotation1="-243.586" rotation2="0.109768 0.276698 0.101681 -0.949237" />
-		<frame time="0.533333" length="0.555608" position="0.278133 -0.2949 0.608367" rotation="17.6947" rotation0="41.3598" rotation1="-242.467" rotation2="0.10929 0.276934 0.101608 -0.949231" />
-		<frame time="0.566667" length="0.555608" position="0.275231 -0.288748 0.610669" rotation="19.5382" rotation0="39.7459" rotation1="-244.005" rotation2="0.108628 0.277214 0.101493 -0.949237" />
-		<frame time="0.6" length="0.555608" position="0.272086 -0.289726 0.611825" rotation="20.7675" rotation0="38.9179" rotation1="-243.582" rotation2="0.108019 0.27753 0.101344 -0.949231" />
-		<frame time="0.633333" length="0.555608" position="0.269614 -0.296265 0.611744" rotation="22.1894" rotation0="38.095" rotation1="-243.066" rotation2="0.107292 0.277896 0.101183 -0.949223" />
-		<frame time="0.666667" length="0.555608" position="0.268363 -0.30469 0.610847" rotation="23.5708" rotation0="37.4583" rotation1="-242.737" rotation2="0.106604 0.278281 0.100979 -0.949209" />
-		<frame time="0.7" length="0.555608" position="0.268103 -0.312996 0.60914" rotation="25.1109" rotation0="36.8855" rotation1="-242.711" rotation2="0.105864 0.278688 0.100745 -0.949197" />
-		<frame time="0.733333" length="0.555608" position="0.268373 -0.322497 0.606641" rotation="26.1325" rotation0="36.5256" rotation1="-243.552" rotation2="0.105105 0.279108 0.100484 -0.949186" />
-		<frame time="0.766667" length="0.555608" position="0.270114 -0.330027 0.60359" rotation="26.6875" rotation0="36.3779" rotation1="-244.718" rotation2="0.104285 0.27954 0.100203 -0.949179" />
-		<frame time="0.8" length="0.555608" position="0.273316 -0.335242 0.600083" rotation="25.9779" rotation0="36.7295" rotation1="-245.99" rotation2="0.103362 0.279978 0.0999447 -0.949178" />
-		<frame time="0.833333" length="0.555608" position="0.277403 -0.338733 0.596547" rotation="25.1745" rotation0="37.2775" rotation1="-246.948" rotation2="0.102452 0.280411 0.0996758 -0.949178" />
-		<frame time="0.866667" length="0.555608" position="0.28194 -0.336371 0.592911" rotation="24.3087" rotation0="37.7837" rotation1="-247.622" rotation2="0.101571 0.280831 0.0994029 -0.949176" />
-		<frame time="0.9" length="0.555608" position="0.285909 -0.330133 0.589327" rotation="23.5777" rotation0="37.8991" rotation1="-248.307" rotation2="0.100755 0.281225 0.099128 -0.949176" />
-		<frame time="0.933333" length="0.555608" position="0.289234 -0.32271 0.585825" rotation="22.3062" rotation0="38.8344" rotation1="-247.289" rotation2="0.099967 0.281591 0.0988652 -0.949178" />
-		<frame time="0.966667" length="0.555608" position="0.291589 -0.313028 0.582593" rotation="22.1481" rotation0="38.5861" rotation1="-252.145" rotation2="0.0992566 0.28192 0.0986179 -0.94918" />
-		<frame time="1" length="0.555608" position="0.292438 -0.302018 0.579728" rotation="22.3045" rotation0="38.3404" rotation1="-249.635" rotation2="0.0989529 0.282185 0.0984235 -0.949154" />
+		<frame time="0" position="0.526316 -0.54366 1.04344" rotation="22.0795" rotation0="38.9893" rotation1="-252.756" rotation2="0.0989116 0.282243 0.0984418 -0.949139" />
+		<frame time="0.0333333" position="0.526502 -0.532593 1.04415" rotation="21.4752" rotation0="39.2178" rotation1="-249.345" rotation2="0.100043 0.28164 0.098762 -0.949166" />
+		<frame time="0.0666667" position="0.526454 -0.518391 1.04437" rotation="22.372" rotation0="38.1095" rotation1="-253.824" rotation2="0.101504 0.28098 0.0991518 -0.949166" />
+		<frame time="0.1" position="0.526354 -0.508518 1.04437" rotation="22.4883" rotation0="38.1672" rotation1="-248.443" rotation2="0.102563 0.28033 0.0995039 -0.949207" />
+		<frame time="0.133333" position="0.525856 -0.505885 1.04418" rotation="23.0243" rotation0="37.478" rotation1="-247.971" rotation2="0.103971 0.279622 0.0999046 -0.949221" />
+		<frame time="0.166667" position="0.524877 -0.507999 1.04424" rotation="23.424" rotation0="36.859" rotation1="-247.696" rotation2="0.105421 0.278923 0.100309 -0.949224" />
+		<frame time="0.2" position="0.52338 -0.51807 1.04456" rotation="23.8963" rotation0="35.791" rotation1="-249.899" rotation2="0.1067 0.278268 0.100674 -0.949235" />
+		<frame time="0.233333" position="0.522076 -0.533589 1.04555" rotation="22.8639" rotation0="36.5026" rotation1="-248.366" rotation2="0.108011 0.277681 0.101035 -0.94922" />
+		<frame time="0.266667" position="0.52011 -0.553165 1.04759" rotation="22.1869" rotation0="36.9591" rotation1="-248.571" rotation2="0.109032 0.277147 0.101303 -0.949231" />
+		<frame time="0.3" position="0.518281 -0.575903 1.05073" rotation="20.5323" rotation0="38.491" rotation1="-247.231" rotation2="0.109474 0.276786 0.101473 -0.949267" />
+		<frame time="0.333333" position="0.51628 -0.601539 1.05538" rotation="19.1145" rotation0="39.7557" rotation1="-246.787" rotation2="0.110028 0.27652 0.101631 -0.949264" />
+		<frame time="0.366667" position="0.514109 -0.608464 1.06124" rotation="18.1024" rotation0="40.9041" rotation1="-246.212" rotation2="0.110249 0.276398 0.101706 -0.949266" />
+		<frame time="0.4" position="0.512225 -0.604857 1.06804" rotation="16.2968" rotation0="42.2329" rotation1="-245.162" rotation2="0.110245 0.276372 0.101727 -0.949271" />
+		<frame time="0.433333" position="0.510244 -0.591289 1.07531" rotation="15.7728" rotation0="42.6396" rotation1="-244.678" rotation2="0.11022 0.276426 0.101761 -0.949255" />
+		<frame time="0.466667" position="0.50759 -0.571074 1.0825" rotation="15.7808" rotation0="42.555" rotation1="-244.204" rotation2="0.11007 0.276546 0.101746 -0.949239" />
+		<frame time="0.5" position="0.504434 -0.549975 1.08922" rotation="16.6054" rotation0="41.9968" rotation1="-243.586" rotation2="0.109768 0.276698 0.101681 -0.949237" />
+		<frame time="0.533333" position="0.500592 -0.530771 1.09496" rotation="17.6947" rotation0="41.3598" rotation1="-242.467" rotation2="0.10929 0.276934 0.101608 -0.949231" />
+		<frame time="0.566667" position="0.495368 -0.519697 1.0991" rotation="19.5382" rotation0="39.7459" rotation1="-244.005" rotation2="0.108628 0.277214 0.101493 -0.949237" />
+		<frame time="0.6" position="0.489708 -0.521458 1.10118" rotation="20.7675" rotation0="38.9179" rotation1="-243.582" rotation2="0.108019 0.27753 0.101344 -0.949231" />
+		<frame time="0.633333" position="0.48526 -0.533226 1.10104" rotation="22.1894" rotation0="38.095" rotation1="-243.066" rotation2="0.107292 0.277896 0.101183 -0.949223" />
+		<frame time="0.666667" position="0.483007 -0.548389 1.09942" rotation="23.5708" rotation0="37.4583" rotation1="-242.737" rotation2="0.106604 0.278281 0.100979 -0.949209" />
+		<frame time="0.7" position="0.48254 -0.56334 1.09635" rotation="25.1109" rotation0="36.8855" rotation1="-242.711" rotation2="0.105864 0.278688 0.100745 -0.949197" />
+		<frame time="0.733333" position="0.483026 -0.580439 1.09185" rotation="26.1325" rotation0="36.5256" rotation1="-243.552" rotation2="0.105105 0.279108 0.100484 -0.949186" />
+		<frame time="0.766667" position="0.486158 -0.593993 1.08636" rotation="26.6875" rotation0="36.3779" rotation1="-244.718" rotation2="0.104285 0.27954 0.100203 -0.949179" />
+		<frame time="0.8" position="0.491923 -0.603378 1.08005" rotation="25.9779" rotation0="36.7295" rotation1="-245.99" rotation2="0.103362 0.279978 0.0999447 -0.949178" />
+		<frame time="0.833333" position="0.499278 -0.609662 1.07368" rotation="25.1745" rotation0="37.2775" rotation1="-246.948" rotation2="0.102452 0.280411 0.0996758 -0.949178" />
+		<frame time="0.866667" position="0.507445 -0.60541 1.06714" rotation="24.3087" rotation0="37.7837" rotation1="-247.622" rotation2="0.101571 0.280831 0.0994029 -0.949176" />
+		<frame time="0.9" position="0.514588 -0.594183 1.06069" rotation="23.5777" rotation0="37.8991" rotation1="-248.307" rotation2="0.100755 0.281225 0.099128 -0.949176" />
+		<frame time="0.933333" position="0.520571 -0.580824 1.05439" rotation="22.3062" rotation0="38.8344" rotation1="-247.289" rotation2="0.099967 0.281591 0.0988652 -0.949178" />
+		<frame time="0.966667" position="0.524811 -0.563397 1.04857" rotation="22.1481" rotation0="38.5861" rotation1="-252.145" rotation2="0.0992566 0.28192 0.0986179 -0.94918" />
+		<frame time="1" position="0.526339 -0.543582 1.04341" rotation="22.3045" rotation0="38.3404" rotation1="-249.635" rotation2="0.0989529 0.282185 0.0984235 -0.949154" />
 	</limb>
 	<limb name="RightHand">
-		<frame time="0" length="0.555608" position="0.0515279 -0.332619 0.29203" rotation="-37.0831" rotation0="15.7248" rotation1="-46.4739" rotation2="0.377232 -0.554494 -0.57327 -0.470737" />
-		<frame time="0.0333333" length="0.555608" position="0.0516316 -0.326129 0.292246" rotation="-38.0662" rotation0="16.6317" rotation1="-48.4034" rotation2="0.37805 -0.55406 -0.573794 -0.469954" />
-		<frame time="0.0666667" length="0.555608" position="0.0512558 -0.317958 0.292266" rotation="-38.8769" rotation0="16.0741" rotation1="-47.5892" rotation2="0.379019 -0.553473 -0.574491 -0.469011" />
-		<frame time="0.1" length="0.555608" position="0.0507509 -0.312268 0.292161" rotation="-39.64" rotation0="15.7736" rotation1="-47.1522" rotation2="0.379867 -0.553102 -0.574924 -0.468232" />
-		<frame time="0.133333" length="0.555608" position="0.0497608 -0.310587 0.292049" rotation="-39.8246" rotation0="15.6835" rotation1="-46.5385" rotation2="0.38086 -0.552552 -0.57557 -0.46728" />
-		<frame time="0.166667" length="0.555608" position="0.0496878 -0.311211 0.291767" rotation="-39.7445" rotation0="15.4017" rotation1="-45.9409" rotation2="0.381859 -0.551958 -0.576258 -0.466318" />
-		<frame time="0.2" length="0.555608" position="0.0486194 -0.316458 0.291863" rotation="-39.7056" rotation0="15.0026" rotation1="-44.931" rotation2="0.382768 -0.551441 -0.57685 -0.465451" />
-		<frame time="0.233333" length="0.555608" position="0.0473043 -0.324882 0.292364" rotation="-40.0088" rotation0="14.7128" rotation1="-44.2189" rotation2="0.383642 -0.550909 -0.577465 -0.464599" />
-		<frame time="0.266667" length="0.555608" position="0.0461739 -0.335569 0.293278" rotation="-40.8751" rotation0="14.589" rotation1="-44.6775" rotation2="0.384352 -0.550499 -0.577934 -0.463914" />
-		<frame time="0.3" length="0.555608" position="0.0453161 -0.348 0.294888" rotation="-41.77" rotation0="13.9555" rotation1="-44.4288" rotation2="0.384754 -0.550358 -0.578111 -0.463528" />
-		<frame time="0.333333" length="0.555608" position="0.0439622 -0.362115 0.297479" rotation="-41.8325" rotation0="11.6187" rotation1="-40.5144" rotation2="0.385157 -0.550144 -0.578349 -0.463151" />
-		<frame time="0.366667" length="0.555608" position="0.042815 -0.365849 0.300721" rotation="-43.0733" rotation0="10.3713" rotation1="-39.7942" rotation2="0.385327 -0.550053 -0.57844 -0.463003" />
-		<frame time="0.4" length="0.555608" position="0.0418367 -0.36387 0.304424" rotation="-42.6261" rotation0="9.8009" rotation1="-38.9456" rotation2="0.385352 -0.550069 -0.578399 -0.463015" />
-		<frame time="0.433333" length="0.555608" position="0.0404802 -0.356402 0.308474" rotation="-42.4742" rotation0="8.33478" rotation1="-36.9629" rotation2="0.385361 -0.55004 -0.578389 -0.463053" />
-		<frame time="0.466667" length="0.555608" position="0.0391198 -0.345169 0.312487" rotation="-42.7268" rotation0="9.78009" rotation1="-39.8663" rotation2="0.385254 -0.550073 -0.578315 -0.463196" />
-		<frame time="0.5" length="0.555608" position="0.0375547 -0.333458 0.316256" rotation="-40.9435" rotation0="6.06599" rotation1="-32.4296" rotation2="0.385033 -0.550159 -0.578204 -0.463417" />
-		<frame time="0.533333" length="0.555608" position="0.0354636 -0.322859 0.319504" rotation="-40.1597" rotation0="6.73987" rotation1="-33.357" rotation2="0.384666 -0.550316 -0.57804 -0.463738" />
-		<frame time="0.566667" length="0.555608" position="0.0326766 -0.316802 0.32186" rotation="-38.5238" rotation0="8.45683" rotation1="-35.6484" rotation2="0.384362 -0.550542 -0.577661 -0.464195" />
-		<frame time="0.6" length="0.555608" position="0.0296072 -0.317916 0.323077" rotation="-36.0695" rotation0="9.7756" rotation1="-36.4123" rotation2="0.383944 -0.550764 -0.577372 -0.464637" />
-		<frame time="0.633333" length="0.555608" position="0.0273061 -0.32458 0.323075" rotation="-34.0862" rotation0="11.3153" rotation1="-37.6963" rotation2="0.383466 -0.551034 -0.577022 -0.465146" />
-		<frame time="0.666667" length="0.555608" position="0.0261918 -0.333174 0.322254" rotation="-32.824" rotation0="12.6365" rotation1="-39.2436" rotation2="0.382955 -0.5513 -0.576715 -0.465632" />
-		<frame time="0.7" length="0.555608" position="0.0260511 -0.341682 0.320627" rotation="-31.8706" rotation0="13.4386" rotation1="-40.3914" rotation2="0.382407 -0.551597 -0.576379 -0.466148" />
-		<frame time="0.733333" length="0.555608" position="0.0264869 -0.351371 0.318234" rotation="-31.776" rotation0="16.7249" rotation1="-49.3243" rotation2="0.381813 -0.551912 -0.576052 -0.466666" />
-		<frame time="0.766667" length="0.555608" position="0.0283798 -0.359174 0.315236" rotation="-31.1451" rotation0="17.4012" rotation1="-49.7651" rotation2="0.38119 -0.552256 -0.575692 -0.467211" />
-		<frame time="0.8" length="0.555608" position="0.0317886 -0.364561 0.311839" rotation="-29.6912" rotation0="16.6419" rotation1="-44.546" rotation2="0.380526 -0.552654 -0.575269 -0.467802" />
-		<frame time="0.833333" length="0.555608" position="0.0359547 -0.368286 0.308396" rotation="-30.4729" rotation0="18.6876" rotation1="-48.7153" rotation2="0.379931 -0.553001 -0.574826 -0.468421" />
-		<frame time="0.866667" length="0.555608" position="0.0406495 -0.366138 0.30485" rotation="-31.3506" rotation0="18.2901" rotation1="-48.7203" rotation2="0.379296 -0.553382 -0.574424 -0.468978" />
-		<frame time="0.9" length="0.555608" position="0.044755 -0.360117 0.301353" rotation="-32.5436" rotation0="17.1774" rotation1="-47.3582" rotation2="0.378711 -0.55372 -0.574058 -0.469499" />
-		<frame time="0.933333" length="0.555608" position="0.0483547 -0.352838 0.297908" rotation="-33.1262" rotation0="14.8912" rotation1="-43.567" rotation2="0.378133 -0.554056 -0.573704 -0.47" />
-		<frame time="0.966667" length="0.555608" position="0.0505647 -0.343421 0.294843" rotation="-35.1415" rotation0="15.4184" rotation1="-45.242" rotation2="0.377616 -0.554348 -0.573398 -0.470445" />
-		<frame time="1" length="0.555608" position="0.051494 -0.33256 0.292023" rotation="-37.1153" rotation0="15.9331" rotation1="-46.4812" rotation2="0.377265 -0.554443 -0.573339 -0.470687" />
+		<frame time="0" position="0.0927414 -0.598657 0.525605" rotation="-37.0831" rotation0="15.7248" rotation1="-46.4739" rotation2="0.377232 -0.554494 -0.57327 -0.470737" />
+		<frame time="0.0333333" position="0.0929281 -0.586977 0.525993" rotation="-38.0662" rotation0="16.6317" rotation1="-48.4034" rotation2="0.37805 -0.55406 -0.573794 -0.469954" />
+		<frame time="0.0666667" position="0.0922517 -0.572271 0.526029" rotation="-38.8769" rotation0="16.0741" rotation1="-47.5892" rotation2="0.379019 -0.553473 -0.574491 -0.469011" />
+		<frame time="0.1" position="0.091343 -0.562028 0.525839" rotation="-39.64" rotation0="15.7736" rotation1="-47.1522" rotation2="0.379867 -0.553102 -0.574924 -0.468232" />
+		<frame time="0.133333" position="0.089561 -0.559003 0.525638" rotation="-39.8246" rotation0="15.6835" rotation1="-46.5385" rotation2="0.38086 -0.552552 -0.57557 -0.46728" />
+		<frame time="0.166667" position="0.0894296 -0.560127 0.525131" rotation="-39.7445" rotation0="15.4017" rotation1="-45.9409" rotation2="0.381859 -0.551958 -0.576258 -0.466318" />
+		<frame time="0.2" position="0.0875067 -0.56957 0.525304" rotation="-39.7056" rotation0="15.0026" rotation1="-44.931" rotation2="0.382768 -0.551441 -0.57685 -0.465451" />
+		<frame time="0.233333" position="0.0851398 -0.584732 0.526205" rotation="-40.0088" rotation0="14.7128" rotation1="-44.2189" rotation2="0.383642 -0.550909 -0.577465 -0.464599" />
+		<frame time="0.266667" position="0.0831051 -0.603968 0.527851" rotation="-40.8751" rotation0="14.589" rotation1="-44.6775" rotation2="0.384352 -0.550499 -0.577934 -0.463914" />
+		<frame time="0.3" position="0.0815613 -0.62634 0.530749" rotation="-41.77" rotation0="13.9555" rotation1="-44.4288" rotation2="0.384754 -0.550358 -0.578111 -0.463528" />
+		<frame time="0.333333" position="0.0791245 -0.651745 0.535411" rotation="-41.8325" rotation0="11.6187" rotation1="-40.5144" rotation2="0.385157 -0.550144 -0.578349 -0.463151" />
+		<frame time="0.366667" position="0.0770597 -0.658467 0.541246" rotation="-43.0733" rotation0="10.3713" rotation1="-39.7942" rotation2="0.385327 -0.550053 -0.57844 -0.463003" />
+		<frame time="0.4" position="0.075299 -0.654903 0.547911" rotation="-42.6261" rotation0="9.8009" rotation1="-38.9456" rotation2="0.385352 -0.550069 -0.578399 -0.463015" />
+		<frame time="0.433333" position="0.0728575 -0.641463 0.5552" rotation="-42.4742" rotation0="8.33478" rotation1="-36.9629" rotation2="0.385361 -0.55004 -0.578389 -0.463053" />
+		<frame time="0.466667" position="0.0704089 -0.621245 0.562424" rotation="-42.7268" rotation0="9.78009" rotation1="-39.8663" rotation2="0.385254 -0.550073 -0.578315 -0.463196" />
+		<frame time="0.5" position="0.067592 -0.600167 0.569207" rotation="-40.9435" rotation0="6.06599" rotation1="-32.4296" rotation2="0.385033 -0.550159 -0.578204 -0.463417" />
+		<frame time="0.533333" position="0.0638284 -0.581091 0.575052" rotation="-40.1597" rotation0="6.73987" rotation1="-33.357" rotation2="0.384666 -0.550316 -0.57804 -0.463738" />
+		<frame time="0.566667" position="0.0588124 -0.570189 0.579293" rotation="-38.5238" rotation0="8.45683" rotation1="-35.6484" rotation2="0.384362 -0.550542 -0.577661 -0.464195" />
+		<frame time="0.6" position="0.0532879 -0.572194 0.581484" rotation="-36.0695" rotation0="9.7756" rotation1="-36.4123" rotation2="0.383944 -0.550764 -0.577372 -0.464637" />
+		<frame time="0.633333" position="0.0491463 -0.584189 0.58148" rotation="-34.0862" rotation0="11.3153" rotation1="-37.6963" rotation2="0.383466 -0.551034 -0.577022 -0.465146" />
+		<frame time="0.666667" position="0.0471408 -0.599656 0.580003" rotation="-32.824" rotation0="12.6365" rotation1="-39.2436" rotation2="0.382955 -0.5513 -0.576715 -0.465632" />
+		<frame time="0.7" position="0.0468876 -0.61497 0.577075" rotation="-31.8706" rotation0="13.4386" rotation1="-40.3914" rotation2="0.382407 -0.551597 -0.576379 -0.466148" />
+		<frame time="0.733333" position="0.0476719 -0.632409 0.572766" rotation="-31.776" rotation0="16.7249" rotation1="-49.3243" rotation2="0.381813 -0.551912 -0.576052 -0.466666" />
+		<frame time="0.766667" position="0.0510787 -0.646451 0.567371" rotation="-31.1451" rotation0="17.4012" rotation1="-49.7651" rotation2="0.38119 -0.552256 -0.575692 -0.467211" />
+		<frame time="0.8" position="0.0572142 -0.656147 0.561257" rotation="-29.6912" rotation0="16.6419" rotation1="-44.546" rotation2="0.380526 -0.552654 -0.575269 -0.467802" />
+		<frame time="0.833333" position="0.0647123 -0.662853 0.55506" rotation="-30.4729" rotation0="18.6876" rotation1="-48.7153" rotation2="0.379931 -0.553001 -0.574826 -0.468421" />
+		<frame time="0.866667" position="0.0731622 -0.658987 0.548678" rotation="-31.3506" rotation0="18.2901" rotation1="-48.7203" rotation2="0.379296 -0.553382 -0.574424 -0.468978" />
+		<frame time="0.9" position="0.0805514 -0.648149 0.542384" rotation="-32.5436" rotation0="17.1774" rotation1="-47.3582" rotation2="0.378711 -0.55372 -0.574058 -0.469499" />
+		<frame time="0.933333" position="0.0870303 -0.635048 0.536184" rotation="-33.1262" rotation0="14.8912" rotation1="-43.567" rotation2="0.378133 -0.554056 -0.573704 -0.47" />
+		<frame time="0.966667" position="0.0910078 -0.618099 0.530667" rotation="-35.1415" rotation0="15.4184" rotation1="-45.242" rotation2="0.377616 -0.554348 -0.573398 -0.470445" />
+		<frame time="1" position="0.0926805 -0.598551 0.525591" rotation="-37.1153" rotation0="15.9331" rotation1="-46.4812" rotation2="0.377265 -0.554443 -0.573339 -0.470687" />
 	</limb>
 </animation>

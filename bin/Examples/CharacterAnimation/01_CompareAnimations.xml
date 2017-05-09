@@ -1251,6 +1251,7 @@
 			<attribute name="Variables" />
 			<component type="CharacterRootEffector" id="92">
 				<attribute name="Segment" value="Root" />
+				<attribute name="Is Animated" value="true" />
 			</component>
 		</node>
 		<node id="720">
@@ -1263,6 +1264,7 @@
 			<attribute name="Variables" />
 			<component type="CharacterChainEffector" id="89">
 				<attribute name="Segment" value="Spine" />
+				<attribute name="Is Animated" value="true" />
 			</component>
 		</node>
 		<node id="721">
@@ -1275,6 +1277,7 @@
 			<attribute name="Variables" />
 			<component type="CharacterLimbEffector" id="90">
 				<attribute name="Segment" value="LeftFoot" />
+				<attribute name="Is Animated" value="true" />
 				<attribute name="Animate Position" value="1" />
 				<attribute name="Animate Rotation" value="1" />
 			</component>
@@ -1289,6 +1292,7 @@
 			<attribute name="Variables" />
 			<component type="CharacterLimbEffector" id="91">
 				<attribute name="Segment" value="RightFoot" />
+				<attribute name="Is Animated" value="true" />
 				<attribute name="Animate Position" value="1" />
 				<attribute name="Animate Rotation" value="1" />
 			</component>
@@ -1303,6 +1307,7 @@
 			<attribute name="Variables" />
 			<component type="CharacterLimbEffector" id="93">
 				<attribute name="Segment" value="LeftHand" />
+				<attribute name="Is Animated" value="true" />
 				<attribute name="Animate Position" value="1" />
 				<attribute name="Animate Rotation" value="1" />
 			</component>
@@ -1317,6 +1322,7 @@
 			<attribute name="Variables" />
 			<component type="CharacterLimbEffector" id="94">
 				<attribute name="Segment" value="RightHand" />
+				<attribute name="Is Animated" value="true" />
 				<attribute name="Animate Position" value="1" />
 				<attribute name="Animate Rotation" value="1" />
 			</component>
