@@ -86,8 +86,10 @@ struct CharacterRootSegmentData : public CharacterSegmentDataT<CharacterSkeleton
     Quaternion rotation_;
 
 public:
+    /// Prepare storage.
+    void Prepare(const CharacterSkeletonSegment& segment);
     /// Reset state.
-    void Reset(const CharacterSkeletonSegment& segment);
+    void Reset();
     /// Blend state with another.
     void Blend(const CharacterRootSegmentData& other, float weight);
     /// Import state from nodes.
@@ -109,8 +111,10 @@ struct CharacterChainSegmentData : public CharacterSegmentDataT<CharacterSkeleto
     PODVector<Quaternion> rotations_;
 
 public:
+    /// Prepare storage.
+    void Prepare(const CharacterSkeletonSegment& segment);
     /// Reset state.
-    void Reset(const CharacterSkeletonSegment& segment);
+    void Reset();
     /// Blend state with another.
     void Blend(const CharacterChainSegmentData& other, float weight);
     /// Import state from nodes.
@@ -129,7 +133,7 @@ struct CharacterLimbSegmentData : public CharacterSegmentDataT<CharacterSkeleton
     /// Target position.
     Vector3 position_;
     /// Limb rotation.
-    float rotation_;
+    float rotation_ = 0.0f;
     /// First segment rotation.
     float rotationA_ = 0.0f;
     /// Second segment rotation.
@@ -138,8 +142,10 @@ struct CharacterLimbSegmentData : public CharacterSegmentDataT<CharacterSkeleton
     Quaternion rotationC_;
 
 public:
+    /// Prepare storage.
+    void Prepare(const CharacterSkeletonSegment& segment);
     /// Reset state.
-    void Reset(const CharacterSkeletonSegment& segment);
+    void Reset();
     /// Blend state with another.
     void Blend(const CharacterLimbSegmentData& other, float weight);
     /// Import state from nodes.
@@ -466,15 +472,16 @@ public:
     /// Register object factory.
     static void RegisterObject(Context* context);
 
-    /// Reset transforms.
-    void ResetTransforms(CharacterSkeletonSegment& segment);
+    /// Initialize effector parameters.
+    virtual void InitializeEffector(const CharacterSkeletonSegment& segment) = 0;
+    /// Prepare effector for animation.
+    virtual void PrepareEffector(CharacterSkeletonSegment& segment);
     /// Reset effector state to zero.
-    // #TODO Don't pass segment here
-    virtual void ResetEffector(const CharacterSkeletonSegment& segment) = 0;
+    virtual void ResetEffector() = 0;
     /// Apply animation track.
     virtual void ApplyAnimation(float weight, float time, CharacterAnimationTrack& animationTrack) = 0;
     /// Resolve effector.
-    virtual void ResolveEffector(CharacterAnimationController& controller, CharacterSkeletonSegment& dest) = 0;
+    virtual void ResolveEffector(CharacterAnimationController& controller, CharacterSkeletonSegment& segment) = 0;
 
     /// Get segment name.
     const String& GetSegmentName() const { return segmentName_; }
@@ -529,6 +536,8 @@ public:
     /// Apply animations.
     void ApplyAnimation();
 
+    /// Mark dirty.
+    void MarkDirty() { dirty_ = true; }
     /// Set skeleton.
     void SetSkeleton(CharacterSkeleton* skeleton);
     /// Set skeleton attribute.
@@ -537,6 +546,10 @@ public:
     ResourceRef GetSkeletonAttr() const;
 
 private:
+    /// Create effector component.
+    static CharacterEffector* CreateEffector(Node& node, CharacterSkeletonSegmentType type);
+    /// Check integrity of segment nodes.
+    void CheckIntegrity();
     /// Lazy initialize model and hierarchy if needed.
     void UpdateHierarchy();
     /// Get character animation.
@@ -576,6 +589,11 @@ private:
     WeakPtr<AnimatedModel> animatedModel_;
     /// Animated model skeleton.
     Skeleton* animatedModelSkeleton_ = nullptr;
+
+    /// Dirty flag.
+    bool dirty_ = false;
+    /// Skeleton segments.
+    Vector<Pair<CharacterSkeletonSegment, WeakPtr<CharacterEffector>>> segments_;
     /// Segment data.
     Vector<CharacterSkeletonSegment> segmentData_;
 
@@ -598,11 +616,22 @@ template <class TAnimationTrack, class TAnimationFrame>
 class CharacterEffectorT : public CharacterEffector
 {
 public:
+    /// @see CharacterEffector::InitializeEffector
+    virtual void InitializeEffector(const CharacterSkeletonSegment& segment) override final
+    {
+        effectorState_.Import(segment);
+    }
+    /// @see CharacterEffector::PrepareEffector
+    virtual void PrepareEffector(CharacterSkeletonSegment& segment) override final
+    {
+        CharacterEffector::PrepareEffector(segment);
+        effectorState_.Prepare(segment);
+    }
     /// @see CharacterEffector::ResetEffector
-    virtual void ResetEffector(const CharacterSkeletonSegment& segment) override final
+    virtual void ResetEffector() override final
     {
         accumulatedWeight_ = 0.0f;
-        effectorState_.Reset(segment);
+        effectorState_.Reset();
     }
     /// @see CharacterEffector::ApplyAnimation
     virtual void ApplyAnimation(float weight, float time, CharacterAnimationTrack& animationTrack) override final
@@ -630,23 +659,19 @@ public:
         }
     }
     /// @see CharacterEffector::ResolveEffector
-    virtual void ResolveEffector(CharacterAnimationController& controller, CharacterSkeletonSegment& dest) override
+    virtual void ResolveEffector(CharacterAnimationController& controller, CharacterSkeletonSegment& segment) override
     {
         if (IsAnimated())
             ExportEffectorState();
         else
             ImportNodeTransform();
 
-        ResolveAnimationState(effectorState_, controller, dest);
-        effectorState_.Export(controller.GetNode()->GetWorldTransform(), controller.GetAnimationTransform(), dest);
+        effectorState_.Export(controller.GetNode()->GetWorldTransform(), controller.GetAnimationTransform(), segment);
     }
 
 protected:
     /// Construct.
     CharacterEffectorT(Context* context) : CharacterEffector(context) {}
-    /// Resolve animation state.
-    virtual void ResolveAnimationState(TAnimationFrame& effectorState,
-        CharacterAnimationController& controller, const CharacterSkeletonSegment& segment) = 0;
 
     // #TODO Use node transform for animation
     /// Import node transform to effector state.
@@ -675,17 +700,6 @@ public:
     virtual ~CharacterRootEffector() {}
     /// Register object factory.
     static void RegisterObject(Context* context);
-
-private:
-    /// @see CharacterEffectorT::ResolveAnimationState
-    virtual void ResolveAnimationState(CharacterRootSegmentData& effectorState,
-        CharacterAnimationController& controller, const CharacterSkeletonSegment& segment) override;
-
-private:
-    /// Multiplier of root offset during animation.
-    float offsetFactor_ = 1.0f;
-    /// Multiplier of root rotation during animation.
-    float rotationFactor_ = 1.0f;
 };
 
 /// Character Limb Effector.
@@ -700,11 +714,6 @@ public:
     virtual ~CharacterLimbEffector() {}
     /// Register object factory.
     static void RegisterObject(Context* context);
-
-private:
-    /// @see CharacterEffectorT::ResolveAnimationState
-    virtual void ResolveAnimationState(CharacterLimbSegmentData& effectorState,
-        CharacterAnimationController& controller, const CharacterSkeletonSegment& segment) override;
 };
 
 /// Character Chain Effector.
@@ -719,13 +728,6 @@ public:
     virtual ~CharacterChainEffector() {}
     /// Register object factory.
     static void RegisterObject(Context* context);
-
-private:
-    /// @see CharacterEffectorT::ResolveAnimationState
-    virtual void ResolveAnimationState(CharacterChainSegmentData& effectorState,
-        CharacterAnimationController& controller, const CharacterSkeletonSegment& segment)
-    {
-    }
 };
 
 /// Register classes.

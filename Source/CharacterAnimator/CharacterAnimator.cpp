@@ -600,8 +600,13 @@ CharacterSkeletonSegmentType GetCharacterSkeletonSegmentType(const String& name)
     return CharacterSkeletonSegmentType::Root;
 }
 
+void CharacterRootSegmentData::Prepare(const CharacterSkeletonSegment& /*segment*/)
+{
+
+}
+
 //////////////////////////////////////////////////////////////////////////
-void CharacterRootSegmentData::Reset(const CharacterSkeletonSegment& /*segment*/)
+void CharacterRootSegmentData::Reset()
 {
     position_ = Vector3::ZERO;
     rotation_ = Quaternion::IDENTITY;
@@ -647,10 +652,14 @@ bool CharacterRootSegmentData::Load(const XMLElement& src)
 }
 
 //////////////////////////////////////////////////////////////////////////
-void CharacterChainSegmentData::Reset(const CharacterSkeletonSegment& segment)
+void CharacterChainSegmentData::Prepare(const CharacterSkeletonSegment& segment)
+{
+    rotations_.Resize(segment.bones_.Size());
+}
+
+void CharacterChainSegmentData::Reset()
 {
     position_ = Vector3::ZERO;
-    rotations_.Resize(segment.bones_.Size());
     for (Quaternion& rotation : rotations_)
         rotation = Quaternion::IDENTITY;
 }
@@ -699,7 +708,12 @@ bool CharacterChainSegmentData::Load(const XMLElement& src)
 }
 
 //////////////////////////////////////////////////////////////////////////
-void CharacterLimbSegmentData::Reset(const CharacterSkeletonSegment& segment)
+void CharacterLimbSegmentData::Prepare(const CharacterSkeletonSegment& /*segment*/)
+{
+
+}
+
+void CharacterLimbSegmentData::Reset()
 {
     position_ = Vector3::ZERO;
     rotation_ = 0.0f;
@@ -1282,7 +1296,7 @@ void CharacterEffector::RegisterObject(Context* context)
     URHO3D_ATTRIBUTE("Is Animated", bool, animated_, false, AM_DEFAULT);
 }
 
-void CharacterEffector::ResetTransforms(CharacterSkeletonSegment& segment)
+void CharacterEffector::PrepareEffector(CharacterSkeletonSegment& segment)
 {
     for (Bone* bone : segment.bones_)
         bone->node_->SetTransform(bone->initialPosition_, bone->initialRotation_, bone->initialScale_);
@@ -1323,9 +1337,7 @@ void CharacterAnimationController::AddEffector(CharacterEffector* effector)
 void CharacterAnimationController::SetAnimationTransform(const Matrix3x4& transform)
 {
     animationTransform_ = transform;
-
-    // #TODO Add dirty flag
-    animatedModelSkeleton_ = nullptr;
+    MarkDirty();
 }
 
 void CharacterAnimationController::SetTargetTransform(StringHash segment, const Matrix3x4& transform)
@@ -1353,6 +1365,7 @@ void CharacterAnimationController::CleanSegment2(StringHash segment)
 
 void CharacterAnimationController::Update(float timeStep)
 {
+    CheckIntegrity();
     UpdateHierarchy();
     AnimationController::Update(timeStep);
     if (animatedModel_)
@@ -1377,35 +1390,22 @@ void CharacterAnimationController::ApplyAnimation()
                 currentAnimationData_.Push(data);
             }
 
-    // Remove expired effectors
-    for (unsigned i = 0; i < effectors_.Size(); /*++i*/)
-    {
-        if (!effectors_[i])
-            effectors_.EraseSwap(i);
-        else
-            ++i;
-    }
-
-    // Gather segments data
-    currentSegmentsData_.Clear();
-    for (CharacterSkeletonSegment& segment : segmentData_)
-        if (CharacterEffector* effector = GetEffector(segment.name_))
-            if (effector->IsEnabledEffective())
-                currentSegmentsData_.Push(MakePair(effector, &segment));
-
     // Animate segments
-    for (auto& segmentData : currentSegmentsData_)
+    for (auto& segmentData : segments_)
     {
-        CharacterEffector& effector = *segmentData.first_;
-        CharacterSkeletonSegment& segment = *segmentData.second_;
+        CharacterSkeletonSegment& segment = segmentData.first_;
+        CharacterEffector& effector = *segmentData.second_;
+        if (!effector.IsEnabledEffective())
+            continue;
+
+        effector.PrepareEffector(segment);
         if (effector.IsAnimated())
         {
-            effector.ResetEffector(segment);
+            effector.ResetEffector();
             for (auto& animationData : currentAnimationData_)
                 if (CharacterAnimationTrack* track = animationData.characterAnimation_->FindTrack(segment.name_))
                     effector.ApplyAnimation(animationData.weight_, animationData.time_, *track);
         }
-        effector.ResetTransforms(segment);
         effector.ResolveEffector(*this, segment);
     }
 }
@@ -1427,19 +1427,101 @@ Urho3D::ResourceRef CharacterAnimationController::GetSkeletonAttr() const
     return ResourceRef(XMLFile::GetTypeStatic(), GetResourceName(skeleton_));
 }
 
+CharacterEffector* CharacterAnimationController::CreateEffector(Node& node, CharacterSkeletonSegmentType type)
+{
+    switch (type)
+    {
+    case CharacterSkeletonSegmentType::Root:
+        return node.CreateComponent<CharacterRootEffector>(LOCAL);
+    case CharacterSkeletonSegmentType::Limb:
+        return node.CreateComponent<CharacterLimbEffector>(LOCAL);
+    case CharacterSkeletonSegmentType::Chain:
+        return node.CreateComponent<CharacterChainEffector>(LOCAL);
+    default:
+        return nullptr;
+    }
+}
+
+void CharacterAnimationController::CheckIntegrity()
+{
+    static const char* containerName = "[segments]";
+
+    // Skip check if attributes are not initialized
+    if (!node_ || !skeleton_)
+        return;
+
+    // If model is expired, mark dirty
+    if (!animatedModel_ || animatedModelSkeleton_ != &animatedModel_->GetSkeleton())
+        MarkDirty();
+
+    // Try get model
+    if (!animatedModel_)
+    {
+        animatedModel_ = node_->GetComponent<AnimatedModel>();
+        if (!animatedModel_)
+            return;
+    }
+
+    // If segments are not initialized, mark dirty
+    const unsigned numSegments = skeleton_->GetSegments().Size();
+    if (segments_.Size() != numSegments)
+        MarkDirty();
+
+    // If any segment is expired, mark dirty
+    if (!dirty_)
+    {
+        for (const auto& segment : segments_)
+            if (!segment.second_)
+            {
+                MarkDirty();
+                break;
+            }
+    }
+
+    if (dirty_)
+    {
+        animatedModelSkeleton_ = &animatedModel_->GetSkeleton();
+
+        // Remove old nodes
+        if (Node* container = node_->GetChild(containerName))
+            node_->RemoveChild(container);
+
+        // Initialize segments
+        // #TODO Rename segmentData_
+        skeleton_->AllocateSegmentData(segmentData_, *animatedModelSkeleton_, Matrix3x4::IDENTITY);
+
+        // Create nodes
+        Node* container = node_->CreateChild(containerName, LOCAL);
+        segments_.Resize(numSegments);
+        for (unsigned i = 0; i < numSegments; ++i)
+        {
+            const CharacterSkeletonSegment& segment = segmentData_[i];
+            Node* child = container->CreateChild(segment.name_, LOCAL);
+            CharacterEffector* effector = CreateEffector(*child, segment.type_);
+            effector->InitializeEffector(segment);
+
+            segments_[i].first_ = segment;
+            segments_[i].second_ = effector;
+        }
+
+        // Reset dirty
+        dirty_ = false;
+    }
+}
+
 void CharacterAnimationController::UpdateHierarchy()
 {
     // Get component
-    if (!node_ || !skeleton_)
-        return;
-    if (animatedModel_ && &animatedModel_->GetSkeleton() == animatedModelSkeleton_)
-        return;
-    animatedModel_ = node_->GetComponent<AnimatedModel>();
-    animatedModelSkeleton_ = &animatedModel_->GetSkeleton();
-    if (!animatedModel_)
-        return;
-
-    skeleton_->AllocateSegmentData(segmentData_, *animatedModelSkeleton_, Matrix3x4::IDENTITY);
+//     if (!node_ || !skeleton_)
+//         return;
+//     if (animatedModel_ && &animatedModel_->GetSkeleton() == animatedModelSkeleton_)
+//         return;
+//     animatedModel_ = node_->GetComponent<AnimatedModel>();
+//     animatedModelSkeleton_ = &animatedModel_->GetSkeleton();
+//     if (!animatedModel_)
+//         return;
+//
+//     skeleton_->AllocateSegmentData(segmentData_, *animatedModelSkeleton_, Matrix3x4::IDENTITY);
 }
 
 CharacterAnimation* CharacterAnimationController::GetCharacterAnimation(const String& animationName)
@@ -1565,22 +1647,8 @@ void CharacterRootEffector::RegisterObject(Context* context)
 {
     context->RegisterFactory<CharacterRootEffector>(characterAnimatorCategory);
     URHO3D_COPY_BASE_ATTRIBUTES(CharacterEffector);
-    URHO3D_ATTRIBUTE("Offset Factor", float, offsetFactor_, 1.0f, AM_DEFAULT);
-    URHO3D_ATTRIBUTE("Rotation Factor", float, rotationFactor_, 1.0f, AM_DEFAULT);
-}
-
-void CharacterRootEffector::ResolveAnimationState(CharacterRootSegmentData& effectorState,
-    CharacterAnimationController& controller, const CharacterSkeletonSegment& segment)
-{
-//     const Matrix3x4 baseTransform = rootNode.GetWorldTransform().Inverse() * GetNode()->GetWorldTransform();
-//     const Vector3 basePosition = baseTransform.Translation();
-//     const Quaternion baseRotation = baseTransform.Rotation() * segment.initialPose_[0].Rotation();
-//
-//     animationState.position_ *= offsetFactor_;
-//     animationState.rotation_ = Quaternion().Slerp(animationState.rotation_, rotationFactor_);
-//     animationState.Render(rootNode.GetWorldTransform(), animTransform, basePosition, baseRotation);
-//
-//     effectorState = animationState;
+    URHO3D_ATTRIBUTE("Position", Vector3, effectorState_.position_, Vector3::ZERO, AM_DEFAULT);
+    URHO3D_ATTRIBUTE("Rotation", Quaternion, effectorState_.rotation_, Quaternion::IDENTITY, AM_DEFAULT);
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -1592,19 +1660,6 @@ void CharacterLimbEffector::RegisterObject(Context* context)
     URHO3D_ATTRIBUTE("Base Rotation", float, effectorState_.rotation_, 0.0f, AM_DEFAULT);
     URHO3D_ATTRIBUTE("Twirl 1", float, effectorState_.rotationA_, 0.0f, AM_DEFAULT);
     URHO3D_ATTRIBUTE("Twirl 2", float, effectorState_.rotationB_, 0.0f, AM_DEFAULT);
-}
-
-void CharacterLimbEffector::ResolveAnimationState(CharacterLimbSegmentData& effectorState,
-    CharacterAnimationController& controller, const CharacterSkeletonSegment& segment)
-{
-//     animationState.Render(rootNode.GetWorldTransform(), animTransform, segment);
-//
-//     effectorState.position_ = Lerp(GetNode()->GetWorldPosition(), animationState.position_, animateTargetPosition_);
-//     effectorState.rotationC_ = Quaternion().Slerp(animationState.rotationC_, animateTargetRotation_);
-//
-//     effectorState.rotation_ = animationState.rotation_;
-//     effectorState.rotationA_ = animationState.rotationA_;
-//     effectorState.rotationB_ = animationState.rotationB_;
 }
 
 //////////////////////////////////////////////////////////////////////////
