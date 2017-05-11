@@ -487,10 +487,8 @@ public:
     const String& GetSegmentName() const { return segmentName_; }
     /// Is this segment animated?
     bool IsAnimated() const { return animated_; }
-
-private:
-    /// @see Component::OnNodeSet
-    virtual void OnNodeSet(Node* node) override;
+    /// Set segment animated.
+    void SetAnimated(bool animated) { animated_ = animated; }
 
 protected:
     /// Controller.
@@ -516,8 +514,6 @@ public:
     /// Register object factory.
     static void RegisterObject(Context* context);
 
-    /// Add segment effector.
-    void AddEffector(CharacterEffector* effector);
     /// Set animation transform.
     void SetAnimationTransform(const Matrix3x4& transform);
     /// Get animation transform.
@@ -556,8 +552,6 @@ private:
     CharacterAnimation* GetCharacterAnimation(const String& animationName);
     /// Get segment by name.
     CharacterSkeletonSegment* GetSegment(const String& segmentName);
-    /// Get effector by name.
-    CharacterEffector* GetEffector(const String& segmentName);
 
     /// Update 2-segment.
     void UpdateSegment2(const CharacterSkeletonSegment2& segment);
@@ -607,8 +601,6 @@ private:
     HashMap<StringHash, Segment2State> segment2states_;
     /// Animation transform.
     Matrix3x4 animationTransform_;
-    /// Segment controllers.
-    Vector<WeakPtr<CharacterEffector>> effectors_;
 };
 
 /// Character Effector template.

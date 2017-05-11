@@ -1302,16 +1302,6 @@ void CharacterEffector::PrepareEffector(CharacterSkeletonSegment& segment)
         bone->node_->SetTransform(bone->initialPosition_, bone->initialRotation_, bone->initialScale_);
 }
 
-void CharacterEffector::OnNodeSet(Node* node)
-{
-    if (node)
-    {
-        controller_ = node->GetParentComponent<CharacterAnimationController>(true);
-        if (controller_)
-            controller_->AddEffector(this);
-    }
-}
-
 //////////////////////////////////////////////////////////////////////////
 CharacterAnimationController::CharacterAnimationController(Context* context)
     : AnimationController(context)
@@ -1329,15 +1319,13 @@ void CharacterAnimationController::RegisterObject(Context* context)
     URHO3D_MIXED_ACCESSOR_ATTRIBUTE("Skeleton", GetSkeletonAttr, SetSkeletonAttr, ResourceRef, ResourceRef(XMLFile::GetTypeStatic()), AM_DEFAULT);
 }
 
-void CharacterAnimationController::AddEffector(CharacterEffector* effector)
-{
-    effectors_.Push(WeakPtr<CharacterEffector>(effector));
-}
-
 void CharacterAnimationController::SetAnimationTransform(const Matrix3x4& transform)
 {
-    animationTransform_ = transform;
-    MarkDirty();
+    if (animationTransform_ != transform)
+    {
+        animationTransform_ = transform;
+        MarkDirty();
+    }
 }
 
 void CharacterAnimationController::SetTargetTransform(StringHash segment, const Matrix3x4& transform)
@@ -1399,7 +1387,7 @@ void CharacterAnimationController::ApplyAnimation()
             continue;
 
         effector.PrepareEffector(segment);
-        if (effector.IsAnimated())
+        if (effector.IsAnimated() && !currentAnimationData_.Empty())
         {
             effector.ResetEffector();
             for (auto& animationData : currentAnimationData_)
@@ -1498,6 +1486,7 @@ void CharacterAnimationController::CheckIntegrity()
             const CharacterSkeletonSegment& segment = segmentData_[i];
             Node* child = container->CreateChild(segment.name_, LOCAL);
             CharacterEffector* effector = CreateEffector(*child, segment.type_);
+            effector->SetAnimated(true);
             effector->InitializeEffector(segment);
 
             segments_[i].first_ = segment;
@@ -1540,14 +1529,6 @@ CharacterSkeletonSegment* CharacterAnimationController::GetSegment(const String&
     for (CharacterSkeletonSegment& segment : segmentData_)
         if (segment.name_ == segmentName)
             return &segment;
-    return nullptr;
-}
-
-CharacterEffector* CharacterAnimationController::GetEffector(const String& segmentName)
-{
-    for (CharacterEffector* effector : effectors_)
-        if (effector && effector->GetSegmentName() == segmentName)
-            return effector;
     return nullptr;
 }
 
