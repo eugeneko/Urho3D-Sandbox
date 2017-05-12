@@ -95,7 +95,7 @@ public:
     /// Import state from nodes.
     void Import(const CharacterSkeletonSegment& src);
     /// Export state to nodes.
-    void Export(const Matrix3x4& rootTransform, const Matrix3x4& animTransform, CharacterSkeletonSegment& dest) const;
+    void Export(const Matrix3x4& rootTransform, const Quaternion& animRotation, CharacterSkeletonSegment& dest) const;
     /// Save to XML.
     bool Save(XMLElement& dest) const;
     /// Load from XML.
@@ -120,7 +120,7 @@ public:
     /// Import state from nodes.
     void Import(const CharacterSkeletonSegment& src);
     /// Export state to nodes.
-    void Export(const Matrix3x4& rootTransform, const Matrix3x4& animTransform, CharacterSkeletonSegment& dest) const;
+    void Export(const Matrix3x4& rootTransform, const Quaternion& animRotation, CharacterSkeletonSegment& dest) const;
     /// Save to XML.
     bool Save(XMLElement& dest) const;
     /// Load from XML.
@@ -151,7 +151,7 @@ public:
     /// Import state from nodes.
     void Import(const CharacterSkeletonSegment& src);
     /// Export state to nodes.
-    void Export(const Matrix3x4& rootTransform, const Matrix3x4& animTransform, CharacterSkeletonSegment& dest) const;
+    void Export(const Matrix3x4& rootTransform, const Quaternion& animRotation, CharacterSkeletonSegment& dest) const;
     /// Save to XML.
     bool Save(XMLElement& dest) const;
     /// Load from XML.
@@ -514,10 +514,10 @@ public:
     /// Register object factory.
     static void RegisterObject(Context* context);
 
-    /// Set animation transform.
-    void SetAnimationTransform(const Matrix3x4& transform);
-    /// Get animation transform.
-    const Matrix3x4& GetAnimationTransform() const { return animationTransform_; }
+    /// Set animation rotation.
+    void SetAnimationRotation(const Quaternion& rotation);
+    /// Get animation rotation.
+    const Quaternion& GetAnimationRotation() const { return animationRotation_; }
     /// Set target transform of segment.
     void SetTargetTransform(StringHash segment, const Matrix3x4& transform);
     /// Set amount of transformation applied to rotation of target bone.
@@ -599,8 +599,11 @@ private:
     Vector<Pair<CharacterEffector*, CharacterSkeletonSegment*>> currentSegmentsData_;
     /// States.
     HashMap<StringHash, Segment2State> segment2states_;
-    /// Animation transform.
-    Matrix3x4 animationTransform_;
+
+    /// Animation rotation.
+    Quaternion animationRotation_;
+    /// Whether to revert animation transform.
+    bool revertAnimationTransform_ = true;
 };
 
 /// Character Effector template.
@@ -658,7 +661,7 @@ public:
         else
             ImportNodeTransform();
 
-        effectorState_.Export(controller.GetNode()->GetWorldTransform(), controller.GetAnimationTransform(), segment);
+        effectorState_.Export(controller.GetNode()->GetWorldTransform(), Quaternion::IDENTITY, segment);
     }
 
 protected:

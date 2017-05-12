@@ -625,15 +625,14 @@ void CharacterRootSegmentData::Import(const CharacterSkeletonSegment& src)
 }
 
 void CharacterRootSegmentData::Export(
-    const Matrix3x4& rootTransform, const Matrix3x4& animTransform, CharacterSkeletonSegment& dest) const
+    const Matrix3x4& rootTransform, const Quaternion& animRotation, CharacterSkeletonSegment& dest) const
 {
-    const Quaternion animRotation = animTransform.Rotation();
     const Quaternion transformedRotation = animRotation.Inverse() * rotation_ * animRotation;
     const Vector3 initialPosition = dest.initialPose_[0].Translation();
     const Quaternion initialRotation = dest.initialPose_[0].Rotation();
 
     Node& node = *dest.nodes_[0];
-    node.SetWorldPosition(rootTransform * (initialPosition + animTransform * position_));
+    node.SetWorldPosition(rootTransform * (initialPosition + animRotation * position_));
     node.SetWorldRotation(rootTransform.Rotation() * transformedRotation * initialRotation);
 }
 
@@ -681,9 +680,8 @@ void CharacterChainSegmentData::Import(const CharacterSkeletonSegment& src)
 }
 
 void CharacterChainSegmentData::Export(
-    const Matrix3x4& rootTransform, const Matrix3x4& animTransform, CharacterSkeletonSegment& dest) const
+    const Matrix3x4& rootTransform, const Quaternion& animRotation, CharacterSkeletonSegment& dest) const
 {
-    const Quaternion animRotation = animTransform.Rotation();
     for (unsigned i = 0; i < dest.nodes_.Size(); ++i)
     {
         const Quaternion transformedRotation = animRotation.Inverse() * rotations_[i] * animRotation;
@@ -839,7 +837,7 @@ void CharacterLimbSegmentData::Import(const CharacterSkeletonSegment& src)
 }
 
 void CharacterLimbSegmentData::Export(
-    const Matrix3x4& rootTransform, const Matrix3x4& animTransform, CharacterSkeletonSegment& dest) const
+    const Matrix3x4& rootTransform, const Quaternion& animRotation, CharacterSkeletonSegment& dest) const
 {
     Bone& boneA = *dest.bones_[0];
     Bone& boneB = *dest.bones_[1];
@@ -855,7 +853,7 @@ void CharacterLimbSegmentData::Export(
 
     const float thighLength = (nodeA.GetWorldPosition() - nodeB.GetWorldPosition()).Length();
     const float calfLength = (nodeB.GetWorldPosition() - nodeC.GetWorldPosition()).Length();
-    const Vector3 worldPosition = rootTransform * (animTransform * (position_ * (thighLength + calfLength)) + initialA.Translation());
+    const Vector3 worldPosition = rootTransform * (animRotation * (position_ * (thighLength + calfLength)) + initialA.Translation());
 
     // Revert nodes to initial pose
 //     nodeA.SetRotation(boneA.initialRotation_);
@@ -895,7 +893,6 @@ void CharacterLimbSegmentData::Export(
     nodeA.SetWorldRotation(Quaternion(rotation_, worldPos2 - worldPos0) * nodeA.GetWorldRotation());
 
     // Apply target rotation
-    const Quaternion animRotation = animTransform.Rotation();
     nodeC.SetWorldRotation(rootTransform.Rotation() * animRotation.Inverse() * rotationC_ * animRotation * initialC.Rotation());
 }
 
@@ -1317,13 +1314,15 @@ void CharacterAnimationController::RegisterObject(Context* context)
     context->RegisterFactory<CharacterAnimationController>(characterAnimatorCategory);
     URHO3D_COPY_BASE_ATTRIBUTES(AnimationController);
     URHO3D_MIXED_ACCESSOR_ATTRIBUTE("Skeleton", GetSkeletonAttr, SetSkeletonAttr, ResourceRef, ResourceRef(XMLFile::GetTypeStatic()), AM_DEFAULT);
+    URHO3D_ATTRIBUTE("Animation Rotation", Quaternion, animationRotation_, Quaternion::IDENTITY, AM_DEFAULT);
+    URHO3D_ATTRIBUTE("Revert Transform", bool, revertAnimationTransform_, true, AM_DEFAULT);
 }
 
-void CharacterAnimationController::SetAnimationTransform(const Matrix3x4& transform)
+void CharacterAnimationController::SetAnimationRotation(const Quaternion& rotation)
 {
-    if (animationTransform_ != transform)
+    if (animationRotation_ != rotation)
     {
-        animationTransform_ = transform;
+        animationRotation_ = rotation;
         MarkDirty();
     }
 }
@@ -1379,10 +1378,10 @@ void CharacterAnimationController::ApplyAnimation()
             }
 
     // Animate segments
-    for (auto& segmentData : segments_)
+    for (auto& elem : segments_)
     {
-        CharacterSkeletonSegment& segment = segmentData.first_;
-        CharacterEffector& effector = *segmentData.second_;
+        CharacterSkeletonSegment& segment = elem.first_;
+        CharacterEffector& effector = *elem.second_;
         if (!effector.IsEnabledEffective())
             continue;
 
@@ -1395,6 +1394,15 @@ void CharacterAnimationController::ApplyAnimation()
                     effector.ApplyAnimation(animationData.weight_, animationData.time_, *track);
         }
         effector.ResolveEffector(*this, segment);
+    }
+
+    // Revert animation transform
+    if (revertAnimationTransform_)
+    {
+        Bone& rootBone = *animatedModelSkeleton_->GetRootBone();
+        Node& rootNode = *rootBone.node_;
+        rootNode.SetRotation(animationRotation_.Inverse() * rootNode.GetRotation());
+        rootNode.SetPosition(animationRotation_.Inverse() * rootNode.GetPosition());
     }
 }
 
@@ -1474,9 +1482,13 @@ void CharacterAnimationController::CheckIntegrity()
         if (Node* container = node_->GetChild(containerName))
             node_->RemoveChild(container);
 
+        // Reset node transform
+        const Matrix3x4 nodeTransform = node_->GetWorldTransform();
+        node_->SetWorldTransform(Vector3::ZERO, Quaternion::IDENTITY, Vector3::ONE);
+
         // Initialize segments
         // #TODO Rename segmentData_
-        skeleton_->AllocateSegmentData(segmentData_, *animatedModelSkeleton_, Matrix3x4::IDENTITY);
+        skeleton_->AllocateSegmentData(segmentData_, *animatedModelSkeleton_, Matrix3x4(Vector3::ZERO, animationRotation_, 1.0f));
 
         // Create nodes
         Node* container = node_->CreateChild(containerName, LOCAL);
@@ -1492,6 +1504,9 @@ void CharacterAnimationController::CheckIntegrity()
             segments_[i].first_ = segment;
             segments_[i].second_ = effector;
         }
+
+        // Restore node transform
+        node_->SetWorldTransform(nodeTransform.Translation(), nodeTransform.Rotation(), nodeTransform.Scale());
 
         // Reset dirty
         dirty_ = false;
@@ -1592,7 +1607,7 @@ void CharacterAnimationController::UpdateSegment2(const CharacterSkeletonSegment
     const Segment2State& state = segment2states_[segment.name_];
 
     // Resolve limb
-    const Matrix3x4 animationToWorld = node_->GetWorldTransform() * animationTransform_;
+    const Matrix3x4 animationToWorld = node_->GetWorldTransform() /** animationTransform_*/;
     const Matrix3x4 worldToAnimation = animationToWorld.Inverse();
 
     const Vector3 worldPos0 = thighNode->GetWorldPosition();
@@ -1748,7 +1763,6 @@ void RegisterCharacterAnimatorScriptAPI(asIScriptEngine* engine)
 
     RegisterComponent<CharacterAnimationController>(engine, "CharacterAnimationController");
     RegisterSubclass<CharacterAnimationController, AnimationController>(engine, "AnimationController", "CharacterAnimationController");
-    engine->RegisterObjectMethod("CharacterAnimationController", "void SetAnimationTransform(const Matrix3x4&in)", asMETHOD(CharacterAnimationController, SetAnimationTransform), asCALL_THISCALL);
     engine->RegisterObjectMethod("CharacterAnimationController", "void SetTargetTransform(const String&in, const Matrix3x4&in)", asFUNCTION(CharacterAnimationController_SetTargetTransform), asCALL_CDECL_OBJLAST);
     engine->RegisterObjectMethod("CharacterAnimationController", "void SetTargetRotationAmount(const String&in, float)", asFUNCTION(CharacterAnimationController_SetTargetRotationAmount), asCALL_CDECL_OBJLAST);
     engine->RegisterObjectMethod("CharacterAnimationController", "void SetTargetRotationBalance(const String&in, float)", asFUNCTION(CharacterAnimationController_SetTargetRotationBalance), asCALL_CDECL_OBJLAST);

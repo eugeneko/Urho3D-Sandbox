@@ -9,7 +9,7 @@ class Animator : ScriptObject
             animController = characterController;
 
         animController.Play("Animations/Kachujin_Walk.ani", 0, true);
-        if (characterController !is null)
-            characterController.SetAnimationTransform(Matrix3x4(Quaternion(rotation, Vector3(0, 1, 0)).rotationMatrix));
+        //if (characterController !is null)
+            //characterController.SetAnimationTransform(Matrix3x4(Quaternion(rotation, Vector3(0, 1, 0)).rotationMatrix));
     }
 }
