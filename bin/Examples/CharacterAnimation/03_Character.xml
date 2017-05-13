@@ -66,6 +66,7 @@
 				<variant type="Int" value="0" />
 			</attribute>
 			<attribute name="Skeleton" value="XMLFile;Models/Doll_Skeleton.xml" />
+			<attribute name="Animation Rotation" value="-4.37114e-08 0 1 -0" />
 		</component>
 		<component type="AnimatedModel" id="9">
 			<attribute name="Model" value="Model;Models/Doll.mdl" />

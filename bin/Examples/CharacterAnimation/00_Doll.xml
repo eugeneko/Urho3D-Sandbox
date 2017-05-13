@@ -7,8 +7,8 @@
 	<attribute name="Elapsed Time" value="1.14192" />
 	<attribute name="Next Replicated Node ID" value="727" />
 	<attribute name="Next Replicated Component ID" value="107" />
-	<attribute name="Next Local Node ID" value="16778406" />
-	<attribute name="Next Local Component ID" value="16779088" />
+	<attribute name="Next Local Node ID" value="16778407" />
+	<attribute name="Next Local Component ID" value="16779100" />
 	<attribute name="Variables" />
 	<attribute name="Variable Names" value="" />
 	<component type="Octree" id="1" />
@@ -123,6 +123,7 @@
 				<variant type="Int" value="0" />
 			</attribute>
 			<attribute name="Skeleton" value="XMLFile;Models/Doll_Skeleton.xml" />
+			<attribute name="Animation Rotation" value="-4.37114e-08 0 1 -0" />
 		</component>
 		<node id="16778262">
 			<attribute name="Is Enabled" value="true" />

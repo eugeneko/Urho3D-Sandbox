@@ -8,6 +8,7 @@
 #include <Urho3D/Graphics/AnimationController.h>
 #include <Urho3D/Graphics/AnimationState.h>
 #include <Urho3D/Graphics/DebugRenderer.h>
+#include <Urho3D/IO/FileSystem.h>
 #include <Urho3D/IO/Log.h>
 #include <Urho3D/Math/MathDefs.h>
 #include <Urho3D/Math/Sphere.h>
@@ -1484,7 +1485,7 @@ void CharacterAnimationController::CheckIntegrity()
 
         // Reset node transform
         const Matrix3x4 nodeTransform = node_->GetWorldTransform();
-        node_->SetWorldTransform(Vector3::ZERO, Quaternion::IDENTITY, Vector3::ONE);
+        node_->SetWorldTransform(Vector3::ZERO, animationRotation_, Vector3::ONE);
 
         // Initialize segments
         // #TODO Rename segmentData_
@@ -1534,7 +1535,7 @@ CharacterAnimation* CharacterAnimationController::GetCharacterAnimation(const St
         return animationCache_[animationName];
 
     ResourceCache* cache = GetSubsystem<ResourceCache>();
-    CharacterAnimation* characterAnimation = cache->GetResource<CharacterAnimation>(animationName.Replaced(".ani", ".xml", false));
+    CharacterAnimation* characterAnimation = cache->GetResource<CharacterAnimation>(ReplaceExtension(animationName, ".char.xml"));
     animationCache_[animationName] = characterAnimation;
     return characterAnimation;
 }

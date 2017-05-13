@@ -55,7 +55,6 @@ class Controller
     }
     void Update(CharacterAnimationController@ characterController, float timeStep)
     {
-        characterController.SetAnimationTransform(Matrix3x4(Quaternion(_animationRotationY, Vector3(0, 1, 0)).rotationMatrix));
         AnimationController@ animController = characterController;
         bool movingX = _velocityX > _thresholdX;
 
