@@ -100,8 +100,8 @@ class Main : ScriptObject
     void DelayedStart()
     {
         @_controller = Controller();
-        _controller.walkAnimation = "Animations/Kachujin_Walk.ani";
-        _controller.idleAnimation = "Animations/Kachujin_Idle.ani";
+        _controller.walkAnimation = "Animations/Doll_Walk.ani";
+        _controller.idleAnimation = "Animations/Doll_Idle.ani";
         _previousPosition = node.worldPosition;
     }
     void FixedUpdate(float timeStep)
