@@ -1,0 +1,8 @@
+<skeleton>
+    <root  name="Root"      bones="mixamorig_Hips"/>
+    <chain name="Spine"     bones="mixamorig_Spine        mixamorig_Spine1          mixamorig_Spine2      mixamorig_Neck"/>
+    <limb  name="LeftFoot"  bones="mixamorig_LeftUpLeg    mixamorig_LeftLeg         mixamorig_LeftFoot"   joint="0 0 1"/>
+    <limb  name="RightFoot" bones="mixamorig_RightUpLeg   mixamorig_RightLeg        mixamorig_RightFoot"  joint="0 0 1"/>
+    <limb  name="LeftHand"  bones="mixamorig_LeftArm      mixamorig_LeftForeArm     mixamorig_LeftHand"   joint="0 0 -1"/>
+    <limb  name="RightHand" bones="mixamorig_RightArm     mixamorig_RightForeArm    mixamorig_RightHand"  joint="0 0 -1"/>
+</skeleton>

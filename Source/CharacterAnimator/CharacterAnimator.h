@@ -600,6 +600,8 @@ private:
     /// States.
     HashMap<StringHash, Segment2State> segment2states_;
 
+    /// Whether the character animation enabled.
+    bool animationEnabled_ = true;
     /// Animation rotation.
     Quaternion animationRotation_;
     /// Whether to revert animation transform.

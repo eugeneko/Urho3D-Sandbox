@@ -893,6 +893,15 @@ void CharacterLimbSegmentData::Export(
     // Apply limb rotation
     nodeA.SetWorldRotation(Quaternion(rotation_, worldPos2 - worldPos0) * nodeA.GetWorldRotation());
 
+//     if (dest.name_ == "RightFoot")
+//         URHO3D_LOGINFOF("%f %f | %f %f | %f %f",
+//             worldPosition.x_, worldPosition.y_, worldPos2.x_, worldPos2.y_,
+//             nodeC.GetWorldPosition().x_, nodeC.GetWorldPosition().y_);
+//     if (dest.name_ == "RightFoot")
+//         URHO3D_LOGINFOF("%f %f | %f %f",
+//             nodeC.GetWorldPosition().x_, nodeC.GetWorldPosition().y_,
+//             rootTransform.Translation().x_, position_.z_);
+
     // Apply target rotation
     nodeC.SetWorldRotation(rootTransform.Rotation() * animRotation.Inverse() * rotationC_ * animRotation * initialC.Rotation());
 }
@@ -1315,6 +1324,7 @@ void CharacterAnimationController::RegisterObject(Context* context)
     context->RegisterFactory<CharacterAnimationController>(characterAnimatorCategory);
     URHO3D_COPY_BASE_ATTRIBUTES(AnimationController);
     URHO3D_MIXED_ACCESSOR_ATTRIBUTE("Skeleton", GetSkeletonAttr, SetSkeletonAttr, ResourceRef, ResourceRef(XMLFile::GetTypeStatic()), AM_DEFAULT);
+    URHO3D_ATTRIBUTE("Enable Animation", bool, animationEnabled_, true, AM_DEFAULT);
     URHO3D_ATTRIBUTE("Animation Rotation", Quaternion, animationRotation_, Quaternion::IDENTITY, AM_DEFAULT);
     URHO3D_ATTRIBUTE("Revert Transform", bool, revertAnimationTransform_, true, AM_DEFAULT);
 }
@@ -1356,7 +1366,7 @@ void CharacterAnimationController::Update(float timeStep)
     CheckIntegrity();
     UpdateHierarchy();
     AnimationController::Update(timeStep);
-    if (animatedModel_)
+    if (animatedModel_ && animationEnabled_)
     {
         animatedModel_->ApplyAnimation();
         ApplyAnimation();
@@ -1451,10 +1461,10 @@ void CharacterAnimationController::CheckIntegrity()
     if (!animatedModel_ || animatedModelSkeleton_ != &animatedModel_->GetSkeleton())
         MarkDirty();
 
-    // Try get model
+    // Try to get model
     if (!animatedModel_)
     {
-        animatedModel_ = node_->GetComponent<AnimatedModel>();
+        animatedModel_ = node_->GetComponent<AnimatedModel>(true);
         if (!animatedModel_)
             return;
     }
@@ -1737,6 +1747,91 @@ bool ImportCharacterAnimation(const String& outputName,
     return true;
 }
 
+void OverrideModelScale(const String& outputName, const String& modelName, const Vector3& scale)
+{
+    ResourceCache* cache = GetScriptContext()->GetSubsystem<ResourceCache>();
+    if (!cache)
+        return;
+
+    SharedPtr<Model> model(cache->GetResource<Model>(modelName));
+    if (!model)
+        return;
+
+    Bone* rootBone = model->GetSkeleton().GetRootBone();
+    if (!rootBone)
+        return;
+
+    rootBone->initialPosition_ *= scale / rootBone->initialScale_;
+    rootBone->initialScale_ = scale;
+    model->SaveFile(outputName);
+}
+
+void OverrideAnimationScale(const String& outputName, const String& animationName, const String& modelName, const Vector3& scale)
+{
+    ResourceCache* cache = GetScriptContext()->GetSubsystem<ResourceCache>();
+    if (!cache)
+        return;
+
+    SharedPtr<Model> model(cache->GetResource<Model>(modelName));
+    SharedPtr<Animation> animation(cache->GetResource<Animation>(animationName));
+    if (!model || !animation)
+        return;
+
+    Bone* rootBone = model->GetSkeleton().GetRootBone();
+    if (!rootBone)
+        return;
+
+    AnimationTrack* track = animation->GetTrack(rootBone->name_);
+    if (!track)
+        return;
+
+    const bool hasPosition = !!(track->channelMask_ & CHANNEL_POSITION);
+    const bool hasScale = !!(track->channelMask_ & CHANNEL_SCALE);
+
+    // Update position
+    if (hasPosition)
+    {
+        for (AnimationKeyFrame& keyFrame : track->keyFrames_)
+            keyFrame.position_ *= scale / (hasScale ? keyFrame.scale_ : Vector3::ONE);
+    }
+
+    // Write scale
+    track->channelMask_ |= CHANNEL_SCALE;
+    for (AnimationKeyFrame& keyFrame : track->keyFrames_)
+        keyFrame.scale_ = scale;
+
+    animation->SaveFile(outputName);
+}
+
+void ResetRootAnimationTrackPosition(const String& outputName, const String& animationName, const String& modelName, float from, float to)
+{
+    ResourceCache* cache = GetScriptContext()->GetSubsystem<ResourceCache>();
+    if (!cache)
+        return;
+
+    SharedPtr<Model> model(cache->GetResource<Model>(modelName));
+    SharedPtr<Animation> animation(cache->GetResource<Animation>(animationName));
+    if (!model || !animation)
+        return;
+
+    Bone* rootBone = model->GetSkeleton().GetRootBone();
+    if (!rootBone)
+        return;
+
+    AnimationTrack* track = animation->GetTrack(rootBone->name_);
+    if (!track)
+        return;
+
+    if (track->channelMask_ & CHANNEL_POSITION)
+    {
+        for (AnimationKeyFrame& keyFrame : track->keyFrames_)
+            if (keyFrame.time_ >= from && keyFrame.time_ <= to)
+                keyFrame.position_ = rootBone->initialPosition_;
+    }
+
+    animation->SaveFile(outputName);
+}
+
 void CharacterAnimationController_SetTargetTransform(const String& segment, const Matrix3x4& transform,
     CharacterAnimationController* characterAnimationController)
 {
@@ -1761,6 +1856,9 @@ void RegisterCharacterAnimatorScriptAPI(asIScriptEngine* engine)
 
     engine->RegisterGlobalFunction("void DumpCharacterSkeletonDirections(const String&in, const String&in, const String&in)", asFUNCTION(DumpCharacterSkeletonDirections), asCALL_CDECL);
     engine->RegisterGlobalFunction("void ImportCharacterAnimation(const String&in, const String&in, const String&in, const String&in, const Matrix3x4&in)", asFUNCTION(ImportCharacterAnimation), asCALL_CDECL);
+    engine->RegisterGlobalFunction("void OverrideModelScale(const String&in, const String&in, const Vector3&in)", asFUNCTION(OverrideModelScale), asCALL_CDECL);
+    engine->RegisterGlobalFunction("void OverrideAnimationScale(const String&in, const String&in, const String&in, const Vector3&in)", asFUNCTION(OverrideAnimationScale), asCALL_CDECL);
+    engine->RegisterGlobalFunction("void ResetRootAnimationTrackPosition(const String&in, const String&in, const String&in, float, float)", asFUNCTION(ResetRootAnimationTrackPosition), asCALL_CDECL);
 
     RegisterComponent<CharacterAnimationController>(engine, "CharacterAnimationController");
     RegisterSubclass<CharacterAnimationController, AnimationController>(engine, "AnimationController", "CharacterAnimationController");

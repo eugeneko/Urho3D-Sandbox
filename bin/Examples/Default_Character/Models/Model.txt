@@ -1,0 +1,2 @@
+Default_Character/Materials/Beta_Joints_MAT.xml
+Default_Character/Materials/asdf1_Beta_HighLimbsGeoSG2.xml
