@@ -7,7 +7,6 @@ const int CTRL_SLOW = 32;
 
 enum State
 {
-    Initial,
     Idle,
     Walk,
     Jump,
@@ -23,36 +22,25 @@ class Animator
     String _walkAnimation;
     float _walkBaseVelocity = 1.5;
     String _idleAnimation;
+    String _jumpAnimation;
 
-    // External state
-    float _movementSpeed = 0;
-    float _velocityY = 0;
+    String idleAnimation    { get const { return _idleAnimation; } set { _idleAnimation = value; } }
+    String walkAnimation    { get const { return _walkAnimation; } set { _walkAnimation = value; } }
+    String jumpAnimation    { get const { return _jumpAnimation; } set { _jumpAnimation = value; } }
+
+    // Control variables
+    bool _grounded = false; ///< Whether the character is on the ground.
+    bool _jump = false; ///< Whether the character is about to jump.
+    float _movementSpeed = 0; ///< Horizontal movement speed.
+
+    float movementSpeed { get const { return _movementSpeed; }  set { _movementSpeed = value; } }
+    bool jump           { get const { return _jump; }           set { _jump = value; } }
+    bool grounded       { get const { return _grounded; }       set { _grounded = value; } }
 
     // Internal state
-    State _state = Initial;
+    State _state = Idle;
     float _idleTimer = 0;
-    bool _aboutToJump = false;
     
-    float movementSpeed
-    {
-        get const { return _movementSpeed; }
-        set { _movementSpeed = value; }
-    }
-    String idleAnimation
-    {
-        get const { return _idleAnimation; }
-        set { _idleAnimation = value; }
-    }
-    String walkAnimation
-    {
-        get const { return _walkAnimation; }
-        set { _walkAnimation = value; }
-    }
-    
-    void Jump()
-    {
-        _aboutToJump = true;
-    }
     void Update(CharacterAnimationController@ characterController, float timeStep)
     {
         AnimationController@ animController = characterController;
@@ -61,21 +49,29 @@ class Animator
         if (movingX)
             _idleTimer = 0;
 
-        if (_state == Initial)
+        // Jump
+        if (jump && grounded)
         {
-            _state = Idle;
-            animController.PlayExclusive(_idleAnimation, 0, true);
+            _state = Jump;
+            jump = false;
+            animController.PlayExclusive(_jumpAnimation, 0, false, _switchDuration);
+            animController.SetSpeed(_jumpAnimation, 0.25);
         }
-        else if (_state == Idle)
+        else // Update movement
+        if ((_state == Idle || _state == Jump) && grounded)
         {
+            //Print("Go Walk");
             if (movingX)
             {
                 _state = Walk;
                 animController.PlayExclusive(_walkAnimation, 0, true, _switchDuration);
             }
+            else
+                animController.PlayExclusive(_idleAnimation, 0, true, _switchDuration);
         }
-        else if (_state == Walk)
+        else if ((_state == Walk || _state == Jump) && grounded)
         {
+            //Print("Go Idle");
             animController.SetSpeed(_walkAnimation, Abs(_movementSpeed / _walkBaseVelocity));
             if (!movingX)
             {
@@ -87,6 +83,8 @@ class Animator
                     animController.PlayExclusive(_idleAnimation, 0, true, _switchDuration);
                 }
             }
+            else
+                animController.PlayExclusive(_walkAnimation, 0, true, _switchDuration);
         }
     }
 }
@@ -138,6 +136,7 @@ class Controller
         // When character has been in air less than 1/10 second, it's still interpreted as being on ground
         bool isGrounded = _inAirTimer < 0.1;
         bool canJump = _jumpCooldown == 0 && isGrounded;
+        animator.grounded = canJump;
 
         // Update movement speed
         bool isMoving = Abs(speed) > _moveThreshold;
@@ -169,8 +168,8 @@ class Controller
         // Apply physics
         if (jump && canJump)
         {
-            Print("Jump");
-            rigidBody.ApplyImpulse(Vector3(0, 1, 0) * rigidBody.mass * 3);
+            rigidBody.ApplyImpulse(Vector3(0, 1, 0) * rigidBody.mass * 6);
+            animator.jump = true;
             jump = false;
             _jumpCooldown = 0.5;
         }
@@ -200,6 +199,7 @@ class Main : ScriptObject
         //_animator.walkAnimation = "Doll_Female/Animations/idle.ani";
         //_animator.idleAnimation = "Doll_Female/Animations/walking.ani";
         _animator.idleAnimation = "Default_Character/Animations/idle.ani";
+        _animator.jumpAnimation = "Default_Character/Animations/jump.ani";
         //_animator.idleAnimation = "Models/Mutant/Mutant_Run.ani";
     }
     void HandleNodeCollision(StringHash eventType, VariantMap& eventData)

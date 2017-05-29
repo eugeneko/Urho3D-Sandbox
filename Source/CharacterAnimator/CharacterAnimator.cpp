@@ -1832,6 +1832,41 @@ void ResetRootAnimationTrackPosition(const String& outputName, const String& ani
     animation->SaveFile(outputName);
 }
 
+void TrimAnimation(const String& outputName, const String& animationName, float from, float to)
+{
+    if (from > to)
+        return;
+
+    ResourceCache* cache = GetScriptContext()->GetSubsystem<ResourceCache>();
+    if (!cache)
+        return;
+
+    SharedPtr<Animation> animation(cache->GetResource<Animation>(animationName));
+    if (!animation)
+        return;
+
+    for (unsigned i = 0; i < animation->GetNumTracks(); ++i)
+        if (AnimationTrack* track = animation->GetTrack(i))
+        {
+            unsigned fromIndex = 0;
+            track->GetKeyFrameIndex(from, fromIndex);
+            unsigned toIndex = 0;
+            track->GetKeyFrameIndex(to, toIndex);
+            track->keyFrames_.Erase(toIndex + 1, track->keyFrames_.Size() - toIndex - 1);
+            track->keyFrames_.Erase(0, fromIndex);
+
+            const float baseTime = track->keyFrames_.Front().time_;
+            for (AnimationKeyFrame& keyFrame : track->keyFrames_)
+                keyFrame.time_ -= baseTime;
+
+            // Needed only once
+            if (i == 0)
+                animation->SetLength(track->keyFrames_.Back().time_ - track->keyFrames_.Front().time_);
+        }
+
+    animation->SaveFile(outputName);
+}
+
 void CharacterAnimationController_SetTargetTransform(const String& segment, const Matrix3x4& transform,
     CharacterAnimationController* characterAnimationController)
 {
@@ -1859,6 +1894,7 @@ void RegisterCharacterAnimatorScriptAPI(asIScriptEngine* engine)
     engine->RegisterGlobalFunction("void OverrideModelScale(const String&in, const String&in, const Vector3&in)", asFUNCTION(OverrideModelScale), asCALL_CDECL);
     engine->RegisterGlobalFunction("void OverrideAnimationScale(const String&in, const String&in, const String&in, const Vector3&in)", asFUNCTION(OverrideAnimationScale), asCALL_CDECL);
     engine->RegisterGlobalFunction("void ResetRootAnimationTrackPosition(const String&in, const String&in, const String&in, float, float)", asFUNCTION(ResetRootAnimationTrackPosition), asCALL_CDECL);
+    engine->RegisterGlobalFunction("void TrimAnimation(const String&in, const String&in, float, float)", asFUNCTION(TrimAnimation), asCALL_CDECL);
 
     RegisterComponent<CharacterAnimationController>(engine, "CharacterAnimationController");
     RegisterSubclass<CharacterAnimationController, AnimationController>(engine, "AnimationController", "CharacterAnimationController");
