@@ -1,5 +1,0 @@
-<?xml version="1.0"?>
-<animation>
-	<metadata name="jumpBegin" type="Float" value="0.633" />
-	<metadata name="jumpEnd" type="Float" value="1.034" />
-</animation>

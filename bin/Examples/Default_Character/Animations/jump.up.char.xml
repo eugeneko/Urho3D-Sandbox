@@ -9,7 +9,6 @@
 		<frame time="0.166667" position="0 0 0" rotation="0.99495 0.0772813 -0.061302 0.0185653" />
 		<frame time="0.2" position="0 0 0" rotation="0.995061 0.0919124 -0.0344026 0.01489" />
 		<frame time="0.233333" position="0 0 0" rotation="0.994343 0.104191 -0.0123083 0.0165675" />
-		<frame time="0.266667" position="0 0 0" rotation="0.992942 0.115803 0.00545556 0.0250208" />
 	</root>
 	<chain name="Spine">
 		<frame time="0" position="-0.106707 1.43963 0.115339">
@@ -60,12 +59,6 @@
 			<bone rotation="0.971157 0.231955 -0.036454 0.0415016" />
 			<bone rotation="0.979317 0.193878 -0.0348731 0.0461865" />
 		</frame>
-		<frame time="0.266667" position="-0.018494 1.48486 0.152487">
-			<bone rotation="0.97976 0.198682 -0.0207645 -0.0128657" />
-			<bone rotation="0.97504 0.220318 -0.0247217 0.0120455" />
-			<bone rotation="0.969377 0.241285 -0.0270725 0.0368465" />
-			<bone rotation="0.978965 0.196885 -0.0281553 0.0455188" />
-		</frame>
 	</chain>
 	<limb name="LeftFoot">
 		<frame time="0" position="-0.111333 -0.707649 0.0589419" rotation="-169.624" rotation0="-174.317" rotation1="9.36047" rotation2="0.943536 0.289088 -0.157929 0.0350357" />
@@ -76,7 +69,6 @@
 		<frame time="0.166667" position="0.0182846 -0.482009 -0.073526" rotation="-170.137" rotation0="-175.265" rotation1="-351.192" rotation2="0.775655 0.600507 -0.156887 0.114617" />
 		<frame time="0.2" position="0.0142571 -0.540285 -0.0551029" rotation="-171.749" rotation0="-174.216" rotation1="12.9533" rotation2="0.783207 0.599976 -0.149648 0.0649682" />
 		<frame time="0.233333" position="0.00228655 -0.651733 -0.0175084" rotation="-174.645" rotation0="-177.604" rotation1="14.2742" rotation2="0.829694 0.541656 -0.134164 0.0147327" />
-		<frame time="0.266667" position="-0.00976804 -0.777691 0.0261483" rotation="-178.098" rotation0="-181.807" rotation1="12.3917" rotation2="0.881267 0.462844 -0.0950436 -0.0105388" />
 	</limb>
 	<limb name="RightFoot">
 		<frame time="0" position="-0.11929 -0.962351 -0.0365531" rotation="-175.677" rotation0="-174.376" rotation1="-11.2234" rotation2="0.985325 0.168568 0.0228319 0.0140978" />
@@ -87,7 +79,6 @@
 		<frame time="0.166667" position="0.0216608 -0.875795 -0.0801326" rotation="175.455" rotation0="183.721" rotation1="-12.9476" rotation2="0.872615 0.44527 0.188088 -0.0700069" />
 		<frame time="0.2" position="0.00605416 -0.75131 -0.0946136" rotation="171.506" rotation0="180.095" rotation1="-14.8479" rotation2="0.808308 0.543025 0.218928 -0.0619037" />
 		<frame time="0.233333" position="-0.00702684 -0.582598 -0.0969136" rotation="170.106" rotation0="177.933" rotation1="-14.9866" rotation2="0.741064 0.634294 0.215414 -0.0457432" />
-		<frame time="0.266667" position="-0.0234077 -0.405766 -0.083888" rotation="168.355" rotation0="175.175" rotation1="347.619" rotation2="0.684222 0.703928 0.183338 -0.052084" />
 	</limb>
 	<limb name="LeftHand">
 		<frame time="0" position="-0.492401 -0.286096 1.10986" rotation="178.529" rotation0="-132.258" rotation1="0.0395647" rotation2="0.536526 0.0376977 0.674741 0.505414" />
@@ -97,8 +88,7 @@
 		<frame time="0.133333" position="-0.605624 0.041824 0.680905" rotation="-166.419" rotation0="211.034" rotation1="0" rotation2="0.623991 -0.197786 0.747699 0.111636" />
 		<frame time="0.166667" position="-0.65028 0.044042 0.599025" rotation="-171.271" rotation0="210.595" rotation1="0" rotation2="0.670633 -0.15756 0.723496 -0.0444922" />
 		<frame time="0.2" position="-0.686715 0.0269057 0.529652" rotation="-179.345" rotation0="212.043" rotation1="-0.172458" rotation2="0.716643 -0.0884636 0.673933 -0.15624" />
-		<frame time="0.233333" position="-0.730951 -0.00675416 0.446539" rotation="172.567" rotation0="-145.805" rotation1="-0.0559529" rotation2="0.766563 -0.00983301 0.604044 -0.217751" />
-		<frame time="0.266667" position="-0.777178 -0.0628634 0.350041" rotation="166.681" rotation0="-143.502" rotation1="0" rotation2="0.818632 0.0647525 0.518652 -0.238009" />
+		<frame time="0.233333" position="-0.730951 -0.00675416 0.446539" rotation="172.567" rotation0="-145.805" rotation1="0" rotation2="0.766563 -0.00983305 0.604044 -0.217751" />
 	</limb>
 	<limb name="RightHand">
 		<frame time="0" position="-0.0263024 0.0194991 1.18933" rotation="147.509" rotation0="-213.896" rotation1="0.0395647" rotation2="-0.372392 0.0798099 0.905715 0.186107" />
@@ -109,6 +99,5 @@
 		<frame time="0.166667" position="0.673636 -0.332534 0.511336" rotation="165.365" rotation0="-213.372" rotation1="0.0395647" rotation2="-0.73923 0.320437 0.564907 -0.178155" />
 		<frame time="0.2" position="0.678485 -0.460723 0.363654" rotation="172.924" rotation0="-219.148" rotation1="0.0395647" rotation2="-0.869206 0.208811 0.447038 -0.0321878" />
 		<frame time="0.233333" position="0.640101 -0.561965 0.239231" rotation="178.088" rotation0="-223.168" rotation1="-0.0395647" rotation2="-0.932234 0.0926816 0.333755 0.104681" />
-		<frame time="0.266667" position="0.578636 -0.643136 0.136617" rotation="-177.421" rotation0="135.534" rotation1="0" rotation2="-0.955524 0.0345963 0.254219 0.145427" />
 	</limb>
 </animation>

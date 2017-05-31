@@ -22,8 +22,15 @@ ImportCharacterAnimation(cache.resourceDirs[0] +
     rotation);
 
 ImportCharacterAnimation(cache.resourceDirs[0] +
-    "Default_Character/Animations/jump.char.xml",
-    "Default_Character/Animations/jump.ani",
+    "Default_Character/Animations/jump.up.char.xml",
+    "Default_Character/Animations/jump.up.ani",
+    "Default_Character/Models/Model_Skeleton.xml",
+    "Default_Character/Models/Model.mdl",
+    rotation);
+
+ImportCharacterAnimation(cache.resourceDirs[0] +
+    "Default_Character/Animations/jump.down.char.xml",
+    "Default_Character/Animations/jump.down.ani",
     "Default_Character/Models/Model_Skeleton.xml",
     "Default_Character/Models/Model.mdl",
     rotation);

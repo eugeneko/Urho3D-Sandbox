@@ -1,0 +1,26 @@
+<?xml version="1.0"?>
+<animation>
+	<root name="Root">
+		<frame time="0" position="0 0 0" rotation="0.994343 0.104191 -0.0123083 0.0165675" />
+	</root>
+	<chain name="Spine">
+		<frame time="0" position="-0.0223146 1.48756 0.142933">
+			<bone rotation="0.981563 0.188298 -0.0326168 -0.00379664" />
+			<bone rotation="0.976788 0.210446 -0.0352073 0.0189287" />
+			<bone rotation="0.971157 0.231955 -0.036454 0.0415016" />
+			<bone rotation="0.979317 0.193878 -0.0348731 0.0461865" />
+		</frame>
+	</chain>
+	<limb name="LeftFoot">
+		<frame time="0" position="0.00228655 -0.651733 -0.0175084" rotation="-174.645" rotation0="-177.604" rotation1="14.2742" rotation2="0.829694 0.541656 -0.134164 0.0147327" />
+	</limb>
+	<limb name="RightFoot">
+		<frame time="0" position="-0.00702684 -0.582598 -0.0969136" rotation="170.106" rotation0="177.933" rotation1="-14.9866" rotation2="0.741064 0.634294 0.215414 -0.0457432" />
+	</limb>
+	<limb name="LeftHand">
+		<frame time="0" position="-0.730951 -0.00675416 0.446539" rotation="172.567" rotation0="-145.805" rotation1="0" rotation2="0.766563 -0.00983305 0.604044 -0.217751" />
+	</limb>
+	<limb name="RightHand">
+		<frame time="0" position="0.640101 -0.561965 0.239231" rotation="178.088" rotation0="-223.168" rotation1="-0.0395647" rotation2="-0.932234 0.0926816 0.333755 0.104681" />
+	</limb>
+</animation>
