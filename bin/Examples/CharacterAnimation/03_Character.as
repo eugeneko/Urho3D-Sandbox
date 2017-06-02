@@ -2,13 +2,13 @@ const int CTRL_UP = 1;
 const int CTRL_DOWN = 2;
 const int CTRL_LEFT = 4;
 const int CTRL_RIGHT = 8;
-const int CTRL_JUMP = 16;
-const int CTRL_SLOW = 32;
+const int CTRL_SLOW = 16;
 
 enum State
 {
     Idle,
     Walk,
+    WalkBackward,
     Jump,
     Fall,
     State_COUNT
@@ -56,7 +56,7 @@ class Animator
         AnimationController@ animController = characterController;
         
         // Compute parameters
-        bool movingX = _movementSpeed > 0;
+        bool movingX = Abs(_movementSpeed) > 0;
         if (movingX)
             _idleTimer = 0;
 
@@ -101,8 +101,16 @@ class Animator
             animController.PlayExclusive(_animations[Idle], 0, true, _switchDuration);
             break;
         case Walk:
-            animController.PlayExclusive(_animations[Walk], 0, true, _switchDuration);
-            animController.SetSpeed(_animations[Walk], Abs(_movementSpeed / _walkBaseVelocity));
+            if (_movementSpeed > 0)
+            {
+                animController.PlayExclusive(_animations[Walk], 0, true, _switchDuration);
+                animController.SetSpeed(_animations[Walk], Abs(_movementSpeed / _walkBaseVelocity));
+            }
+            else
+            {
+                animController.PlayExclusive(_animations[WalkBackward], 0, true, _switchDuration);
+                animController.SetSpeed(_animations[WalkBackward], Abs(-_movementSpeed / _walkBaseVelocity));
+            }
             break;
         case Jump:
             animController.PlayExclusive(_animations[Jump], 0, false, _switchDuration);
@@ -129,6 +137,7 @@ class Controller
     bool _slow = false;
     bool _grounded = false;
     bool _jump = false;
+    Vector2 _aim;
     
     float _inAirTimer = 0;
     float _jumpCooldown = 0;
@@ -141,6 +150,8 @@ class Controller
     bool grounded   { get const { return _grounded; }  set { _grounded = value; } }
     /// Whether the character is about to jump.
     bool jump       { get const { return _jump;     }  set { _jump = value;     } }
+    /// Aim position.
+    Vector2 aim     { get const { return _aim;      }  set { _aim = value;      } }
 
     ///  90   -90
     ///  <  0  >
@@ -166,6 +177,10 @@ class Controller
 
         // Update movement speed
         bool isMoving = Abs(speed) > _moveThreshold;
+        if (slow)
+        {
+            _direction = aim.x < graphics.width / 2 ? -1 : 1;
+        }
         if (isMoving)
         {
             if (slow)
@@ -220,6 +235,7 @@ class Main : ScriptObject
         @_controller = Controller();
         _animator.animation[Idle] = "Default_Character/Animations/idle.ani";
         _animator.animation[Walk] = "Default_Character/Animations/walking.ani";
+        _animator.animation[WalkBackward] = "Default_Character/Animations/walking_backward.ani";
         _animator.animation[Jump] = "Default_Character/Animations/jump.up.ani";
         _animator.animation[Fall] = "Default_Character/Animations/jump.down.ani";
     }
@@ -258,6 +274,7 @@ class Main : ScriptObject
         _controller.speed = walkSpeed * walkDirection;
         _controller.slow = _controls.IsDown(CTRL_SLOW);
         _controller.jump = _controls.IsDown(CTRL_UP);
+        _controller.aim = Vector2(_controls.yaw, _controls.pitch);
         _controller.Update(node, _animator, timeStep);
         _animator.Update(characterController, timeStep);
         
@@ -265,15 +282,14 @@ class Main : ScriptObject
     }
     void Update(float timeStep)
     {
-        _controls.Set(CTRL_UP | CTRL_DOWN | CTRL_LEFT | CTRL_RIGHT | CTRL_JUMP | CTRL_SLOW, false);
+        _controls.Set(CTRL_UP | CTRL_DOWN | CTRL_LEFT | CTRL_RIGHT | CTRL_SLOW, false);
         if (ui.focusElement is null)
         {
             _controls.Set(CTRL_UP, input.keyDown[KEY_I]);
             _controls.Set(CTRL_DOWN, input.keyDown[KEY_K]);
             _controls.Set(CTRL_LEFT, input.keyDown[KEY_J]);
             _controls.Set(CTRL_RIGHT, input.keyDown[KEY_L]);
-            _controls.Set(CTRL_SLOW, input.keyDown[KEY_U]);
-            _controls.Set(CTRL_JUMP, input.keyDown[KEY_SPACE]);
+            _controls.Set(CTRL_SLOW, input.keyDown[KEY_H]);
 
             _controls.yaw = input.mousePosition.x;
             _controls.pitch = input.mousePosition.y;
