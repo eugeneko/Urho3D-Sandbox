@@ -15,6 +15,13 @@ ImportCharacterAnimation(cache.resourceDirs[0] +
     rotation);
 
 ImportCharacterAnimation(cache.resourceDirs[0] +
+    "Default_Character/Animations/running.char.xml",
+    "Default_Character/Animations/running.ani",
+    "Default_Character/Models/Model_Skeleton.xml",
+    "Default_Character/Models/Model.mdl",
+    rotation);
+
+ImportCharacterAnimation(cache.resourceDirs[0] +
     "Default_Character/Animations/walking_backward.char.xml",
     "Default_Character/Animations/walking_backward.ani",
     "Default_Character/Models/Model_Skeleton.xml",

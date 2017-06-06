@@ -14,33 +14,49 @@ enum State
     State_COUNT
 }
 
+class WalkAnimationDesc
+{
+    String animationName;
+    Animation@ animation;
+    float minVelocity;
+    float baseVelocity;
+    float length;
+}
+
 class Animator
 {
     // Configuration
-    Array<String> _animations; ///< Animations for each state.
+    private Array<String> _animations; ///< Animations for each state.
+    private Array<WalkAnimationDesc> _walkAnimations; ///< Walk animations.
+    
     float _idleThreshold = 0.1;
     float _switchDuration = 0.2;
     float _animationRotationY = 180;
     float _walkBaseVelocity = 1.5;
     
-    /// Set animation and read all parameters.
-    void set_animation(State state, String &in animation)
+    /// Add walk animation. Shall be ordered from negative to positive speeds.
+    void AddWalkAnimation(String &in animation, float minVelocity)
+    {
+        WalkAnimationDesc desc;
+        desc.animationName = animation;
+        desc.animation = cache.GetResource("Animation", animation);
+        desc.minVelocity = minVelocity;
+        desc.baseVelocity = desc.animation.metadata["speed"].GetFloat();
+        desc.length = desc.animation.length;
+        Print(desc.baseVelocity);
+        _walkAnimations.Push(desc);
+    }
+    /// Add animation. Don't use this for walk animations.
+    void AddAnimation(State state, String &in animation)
     {
         _animations[state] = animation;
     }
-    /// Get animation.
-    String get_animation(State state) { return _animations[state]; }
 
     // Control variables
-    bool _grounded = false; ///< Whether the character is on the ground.
-    bool _jump = false; ///< Whether the character is about to jump.
-    float _movementSpeed = 0; ///< Horizontal movement speed.
-    float _verticalSpeed = 0; ///< Vertical movement speed.
-
-    float movementSpeed { get const { return _movementSpeed; }  set { _movementSpeed = value; } }
-    float verticalSpeed { get const { return _verticalSpeed; }  set { _verticalSpeed = value; } }
-    bool jump           { get const { return _jump; }           set { _jump = value; } }
-    bool grounded       { get const { return _grounded; }       set { _grounded = value; } }
+    bool grounded = false; ///< Whether the character is on the ground.
+    bool jump = false; ///< Whether the character is about to jump.
+    float movementSpeed = 0; ///< Horizontal movement speed.
+    float verticalSpeed = 0; ///< Vertical movement speed.
 
     // Internal state
     State _state = Idle;
@@ -51,12 +67,52 @@ class Animator
     {
         _animations.Resize(State_COUNT);
     }
+    private float GetWalkPhase(AnimationController@ animController) const
+    {
+        for (uint i = 0; i < _walkAnimations.length; ++i)
+        {
+            if (animController.IsPlaying(_walkAnimations[i].animationName))
+                return animController.GetTime(_walkAnimations[i].animationName) / _walkAnimations[i].length;
+        }
+        return -1;
+    }
+    private uint SelectWalkAnimation(float velocity) const
+    {
+        for (uint i = 0; i < _walkAnimations.length; ++i)
+        {
+            float edge = _walkAnimations[i].minVelocity;
+            if (edge > 0)
+                break;
+            if (velocity <= edge)
+                return i;
+        }
+        for (uint i = _walkAnimations.length; i > 0; --i)
+        {
+            float edge = _walkAnimations[i - 1].minVelocity;
+            if (edge < 0)
+                break;
+            if (velocity >= edge)
+                return i - 1;
+        }
+        return 0;
+    }
+    private void UpdateWalkAnimation(AnimationController@ animController, float velocity, float switchDuration)
+    {
+        uint idx = SelectWalkAnimation(velocity);
+        const String animationName = _walkAnimations[idx].animationName;
+        bool isPlaying = animController.IsPlaying(animationName);
+        float phase = GetWalkPhase(animController);
+        animController.PlayExclusive(animationName, 0, true, switchDuration);
+        if (!isPlaying)
+            animController.SetTime(animationName, phase * _walkAnimations[idx].length);
+        animController.SetSpeed(animationName, Abs(velocity / _walkAnimations[idx].baseVelocity));
+    }
     void Update(CharacterAnimationController@ characterController, float timeStep)
     {
         AnimationController@ animController = characterController;
         
         // Compute parameters
-        bool movingX = Abs(_movementSpeed) > 0;
+        bool movingX = Abs(movementSpeed) > 0;
         if (movingX)
             _idleTimer = 0;
 
@@ -101,16 +157,7 @@ class Animator
             animController.PlayExclusive(_animations[Idle], 0, true, _switchDuration);
             break;
         case Walk:
-            if (_movementSpeed > 0)
-            {
-                animController.PlayExclusive(_animations[Walk], 0, true, _switchDuration);
-                animController.SetSpeed(_animations[Walk], Abs(_movementSpeed / _walkBaseVelocity));
-            }
-            else
-            {
-                animController.PlayExclusive(_animations[WalkBackward], 0, true, _switchDuration);
-                animController.SetSpeed(_animations[WalkBackward], Abs(-_movementSpeed / _walkBaseVelocity));
-            }
+            UpdateWalkAnimation(animController, movementSpeed, _switchDuration);
             break;
         case Jump:
             animController.PlayExclusive(_animations[Jump], 0, false, _switchDuration);
@@ -125,119 +172,119 @@ class Animator
 
 class Controller
 {
-    float _moveThreshold = 0.01;    ///< Movement threshold.
+    // Grounding configuration
+    float flyThreshold = 0.1;
+    float jumpCooldown = 0.5;
+    
+    // Movement parameters
+    float moveVelocity = 1;
+    float jumpVelocity = 6;
 
     // Rotation parameters
-    float _flipDuration = 0.3;      ///< Flip from -1 to 1 duration.
-    float _rotationNegative = 90;   ///< Rotation angle for negative direction.
-    float _rotationNeutral = 0;     ///< Rotation angle for zero direction.
-    float _rotationPositive = -90;  ///< Rotation angle for positive direction.
+    float flipDuration = 0.3;       ///< Flip from -1 to 1 duration.
+    float rotationNegative = 90;    ///< Rotation angle for negative direction.
+    float rotationNeutral = 0;      ///< Rotation angle for zero direction.
+    float rotationPositive = -90;   ///< Rotation angle for positive direction.
     
-    float _speed = 0;
-    bool _slow = false;
-    bool _grounded = false;
-    bool _jump = false;
-    Vector2 _aim;
+    // Control variables
+    int moveDirection = 0;          ///< Movement direction.
+    bool slow = false;              ///< Whether the character is in slow movement mode.
+    bool grounded = false;          ///< Whether the character is on the ground.
+    bool jump = false;              ///< Whether the character is about to jump.
+    int lookDirection = 1;          ///< Look direction.
     
-    float _inAirTimer = 0;
-    float _jumpCooldown = 0;
-
-    /// Horizontal character speed.
-    float speed     { get const { return _speed;    }  set { _speed = value;    } }
-    /// Whether the character is in slow movement mode.
-    bool slow       { get const { return _slow;     }  set { _slow = value;     } }
-    /// Whether the character is on the ground.
-    bool grounded   { get const { return _grounded; }  set { _grounded = value; } }
-    /// Whether the character is about to jump.
-    bool jump       { get const { return _jump;     }  set { _jump = value;     } }
-    /// Aim position.
-    Vector2 aim     { get const { return _aim;      }  set { _aim = value;      } }
-
     ///  90   -90
     ///  <  0  >
     ///     v
     /// -1  0  1
-    int _direction = 1;
-    float _currentDirection = 1;
+    private int _direction = 1;
+    private float _currentDirection = 1;
+
+    private float _inAirTimer = 0;
+    private float _jumpTimer = 0;
+    private bool _softGrounded = false;
     
-    void Update(Node@ node, Animator@ animator, float timeStep)
+    private void UpdateParameters(float timeStep)
     {
-        RigidBody@ rigidBody = node.GetComponent("RigidBody");
-        
-        // Update the in air timer. Reset if grounded
+        // Update timers
         if (!grounded)
             _inAirTimer += timeStep;
         else
             _inAirTimer = 0.0f;
-        _jumpCooldown = Max(_jumpCooldown - timeStep, 0.0);
-        // When character has been in air less than 1/10 second, it's still interpreted as being on ground
-        bool isGrounded = _inAirTimer < 0.1;
-        bool canJump = _jumpCooldown == 0 && isGrounded;
-        animator.grounded = canJump;
+        _jumpTimer += timeStep;
+        _softGrounded = _jumpTimer > jumpCooldown && _inAirTimer < flyThreshold;
 
-        // Update movement speed
-        bool isMoving = Abs(speed) > _moveThreshold;
-        if (slow)
+        // Update jump state
+        if (jump)
         {
-            _direction = aim.x < graphics.width / 2 ? -1 : 1;
-        }
-        if (isMoving)
-        {
-            if (slow)
-            {
-                animator.movementSpeed = speed * _direction;
-            }
+            if (!_softGrounded)
+                jump = false;
             else
-            {
-                _direction = speed >= 0 ? 1 : -1;
-                animator.movementSpeed = Abs(speed * _direction);
-            }
+                _jumpTimer = 0;
         }
-        else
+    }
+    void Update(Node@ node, RigidBody@ rigidBody, Animator@ animator, float timeStep)
+    {
+        // Update parameters
+        UpdateParameters(timeStep);
+        animator.grounded = _softGrounded;
+
+        // Update direction and speed
+        bool isMoving = moveDirection != 0;
+        if (slow)
+            _direction = lookDirection;
+        else if (isMoving)
+            _direction = moveDirection >= 0 ? 1 : -1;
+
+        // Update jump
+        if (jump)
         {
-            animator.movementSpeed = 0.0;
-        }
-        
-        // Update current direction and node rotation
-        float flipSpeed = 1 / (0.5 * _flipDuration);
-        _currentDirection = Clamp(_currentDirection + Sign(_direction - _currentDirection) * flipSpeed * timeStep, -1.0f, 1.0f);
-        float angle = _currentDirection < 0
-            ? Lerp(_rotationNeutral, _rotationNegative, -_currentDirection)
-            : Lerp(_rotationNeutral, _rotationPositive, _currentDirection);
-        node.worldRotation = Quaternion(angle, Vector3(0, 1, 0));
-        
-        // Apply physics
-        if (jump && canJump)
-        {
-            rigidBody.ApplyImpulse(Vector3(0, 1, 0) * rigidBody.mass * 6);
+            rigidBody.ApplyImpulse(Vector3(0, 1, 0) * rigidBody.mass * jumpVelocity);
             animator.jump = true;
             jump = false;
-            _jumpCooldown = 0.5;
         }
-        
+
+        // Apply movement
+        float speed = moveVelocity * moveDirection;
+        animator.movementSpeed = speed * _direction;
         Vector3 linearVelocity = rigidBody.linearVelocity;
         linearVelocity.x = speed;
         rigidBody.linearVelocity = linearVelocity;
         animator.verticalSpeed = linearVelocity.y;
+        
+        // Interpolate direction and apply node rotation
+        float flipSpeed = 1 / (0.5 * flipDuration);
+        _currentDirection = Clamp(_currentDirection + Sign(_direction - _currentDirection) * flipSpeed * timeStep, -1.0f, 1.0f);
+        float angle = _currentDirection < 0
+            ? Lerp(rotationNeutral, rotationNegative, -_currentDirection)
+            : Lerp(rotationNeutral, rotationPositive, _currentDirection);
+        node.worldRotation = Quaternion(angle, Vector3(0, 1, 0));
     }
 }
 
 class Main : ScriptObject
 {
-    Controls _controls;
-    Animator@ _animator;
-    Controller@ _controller;
+    float walkVelocity = 1.5;
+    float runVelocity = 3;
+    float acceleration = 0.5;
+
+    private Controls _controls;
+    private Animator@ _animator;
+    private Controller@ _controller;
+    float _velocity;
     void DelayedStart()
     {
         SubscribeToEvent(node, "NodeCollision", "HandleNodeCollision");
+        SubscribeToEvent("KeyDown", "HandleKeyDown");
 
         @_animator = Animator();
         @_controller = Controller();
-        _animator.animation[Idle] = "Default_Character/Animations/idle.ani";
-        _animator.animation[Walk] = "Default_Character/Animations/walking.ani";
-        _animator.animation[WalkBackward] = "Default_Character/Animations/walking_backward.ani";
-        _animator.animation[Jump] = "Default_Character/Animations/jump.up.ani";
-        _animator.animation[Fall] = "Default_Character/Animations/jump.down.ani";
+        _animator.AddAnimation(Idle, "Default_Character/Animations/idle.ani");
+        _animator.AddAnimation(Jump, "Default_Character/Animations/jump.up.ani");
+        _animator.AddAnimation(Fall, "Default_Character/Animations/jump.down.ani");
+        _animator.AddWalkAnimation("Default_Character/Animations/walking_backward.ani", -1);
+        _animator.AddWalkAnimation("Default_Character/Animations/walking.ani", 1);
+        _animator.AddWalkAnimation("Default_Character/Animations/running.ani", 3);
     }
     void HandleNodeCollision(StringHash eventType, VariantMap& eventData)
     {
@@ -259,37 +306,44 @@ class Main : ScriptObject
             }
         }
     }
+    void HandleKeyDown(StringHash eventType, VariantMap& eventData)
+    {
+        int key = eventData["Key"].GetInt();
+        if (key == KEY_H)
+            _controls.Set(CTRL_SLOW, !_controls.IsDown(CTRL_SLOW));
+    }
     void FixedUpdate(float timeStep)
     {
         const float walkSpeed = 1.5;
         //const float walkSpeed = 2;
-        float walkDirection = 0;
+        int moveDirection = 0;
         if (_controls.IsDown(CTRL_LEFT))
-            walkDirection += -1;
+            moveDirection += -1;
         if (_controls.IsDown(CTRL_RIGHT))
-            walkDirection += 1;
+            moveDirection += 1;
 
         CharacterAnimationController@ characterController = node.GetComponent("CharacterAnimationController");
         RigidBody@ rigidBody = node.GetComponent("RigidBody");
-        _controller.speed = walkSpeed * walkDirection;
+        _controller.moveDirection = moveDirection;
         _controller.slow = _controls.IsDown(CTRL_SLOW);
         _controller.jump = _controls.IsDown(CTRL_UP);
-        _controller.aim = Vector2(_controls.yaw, _controls.pitch);
-        _controller.Update(node, _animator, timeStep);
+        _controller.lookDirection = _controls.yaw >= graphics.width / 2 ? 1 : -1;
+        _controller.moveVelocity = _controls.IsDown(CTRL_SLOW) ? 1.5 : 4;
+        //_controller.aim = Vector2(_controls.yaw, _controls.pitch);
+        _controller.Update(node, rigidBody, _animator, timeStep);
         _animator.Update(characterController, timeStep);
         
         _controller.grounded = false;
     }
     void Update(float timeStep)
     {
-        _controls.Set(CTRL_UP | CTRL_DOWN | CTRL_LEFT | CTRL_RIGHT | CTRL_SLOW, false);
+        _controls.Set(CTRL_UP | CTRL_DOWN | CTRL_LEFT | CTRL_RIGHT, false);
         if (ui.focusElement is null)
         {
             _controls.Set(CTRL_UP, input.keyDown[KEY_I]);
             _controls.Set(CTRL_DOWN, input.keyDown[KEY_K]);
             _controls.Set(CTRL_LEFT, input.keyDown[KEY_J]);
             _controls.Set(CTRL_RIGHT, input.keyDown[KEY_L]);
-            _controls.Set(CTRL_SLOW, input.keyDown[KEY_H]);
 
             _controls.yaw = input.mousePosition.x;
             _controls.pitch = input.mousePosition.y;
