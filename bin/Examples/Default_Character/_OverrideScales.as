@@ -1,8 +1,12 @@
 Vector3 scale(0.01, 0.01, 0.01);
 
 OverrideModelScale(cache.resourceDirs[0] +
-    "Default_Character/Models/Model.mdl",
-    "Default_Character/Models/Model.mdl", scale);
+    "Default_Character/Models/Female.mdl",
+    "Default_Character/Models/Female.mdl", scale);
+
+OverrideModelScale(cache.resourceDirs[0] +
+    "Default_Character/Models/Male.mdl",
+    "Default_Character/Models/Male.mdl", scale);
 
 OverrideAnimationScale(cache.resourceDirs[0] +
     "Default_Character/Animations/idle.ani",

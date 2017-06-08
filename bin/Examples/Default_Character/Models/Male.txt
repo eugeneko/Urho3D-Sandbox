@@ -1,0 +1,2 @@
+Default_Character/Materials/Alpha_Body_MAT.xml
+Default_Character/Materials/Alpha_Joints_MAT.xml

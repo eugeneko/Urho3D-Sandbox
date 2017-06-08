@@ -1,4 +1,4 @@
 <?xml version="1.0"?>
 <animation>
-    <metadata name="speed" type="Float" value="4"/>
+	<metadata name="speed" type="Float" value="4" />
 </animation>

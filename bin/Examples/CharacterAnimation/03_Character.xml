@@ -64,6 +64,8 @@
 			<attribute name="Delayed Method Calls" value="0" />
 			<attribute name="Script File" value="ScriptFile;CharacterAnimation/03_Character.as" />
 			<attribute name="Class Name" value="Main" />
+			<attribute name="walkVelocity" value="1.5" />
+			<attribute name="runVelocity" value="4" />
 		</component>
 		<component type="CollisionShape" id="30">
 			<attribute name="Shape Type" value="Capsule" />
@@ -81,11 +83,11 @@
 			<attribute name="Node Animation States">
 				<variant type="Int" value="0" />
 			</attribute>
-			<attribute name="Skeleton" value="XMLFile;Default_Character/Models/Model_Skeleton.xml" />
+			<attribute name="Skeleton" value="XMLFile;Default_Character/Models/Female_Skeleton.xml" />
 			<attribute name="Animation Rotation" value="-4.37114e-08 0 1 -0" />
 		</component>
 		<component type="AnimatedModel" id="37">
-			<attribute name="Model" value="Model;Default_Character/Models/Model.mdl" />
+			<attribute name="Model" value="Model;Default_Character/Models/Female.mdl" />
 			<attribute name="Material" value="Material;Default_Character/Materials/Beta_Joints_MAT.xml;Default_Character/Materials/asdf1_Beta_HighLimbsGeoSG2.xml" />
 			<attribute name="Bone Animation Enabled">
 				<variant type="Bool" value="true" />
