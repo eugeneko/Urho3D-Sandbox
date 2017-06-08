@@ -29,10 +29,11 @@ class Animator
     private Array<String> _animations; ///< Animations for each state.
     private Array<WalkAnimationDesc> _walkAnimations; ///< Walk animations.
     
-    float _idleThreshold = 0.1;
-    float _switchDuration = 0.2;
-    float _animationRotationY = 180;
-    float _walkBaseVelocity = 1.5;
+    float idleThreshold = 0.1;
+    float walkSwitchDuration = 0.2;
+    float jumpSwitchDuration = 0.1;
+    float flySwitchDuration = 0.4;
+    private float _switchDuration = 0.2;
     
     /// Add walk animation. Shall be ordered from negative to positive speeds.
     void AddWalkAnimation(String &in animation, float minVelocity)
@@ -66,6 +67,7 @@ class Animator
     Animator()
     {
         _animations.Resize(State_COUNT);
+        _switchDuration = walkSwitchDuration;
     }
     private float GetWalkPhase(AnimationController@ animController) const
     {
@@ -134,7 +136,7 @@ class Animator
             else
             {
                 _idleTimer += timeStep;
-                if (_idleTimer >= _idleThreshold)
+                if (_idleTimer >= idleThreshold)
                 {
                     _idleTimer = 0;
                     _state = Idle;
@@ -155,16 +157,19 @@ class Animator
         {
         case Idle:
             animController.PlayExclusive(_animations[Idle], 0, true, _switchDuration);
+            _switchDuration = walkSwitchDuration;
             break;
         case Walk:
             UpdateWalkAnimation(animController, movementSpeed, _switchDuration);
+            _switchDuration = walkSwitchDuration;
             break;
         case Jump:
-            animController.PlayExclusive(_animations[Jump], 0, false, _switchDuration);
+            animController.PlayExclusive(_animations[Jump], 0, false, jumpSwitchDuration);
             animController.SetSpeed(_animations[Jump], 0.5);
+            _switchDuration = jumpSwitchDuration;
             break;
         case Fall:
-            animController.PlayExclusive(_animations[Fall], 0, false, _switchDuration);
+            animController.PlayExclusive(_animations[Fall], 0, false, flySwitchDuration);
             break;
         }
     }
@@ -265,8 +270,7 @@ class Controller
 class Main : ScriptObject
 {
     float walkVelocity = 1.5;
-    float runVelocity = 3;
-    float acceleration = 0.5;
+    float runVelocity = 4;
 
     private Controls _controls;
     private Animator@ _animator;
@@ -314,8 +318,6 @@ class Main : ScriptObject
     }
     void FixedUpdate(float timeStep)
     {
-        const float walkSpeed = 1.5;
-        //const float walkSpeed = 2;
         int moveDirection = 0;
         if (_controls.IsDown(CTRL_LEFT))
             moveDirection += -1;
@@ -328,7 +330,7 @@ class Main : ScriptObject
         _controller.slow = _controls.IsDown(CTRL_SLOW);
         _controller.jump = _controls.IsDown(CTRL_UP);
         _controller.lookDirection = _controls.yaw >= graphics.width / 2 ? 1 : -1;
-        _controller.moveVelocity = _controls.IsDown(CTRL_SLOW) ? 1.5 : 4;
+        _controller.moveVelocity = _controls.IsDown(CTRL_SLOW) ? walkVelocity : runVelocity;
         //_controller.aim = Vector2(_controls.yaw, _controls.pitch);
         _controller.Update(node, rigidBody, _animator, timeStep);
         _animator.Update(characterController, timeStep);
