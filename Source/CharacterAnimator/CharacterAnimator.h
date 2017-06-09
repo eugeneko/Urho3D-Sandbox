@@ -582,7 +582,7 @@ private:
     /// Animated model.
     WeakPtr<AnimatedModel> animatedModel_;
     /// Animated model skeleton.
-    Skeleton* animatedModelSkeleton_ = nullptr;
+    WeakPtr<Node> rootNode_;
 
     /// Dirty flag.
     bool dirty_ = false;

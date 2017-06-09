@@ -20,6 +20,7 @@ class WalkAnimationDesc
     Animation@ animation;
     float minVelocity;
     float baseVelocity;
+    float footScale;
     float length;
 }
 
@@ -29,6 +30,7 @@ class Animator
     private Array<String> _animations; ///< Animations for each state.
     private Array<WalkAnimationDesc> _walkAnimations; ///< Walk animations.
     
+    float modelFootScale = 1;
     float idleThreshold = 0.1;
     float walkSwitchDuration = 0.2;
     float jumpSwitchDuration = 0.1;
@@ -43,8 +45,8 @@ class Animator
         desc.animation = cache.GetResource("Animation", animation);
         desc.minVelocity = minVelocity;
         desc.baseVelocity = desc.animation.metadata["speed"].GetFloat();
+        desc.footScale = desc.animation.metadata["footscale"].GetFloat();
         desc.length = desc.animation.length;
-        Print(desc.baseVelocity);
         _walkAnimations.Push(desc);
     }
     /// Add animation. Don't use this for walk animations.
@@ -107,7 +109,9 @@ class Animator
         animController.PlayExclusive(animationName, 0, true, switchDuration);
         if (!isPlaying)
             animController.SetTime(animationName, phase * _walkAnimations[idx].length);
-        animController.SetSpeed(animationName, Abs(velocity / _walkAnimations[idx].baseVelocity));
+
+        float baseVelocity = _walkAnimations[idx].baseVelocity * modelFootScale / _walkAnimations[idx].footScale;
+        animController.SetSpeed(animationName, Abs(velocity / baseVelocity));
     }
     void Update(CharacterAnimationController@ characterController, float timeStep)
     {
@@ -271,11 +275,14 @@ class Main : ScriptObject
 {
     float walkVelocity = 1.5;
     float runVelocity = 4;
+    bool male = false;
 
+    private float _modelFootScale = 1;
     private Controls _controls;
     private Animator@ _animator;
     private Controller@ _controller;
     float _velocity;
+
     void DelayedStart()
     {
         SubscribeToEvent(node, "NodeCollision", "HandleNodeCollision");
@@ -333,9 +340,20 @@ class Main : ScriptObject
         _controller.moveVelocity = _controls.IsDown(CTRL_SLOW) ? walkVelocity : runVelocity;
         //_controller.aim = Vector2(_controls.yaw, _controls.pitch);
         _controller.Update(node, rigidBody, _animator, timeStep);
+        _animator.modelFootScale = _modelFootScale;
         _animator.Update(characterController, timeStep);
         
         _controller.grounded = false;
+    }
+    void ApplyAttributes()
+    {
+        String modelName = male ? "Default_Character/Models/Male.mdl" : "Default_Character/Models/Female.mdl";
+        Model@ model = cache.GetResource("Model", modelName);
+
+        AnimatedModel@ animatedModel = node.GetComponent("AnimatedModel");
+        animatedModel.model = model;
+        animatedModel.ApplyMaterialList();
+        _modelFootScale = model.metadata["footscale"].GetFloat();
     }
     void Update(float timeStep)
     {

@@ -1410,10 +1410,8 @@ void CharacterAnimationController::ApplyAnimation()
     // Revert animation transform
     if (revertAnimationTransform_)
     {
-        Bone& rootBone = *animatedModelSkeleton_->GetRootBone();
-        Node& rootNode = *rootBone.node_;
-        rootNode.SetRotation(animationRotation_.Inverse() * rootNode.GetRotation());
-        rootNode.SetPosition(animationRotation_.Inverse() * rootNode.GetPosition());
+        rootNode_->SetRotation(animationRotation_.Inverse() * rootNode_->GetRotation());
+        rootNode_->SetPosition(animationRotation_.Inverse() * rootNode_->GetPosition());
     }
 }
 
@@ -1458,7 +1456,7 @@ void CharacterAnimationController::CheckIntegrity()
         return;
 
     // If model is expired, mark dirty
-    if (!animatedModel_ || animatedModelSkeleton_ != &animatedModel_->GetSkeleton())
+    if (!animatedModel_ || !rootNode_)
         MarkDirty();
 
     // Try to get model
@@ -1487,7 +1485,7 @@ void CharacterAnimationController::CheckIntegrity()
 
     if (dirty_)
     {
-        animatedModelSkeleton_ = &animatedModel_->GetSkeleton();
+        rootNode_ = animatedModel_->GetSkeleton().GetRootBone()->node_;
 
         // Remove old nodes
         if (Node* container = node_->GetChild(containerName))
@@ -1499,7 +1497,7 @@ void CharacterAnimationController::CheckIntegrity()
 
         // Initialize segments
         // #TODO Rename segmentData_
-        skeleton_->AllocateSegmentData(segmentData_, *animatedModelSkeleton_, Matrix3x4(Vector3::ZERO, animationRotation_, 1.0f));
+        skeleton_->AllocateSegmentData(segmentData_, animatedModel_->GetSkeleton(), Matrix3x4(Vector3::ZERO, animationRotation_, 1.0f));
 
         // Create nodes
         Node* container = node_->CreateChild(containerName, LOCAL);

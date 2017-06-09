@@ -1,4 +1,5 @@
 <?xml version="1.0"?>
 <animation>
 	<metadata name="speed" type="Float" value="1.7" />
+	<metadata name="footscale" type="Float" value="0.888993" />
 </animation>
