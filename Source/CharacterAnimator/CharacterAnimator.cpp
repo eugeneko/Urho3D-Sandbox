@@ -1867,6 +1867,58 @@ void TrimAnimation(const String& outputName, const String& animationName, float 
     animation->SaveFile(outputName);
 }
 
+float ComputeSegmentLength(const String& modelName, const String& skeletonName, const String& segmentName)
+{
+    ResourceCache* cache = GetScriptContext()->GetSubsystem<ResourceCache>();
+    if (!cache)
+        return 0;
+
+    // Load resources
+    SharedPtr<Model> model(cache->GetResource<Model>(modelName));
+    SharedPtr<CharacterSkeleton> characterSkeleton(cache->GetResource<CharacterSkeleton>(skeletonName));
+    if (!model)
+    {
+        URHO3D_LOGWARNINGF("Failed to load model %s", modelName.CString());
+        return 0;
+    }
+    if (!characterSkeleton)
+    {
+        URHO3D_LOGWARNINGF("Failed to load skeleton %s", skeletonName.CString());
+        return 0;
+    }
+
+    // Find segment
+    const CharacterSkeletonSegment* segment = characterSkeleton->FindSegment(segmentName);
+    if (!segment)
+    {
+        URHO3D_LOGWARNINGF("Can't find segment %s", segmentName.CString());
+        return 0;
+    }
+    if (segment->type_ != CharacterSkeletonSegmentType::Limb || segment->boneNames_.Size() < 3)
+    {
+        URHO3D_LOGWARNINGF("Only limb segments allowed");
+        return 0;
+    }
+
+    // Find bones
+    Skeleton& skeleton = model->GetSkeleton();
+    PODVector<Matrix3x4> globalTransforms = ComputeGlobalTransforms(skeleton, Matrix3x4::IDENTITY);
+    Bone* boneA = skeleton.GetBone(segment->boneNames_[0]);
+    Bone* boneB = skeleton.GetBone(segment->boneNames_[1]);
+    Bone* boneC = skeleton.GetBone(segment->boneNames_[2]);
+    if (!boneA || !boneB || !boneC)
+    {
+        URHO3D_LOGWARNINGF("Can't find bone");
+        return 0;
+    }
+
+    // Compute length
+    const Vector3 positionA = globalTransforms[boneA - skeleton.GetBones().Buffer()].Translation();
+    const Vector3 positionB = globalTransforms[boneB - skeleton.GetBones().Buffer()].Translation();
+    const Vector3 positionC = globalTransforms[boneC - skeleton.GetBones().Buffer()].Translation();
+    return (positionC - positionB).Length() + (positionB - positionA).Length();
+}
+
 void CharacterAnimationController_SetTargetTransform(const String& segment, const Matrix3x4& transform,
     CharacterAnimationController* characterAnimationController)
 {
@@ -1895,6 +1947,7 @@ void RegisterCharacterAnimatorScriptAPI(asIScriptEngine* engine)
     engine->RegisterGlobalFunction("void OverrideAnimationScale(const String&in, const String&in, const String&in, const Vector3&in)", asFUNCTION(OverrideAnimationScale), asCALL_CDECL);
     engine->RegisterGlobalFunction("void ResetRootAnimationTrackPosition(const String&in, const String&in, const String&in, float, float)", asFUNCTION(ResetRootAnimationTrackPosition), asCALL_CDECL);
     engine->RegisterGlobalFunction("void TrimAnimation(const String&in, const String&in, float, float)", asFUNCTION(TrimAnimation), asCALL_CDECL);
+    engine->RegisterGlobalFunction("float ComputeSegmentLength(const String&in, const String&in, const String&in)", asFUNCTION(ComputeSegmentLength), asCALL_CDECL);
 
     RegisterComponent<CharacterAnimationController>(engine, "CharacterAnimationController");
     RegisterSubclass<CharacterAnimationController, AnimationController>(engine, "AnimationController", "CharacterAnimationController");
