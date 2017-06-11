@@ -1,8 +1,8 @@
 <skeleton>
     <root  name="Root"      bones="Hips"/>
     <chain name="Spine"     bones="Spine        Spine1          Spine2      Neck"/>
-    <limb  name="LeftFoot"  bones="LeftUpLeg    LeftLeg         LeftFoot"   joint="0 0 1"/>
-    <limb  name="RightFoot" bones="RightUpLeg   RightLeg        RightFoot"  joint="0 0 1"/>
-    <limb  name="LeftHand"  bones="LeftArm      LeftForeArm     LeftHand"   joint="0 0 -1"/>
-    <limb  name="RightHand" bones="RightArm     RightForeArm    RightHand"  joint="0 0 -1"/>
+    <limb  name="LeftFoot"  bones="LeftUpLeg    LeftLeg         LeftFoot"   joint="0 0 -1"/>
+    <limb  name="RightFoot" bones="RightUpLeg   RightLeg        RightFoot"  joint="0 0 -1"/>
+    <limb  name="LeftHand"  bones="LeftArm      LeftForeArm     LeftHand"   joint="0 0 1"/>
+    <limb  name="RightHand" bones="RightArm     RightForeArm    RightHand"  joint="0 0 1"/>
 </skeleton>

@@ -7,8 +7,8 @@
 	<attribute name="Elapsed Time" value="0" />
 	<attribute name="Next Replicated Node ID" value="725" />
 	<attribute name="Next Replicated Component ID" value="95" />
-	<attribute name="Next Local Node ID" value="16778134" />
-	<attribute name="Next Local Component ID" value="16778848" />
+	<attribute name="Next Local Node ID" value="16778240" />
+	<attribute name="Next Local Component ID" value="16778872" />
 	<attribute name="Variables" />
 	<attribute name="Variable Names" value="" />
 	<component type="Octree" id="1" />
@@ -48,14 +48,10 @@
 		<attribute name="Scale" value="1 1 1" />
 		<attribute name="Variables" />
 		<component type="AnimatedModel" id="68">
-			<attribute name="Model" value="Model;Models/Swat.mdl" />
-			<attribute name="Material" value="Material;Materials/GreenTransparent.xml;Materials/GreenTransparent.xml;Materials/GreenTransparent.xml" />
+			<attribute name="Model" value="Model;Default_Character/Models/Female.mdl" />
+			<attribute name="Material" value="Material;Materials/GreenTransparent.xml;Materials/GreenTransparent.xml" />
 			<attribute name="Cast Shadows" value="true" />
 			<attribute name="Bone Animation Enabled">
-				<variant type="Bool" value="true" />
-				<variant type="Bool" value="true" />
-				<variant type="Bool" value="true" />
-				<variant type="Bool" value="true" />
 				<variant type="Bool" value="true" />
 				<variant type="Bool" value="true" />
 				<variant type="Bool" value="true" />
@@ -124,254 +120,218 @@
 				<variant type="Int" value="0" />
 			</attribute>
 		</component>
-		<node id="16777774">
+		<node id="16778135">
 			<attribute name="Is Enabled" value="true" />
-			<attribute name="Name" value="swat:Hips" />
+			<attribute name="Name" value="mixamorig_Hips" />
 			<attribute name="Tags" />
-			<attribute name="Position" value="3.64755e-08 0.963687 0.000356898" />
-			<attribute name="Rotation" value="1 0 0 0" />
+			<attribute name="Position" value="1.1e-07 1.04275 -0.0155431" />
+			<attribute name="Rotation" value="1 0 0 -5e-07" />
 			<attribute name="Scale" value="0.01 0.01 0.01" />
 			<attribute name="Variables" />
-			<node id="16777775">
+			<node id="16778136">
 				<attribute name="Is Enabled" value="true" />
-				<attribute name="Name" value="swat:Spine" />
+				<attribute name="Name" value="mixamorig_Spine" />
 				<attribute name="Tags" />
-				<attribute name="Position" value="0 9.2263 -1.5771" />
-				<attribute name="Rotation" value="1 0 0 0" />
+				<attribute name="Position" value="0 10.1816 -0.131521" />
+				<attribute name="Rotation" value="0.998777 0.049444 2.50306e-07 -4.45545e-05" />
 				<attribute name="Scale" value="1 1 1" />
 				<attribute name="Variables" />
-				<node id="16777776">
+				<node id="16778137">
 					<attribute name="Is Enabled" value="true" />
-					<attribute name="Name" value="swat:Spine1" />
+					<attribute name="Name" value="mixamorig_Spine1" />
 					<attribute name="Tags" />
-					<attribute name="Position" value="0 16.254 0.1656" />
-					<attribute name="Rotation" value="1 0 0 0" />
+					<attribute name="Position" value="-0.000921 10.133 -0" />
+					<attribute name="Rotation" value="0.999677 0.0254302 -1.70585e-13 3.30107e-05" />
 					<attribute name="Scale" value="1 1 1" />
 					<attribute name="Variables" />
-					<node id="16777777">
+					<node id="16778138">
 						<attribute name="Is Enabled" value="true" />
-						<attribute name="Name" value="swat:Spine2" />
+						<attribute name="Name" value="mixamorig_Spine2" />
 						<attribute name="Tags" />
-						<attribute name="Position" value="0 13.6396 1.2923" />
+						<attribute name="Position" value="-0.000228 9.20307 -0" />
 						<attribute name="Rotation" value="1 0 0 0" />
 						<attribute name="Scale" value="1 1 1" />
 						<attribute name="Variables" />
-						<node id="16777778">
+						<node id="16778139">
 							<attribute name="Is Enabled" value="true" />
-							<attribute name="Name" value="swat:Neck" />
+							<attribute name="Name" value="mixamorig_Neck" />
 							<attribute name="Tags" />
-							<attribute name="Position" value="0 13.8774 4.3542" />
-							<attribute name="Rotation" value="1 0 0 0" />
+							<attribute name="Position" value="-0.000418 16.8605 -0" />
+							<attribute name="Rotation" value="0.997196 -0.0748273 2.75773e-06 1.27858e-05" />
 							<attribute name="Scale" value="1 1 1" />
 							<attribute name="Variables" />
-							<node id="16777779">
+							<node id="16778140">
 								<attribute name="Is Enabled" value="true" />
-								<attribute name="Name" value="swat:Neck1" />
+								<attribute name="Name" value="mixamorig_Head" />
 								<attribute name="Tags" />
-								<attribute name="Position" value="0 4.34 -0.9269" />
-								<attribute name="Rotation" value="1 0 0 0" />
+								<attribute name="Position" value="0 9.61788 -1.68501" />
+								<attribute name="Rotation" value="1 0 -1.5e-06 0" />
 								<attribute name="Scale" value="1 1 1" />
 								<attribute name="Variables" />
-								<node id="16777780">
-									<attribute name="Is Enabled" value="true" />
-									<attribute name="Name" value="swat:Head" />
-									<attribute name="Tags" />
-									<attribute name="Position" value="0 4.0266 -0.8585" />
-									<attribute name="Rotation" value="1 0 0 0" />
-									<attribute name="Scale" value="1 1 1" />
-									<attribute name="Variables" />
-									<node id="16777781">
-										<attribute name="Is Enabled" value="true" />
-										<attribute name="Name" value="swat:RightEye" />
-										<attribute name="Tags" />
-										<attribute name="Position" value="-3.0057 7.2618 -7.9556" />
-										<attribute name="Rotation" value="0.998207 -0.0541571 -0.0254469 -0.0013806" />
-										<attribute name="Scale" value="1 1 1" />
-										<attribute name="Variables" />
-									</node>
-									<node id="16777782">
-										<attribute name="Is Enabled" value="true" />
-										<attribute name="Name" value="swat:LeftEye" />
-										<attribute name="Tags" />
-										<attribute name="Position" value="3.0057 7.2618 -7.9556" />
-										<attribute name="Rotation" value="0.998087 -0.0526761 -0.0323087 -0.00170516" />
-										<attribute name="Scale" value="1 1 1" />
-										<attribute name="Variables" />
-									</node>
-									<node id="16777783">
-										<attribute name="Is Enabled" value="true" />
-										<attribute name="Name" value="swat:Jaw" />
-										<attribute name="Tags" />
-										<attribute name="Position" value="0 2.0303 -2.4562" />
-										<attribute name="Rotation" value="1 0 0 0" />
-										<attribute name="Scale" value="1 1 1" />
-										<attribute name="Variables" />
-									</node>
-								</node>
 							</node>
 						</node>
-						<node id="16777784">
+						<node id="16778141">
 							<attribute name="Is Enabled" value="true" />
-							<attribute name="Name" value="swat:LeftShoulder" />
+							<attribute name="Name" value="mixamorig_LeftShoulder" />
 							<attribute name="Tags" />
-							<attribute name="Position" value="6.1442 10.187 3.7932" />
-							<attribute name="Rotation" value="1 0 0 0" />
+							<attribute name="Position" value="4.57018 11.2157 0.965006" />
+							<attribute name="Rotation" value="-0.38822 0.51276 0.589092 0.489216" />
 							<attribute name="Scale" value="1 1 1" />
 							<attribute name="Variables" />
-							<node id="16777785">
+							<node id="16778142">
 								<attribute name="Is Enabled" value="true" />
-								<attribute name="Name" value="swat:LeftArm" />
+								<attribute name="Name" value="mixamorig_LeftArm" />
 								<attribute name="Tags" />
-								<attribute name="Position" value="12.3191 -1.113 1.7935" />
-								<attribute name="Rotation" value="1 0 0 0" />
+								<attribute name="Position" value="0.320732 10.8308 -0.213868" />
+								<attribute name="Rotation" value="0.995919 0.00317722 -0.000574344 0.0901971" />
 								<attribute name="Scale" value="1 1 1" />
 								<attribute name="Variables" />
-								<node id="16777786">
+								<node id="16778143">
 									<attribute name="Is Enabled" value="true" />
-									<attribute name="Name" value="swat:LeftForeArm" />
+									<attribute name="Name" value="mixamorig_LeftForeArm" />
 									<attribute name="Tags" />
-									<attribute name="Position" value="27.687 0 -0" />
-									<attribute name="Rotation" value="1 0 0 0" />
+									<attribute name="Position" value="0.193078 27.8206 1.06067" />
+									<attribute name="Rotation" value="0.999714 0.0236808 0.00321642 0.00105455" />
 									<attribute name="Scale" value="1 1 1" />
 									<attribute name="Variables" />
-									<node id="16777787">
+									<node id="16778144">
 										<attribute name="Is Enabled" value="true" />
-										<attribute name="Name" value="swat:LeftHand" />
+										<attribute name="Name" value="mixamorig_LeftHand" />
 										<attribute name="Tags" />
-										<attribute name="Position" value="27.8738 0 -0" />
-										<attribute name="Rotation" value="0.998051 -0.0511365 -0.0219713 -0.0282335" />
+										<attribute name="Position" value="0.253564 28.3265 -0.260771" />
+										<attribute name="Rotation" value="0.998146 -0.00584309 0.0237448 -0.0557426" />
 										<attribute name="Scale" value="1 1 1" />
 										<attribute name="Variables" />
-										<node id="16777788">
+										<node id="16778145">
 											<attribute name="Is Enabled" value="true" />
-											<attribute name="Name" value="swat:LeftHandThumb1" />
+											<attribute name="Name" value="mixamorig_LeftHandThumb1" />
 											<attribute name="Tags" />
-											<attribute name="Position" value="2.3785 -1.0029 -2.6209" />
-											<attribute name="Rotation" value="0.996287 -0.0534186 -0.0496936 -0.0456982" />
+											<attribute name="Position" value="-2.94914 2.17644 -1.52435" />
+											<attribute name="Rotation" value="0.943287 -0.16771 -0.0543562 0.281296" />
 											<attribute name="Scale" value="1 1 1" />
 											<attribute name="Variables" />
-											<node id="16777789">
+											<node id="16778146">
 												<attribute name="Is Enabled" value="true" />
-												<attribute name="Name" value="swat:LeftHandThumb2" />
+												<attribute name="Name" value="mixamorig_LeftHandThumb2" />
 												<attribute name="Tags" />
-												<attribute name="Position" value="3.3624 -1.0029 -2.8398" />
-												<attribute name="Rotation" value="0.992428 0.0352053 0.117673 0.000126919" />
+												<attribute name="Position" value="-0.213359 4.14349 -0.414375" />
+												<attribute name="Rotation" value="0.99273 -0.0655239 0.00494319 0.100844" />
 												<attribute name="Scale" value="1 1 1" />
 												<attribute name="Variables" />
-												<node id="16777790">
+												<node id="16778147">
 													<attribute name="Is Enabled" value="true" />
-													<attribute name="Name" value="swat:LeftHandThumb3" />
+													<attribute name="Name" value="mixamorig_LeftHandThumb3" />
 													<attribute name="Tags" />
-													<attribute name="Position" value="4.5018 -1.3445 -2.1783" />
-													<attribute name="Rotation" value="0.991357 -0.0550657 0.00810093 -0.118801" />
+													<attribute name="Position" value="0.515291 3.38371 0.109272" />
+													<attribute name="Rotation" value="0.992905 0.0465669 -0.00219029 -0.109394" />
 													<attribute name="Scale" value="1 1 1" />
 													<attribute name="Variables" />
 												</node>
 											</node>
 										</node>
-										<node id="16777791">
+										<node id="16778148">
 											<attribute name="Is Enabled" value="true" />
-											<attribute name="Name" value="swat:LeftHandMiddle1" />
+											<attribute name="Name" value="mixamorig_LeftHandIndex1" />
 											<attribute name="Tags" />
-											<attribute name="Position" value="10.4639 0.6148 -0.4298" />
-											<attribute name="Rotation" value="0.99936 -2.40843e-07 0.0204978 0.0293207" />
+											<attribute name="Position" value="-3.18865 8.82971 -0.472725" />
+											<attribute name="Rotation" value="0.998795 -0.00693535 -0.000646529 0.0485705" />
 											<attribute name="Scale" value="1 1 1" />
 											<attribute name="Variables" />
-											<node id="16777792">
+											<node id="16778149">
 												<attribute name="Is Enabled" value="true" />
-												<attribute name="Name" value="swat:LeftHandMiddle2" />
+												<attribute name="Name" value="mixamorig_LeftHandIndex2" />
 												<attribute name="Tags" />
-												<attribute name="Position" value="5.7921 0 -0" />
-												<attribute name="Rotation" value="1 0 0 0" />
+												<attribute name="Position" value="-0.019232 3.67599 0.0521" />
+												<attribute name="Rotation" value="0.999702 0.0243938 0.00023682 -0.000252825" />
 												<attribute name="Scale" value="1 1 1" />
 												<attribute name="Variables" />
-												<node id="16777793">
+												<node id="16778150">
 													<attribute name="Is Enabled" value="true" />
-													<attribute name="Name" value="swat:LeftHandMiddle3" />
+													<attribute name="Name" value="mixamorig_LeftHandIndex3" />
 													<attribute name="Tags" />
-													<attribute name="Position" value="3.7132 0 -0" />
-													<attribute name="Rotation" value="1 0 0 0" />
+													<attribute name="Position" value="-0.016458 2.88129 -0.099755" />
+													<attribute name="Rotation" value="0.999567 0.0233529 0.00133158 0.0178407" />
 													<attribute name="Scale" value="1 1 1" />
 													<attribute name="Variables" />
 												</node>
 											</node>
 										</node>
-										<node id="16777794">
+										<node id="16778151">
 											<attribute name="Is Enabled" value="true" />
-											<attribute name="Name" value="swat:LeftHandIndex1" />
+											<attribute name="Name" value="mixamorig_LeftHandMiddle1" />
 											<attribute name="Tags" />
-											<attribute name="Position" value="10.3945 0.6148 -2.7055" />
-											<attribute name="Rotation" value="0.99936 -3.15425e-07 0.0204978 0.0293208" />
+											<attribute name="Position" value="-0.974614 9.48345 0.002382" />
+											<attribute name="Rotation" value="0.998403 0.0223727 0.00188125 0.0518413" />
 											<attribute name="Scale" value="1 1 1" />
 											<attribute name="Variables" />
-											<node id="16777795">
+											<node id="16778152">
 												<attribute name="Is Enabled" value="true" />
-												<attribute name="Name" value="swat:LeftHandIndex2" />
+												<attribute name="Name" value="mixamorig_LeftHandMiddle2" />
 												<attribute name="Tags" />
-												<attribute name="Position" value="5.5493 0 -0" />
-												<attribute name="Rotation" value="1 0 0 0" />
+												<attribute name="Position" value="0.005079 3.69455 -0.16499" />
+												<attribute name="Rotation" value="0.999866 -0.0116926 -8.40112e-05 0.011452" />
 												<attribute name="Scale" value="1 1 1" />
 												<attribute name="Variables" />
-												<node id="16777796">
+												<node id="16778153">
 													<attribute name="Is Enabled" value="true" />
-													<attribute name="Name" value="swat:LeftHandIndex3" />
+													<attribute name="Name" value="mixamorig_LeftHandMiddle3" />
 													<attribute name="Tags" />
-													<attribute name="Position" value="3.3911 0 -0" />
-													<attribute name="Rotation" value="1 0 0 0" />
+													<attribute name="Position" value="0.071581 2.94939 -0.062733" />
+													<attribute name="Rotation" value="0.999815 -0.0124563 0.000356316 -0.0146592" />
 													<attribute name="Scale" value="1 1 1" />
 													<attribute name="Variables" />
 												</node>
 											</node>
 										</node>
-										<node id="16777797">
+										<node id="16778154">
 											<attribute name="Is Enabled" value="true" />
-											<attribute name="Name" value="swat:LeftHandRing1" />
+											<attribute name="Name" value="mixamorig_LeftHandRing1" />
 											<attribute name="Tags" />
-											<attribute name="Position" value="10.3252 0.3211 1.8755" />
-											<attribute name="Rotation" value="0.99936 -2.70985e-07 0.0204978 0.0293208" />
+											<attribute name="Position" value="0.923424 9.2474 -0.076253" />
+											<attribute name="Rotation" value="0.998929 0.000139399 -0.000241759 0.0462733" />
 											<attribute name="Scale" value="1 1 1" />
 											<attribute name="Variables" />
-											<node id="16777798">
+											<node id="16778155">
 												<attribute name="Is Enabled" value="true" />
-												<attribute name="Name" value="swat:LeftHandRing2" />
+												<attribute name="Name" value="mixamorig_LeftHandRing2" />
 												<attribute name="Tags" />
-												<attribute name="Position" value="5.4452 0 -0" />
-												<attribute name="Rotation" value="1 0 0 0" />
+												<attribute name="Position" value="-0.031011 3.15387 -0" />
+												<attribute name="Rotation" value="0.999754 0.0220112 0.000246061 -0.00281919" />
 												<attribute name="Scale" value="1 1 1" />
 												<attribute name="Variables" />
-												<node id="16777799">
+												<node id="16778156">
 													<attribute name="Is Enabled" value="true" />
-													<attribute name="Name" value="swat:LeftHandRing3" />
+													<attribute name="Name" value="mixamorig_LeftHandRing3" />
 													<attribute name="Tags" />
-													<attribute name="Position" value="3.7132 0 -0" />
-													<attribute name="Rotation" value="1 0 0 0" />
+													<attribute name="Position" value="-0.045394 2.93447 -0.12934" />
+													<attribute name="Rotation" value="0.999156 -0.0403483 0.000149626 0.00766998" />
 													<attribute name="Scale" value="1 1 1" />
 													<attribute name="Variables" />
 												</node>
 											</node>
 										</node>
-										<node id="16777800">
+										<node id="16778157">
 											<attribute name="Is Enabled" value="true" />
-											<attribute name="Name" value="swat:LeftHandPinky1" />
+											<attribute name="Name" value="mixamorig_LeftHandPinky1" />
 											<attribute name="Tags" />
-											<attribute name="Position" value="10.013 -0.0783 3.9671" />
-											<attribute name="Rotation" value="0.99936 -2.70635e-07 0.0204978 0.0293208" />
+											<attribute name="Position" value="2.95064 8.4237 -0.557203" />
+											<attribute name="Rotation" value="0.998102 0.00636884 -0.00104448 0.061243" />
 											<attribute name="Scale" value="1 1 1" />
 											<attribute name="Variables" />
-											<node id="16777801">
+											<node id="16778158">
 												<attribute name="Is Enabled" value="true" />
-												<attribute name="Name" value="swat:LeftHandPinky2" />
+												<attribute name="Name" value="mixamorig_LeftHandPinky2" />
 												<attribute name="Tags" />
-												<attribute name="Position" value="3.6763 0 -0" />
-												<attribute name="Rotation" value="1 0 0 0" />
+												<attribute name="Position" value="0.072522 3.59903 -0.044598" />
+												<attribute name="Rotation" value="0.99983 -0.0163418 -2.22538e-05 -0.00848569" />
 												<attribute name="Scale" value="1 1 1" />
 												<attribute name="Variables" />
-												<node id="16777802">
+												<node id="16778159">
 													<attribute name="Is Enabled" value="true" />
-													<attribute name="Name" value="swat:LeftHandPinky3" />
+													<attribute name="Name" value="mixamorig_LeftHandPinky3" />
 													<attribute name="Tags" />
-													<attribute name="Position" value="2.8113 0 -0" />
-													<attribute name="Rotation" value="1 0 0 0" />
+													<attribute name="Position" value="0.006701 2.11377 0.042923" />
+													<attribute name="Rotation" value="0.999924 0.0113874 0.000101508 0.00474386" />
 													<attribute name="Scale" value="1 1 1" />
 													<attribute name="Variables" />
 												</node>
@@ -381,168 +341,168 @@
 								</node>
 							</node>
 						</node>
-						<node id="16777803">
+						<node id="16778160">
 							<attribute name="Is Enabled" value="true" />
-							<attribute name="Name" value="swat:RightShoulder" />
+							<attribute name="Name" value="mixamorig_RightShoulder" />
 							<attribute name="Tags" />
-							<attribute name="Position" value="-6.1402 10.187 3.7932" />
-							<attribute name="Rotation" value="1 0 0 0" />
+							<attribute name="Position" value="-4.57024 11.2157 0.965072" />
+							<attribute name="Rotation" value="0.38822 -0.512756 0.589089 0.489225" />
 							<attribute name="Scale" value="1 1 1" />
 							<attribute name="Variables" />
-							<node id="16777804">
+							<node id="16778161">
 								<attribute name="Is Enabled" value="true" />
-								<attribute name="Name" value="swat:RightArm" />
+								<attribute name="Name" value="mixamorig_RightArm" />
 								<attribute name="Tags" />
-								<attribute name="Position" value="-12.3231 -1.113 1.7935" />
-								<attribute name="Rotation" value="1 0 0 0" />
+								<attribute name="Position" value="-0.320559 10.8313 -0.214489" />
+								<attribute name="Rotation" value="0.995918 0.00317421 0.000573089 -0.0902024" />
 								<attribute name="Scale" value="1 1 1" />
 								<attribute name="Variables" />
-								<node id="16777805">
+								<node id="16778162">
 									<attribute name="Is Enabled" value="true" />
-									<attribute name="Name" value="swat:RightForeArm" />
+									<attribute name="Name" value="mixamorig_RightForeArm" />
 									<attribute name="Tags" />
-									<attribute name="Position" value="-27.687 0 -0" />
-									<attribute name="Rotation" value="1 0 0 0" />
+									<attribute name="Position" value="-0.193222 27.8207 1.05967" />
+									<attribute name="Rotation" value="0.999714 0.0236823 -0.00321367 -0.0010423" />
 									<attribute name="Scale" value="1 1 1" />
 									<attribute name="Variables" />
-									<node id="16777806">
+									<node id="16778163">
 										<attribute name="Is Enabled" value="true" />
-										<attribute name="Name" value="swat:RightHand" />
+										<attribute name="Name" value="mixamorig_RightHand" />
 										<attribute name="Tags" />
-										<attribute name="Position" value="-27.8738 0 -0" />
-										<attribute name="Rotation" value="0.998717 -0.0406809 0.020761 0.0218939" />
+										<attribute name="Position" value="-0.252989 28.3265 -0.261912" />
+										<attribute name="Rotation" value="0.998145 -0.00603044 -0.0237258 0.055749" />
 										<attribute name="Scale" value="1 1 1" />
 										<attribute name="Variables" />
-										<node id="16777807">
+										<node id="16778164">
 											<attribute name="Is Enabled" value="true" />
-											<attribute name="Name" value="swat:RightHandThumb1" />
+											<attribute name="Name" value="mixamorig_RightHandPinky1" />
 											<attribute name="Tags" />
-											<attribute name="Position" value="-2.5178 -0.9367 -2.5137" />
-											<attribute name="Rotation" value="0.994886 -0.0611502 0.0684332 0.0421955" />
-											<attribute name="Scale" value="1 1 1" />
+											<attribute name="Position" value="-2.95035 8.4229 -0.554315" />
+											<attribute name="Rotation" value="0.998092 0.00653748 0.00106102 -0.0613892" />
+											<attribute name="Scale" value="0.999999 1 1" />
 											<attribute name="Variables" />
-											<node id="16777808">
+											<node id="16778165">
 												<attribute name="Is Enabled" value="true" />
-												<attribute name="Name" value="swat:RightHandThumb2" />
+												<attribute name="Name" value="mixamorig_RightHandPinky2" />
 												<attribute name="Tags" />
-												<attribute name="Position" value="-3.2638 -1.087 -2.9669" />
-												<attribute name="Rotation" value="0.990239 0.0380769 -0.133887 0.00716575" />
+												<attribute name="Position" value="-0.07336 3.59901 -0.044561" />
+												<attribute name="Rotation" value="0.999826 -0.0166254 2.12537e-05 0.00849223" />
 												<attribute name="Scale" value="1 1 1" />
 												<attribute name="Variables" />
-												<node id="16777809">
+												<node id="16778166">
 													<attribute name="Is Enabled" value="true" />
-													<attribute name="Name" value="swat:RightHandThumb3" />
+													<attribute name="Name" value="mixamorig_RightHandPinky3" />
 													<attribute name="Tags" />
-													<attribute name="Position" value="-4.4165 -1.3703 -2.135" />
-													<attribute name="Rotation" value="0.989769 -0.0403787 -0.0608437 0.122579" />
+													<attribute name="Position" value="-0.007192 2.11374 0.044115" />
+													<attribute name="Rotation" value="0.999915 0.012152 -0.000107259 -0.00475191" />
+													<attribute name="Scale" value="1 0.999999 1" />
+													<attribute name="Variables" />
+												</node>
+											</node>
+										</node>
+										<node id="16778167">
+											<attribute name="Is Enabled" value="true" />
+											<attribute name="Name" value="mixamorig_RightHandRing1" />
+											<attribute name="Tags" />
+											<attribute name="Position" value="-0.92314 9.24652 -0.073197" />
+											<attribute name="Rotation" value="0.998926 0.000339364 0.000246014 -0.0463418" />
+											<attribute name="Scale" value="1 1 1" />
+											<attribute name="Variables" />
+											<node id="16778168">
+												<attribute name="Is Enabled" value="true" />
+												<attribute name="Name" value="mixamorig_RightHandRing2" />
+												<attribute name="Tags" />
+												<attribute name="Position" value="0.030743 3.15388 -0.000173" />
+												<attribute name="Rotation" value="0.999755 0.0219454 -0.00024381 0.00283269" />
+												<attribute name="Scale" value="1 1 1" />
+												<attribute name="Variables" />
+												<node id="16778169">
+													<attribute name="Is Enabled" value="true" />
+													<attribute name="Name" value="mixamorig_RightHandRing3" />
+													<attribute name="Tags" />
+													<attribute name="Position" value="0.045155 2.93448 -0.12914" />
+													<attribute name="Rotation" value="0.999163 -0.0401824 -0.000149876 -0.00767392" />
 													<attribute name="Scale" value="1 1 1" />
 													<attribute name="Variables" />
 												</node>
 											</node>
 										</node>
-										<node id="16777810">
+										<node id="16778170">
 											<attribute name="Is Enabled" value="true" />
-											<attribute name="Name" value="swat:RightHandIndex1" />
+											<attribute name="Name" value="mixamorig_RightHandMiddle1" />
 											<attribute name="Tags" />
-											<attribute name="Position" value="-10.4665 0.4896 -2.712" />
-											<attribute name="Rotation" value="0.999545 -2.87939e-07 -0.0198528 -0.0227207" />
+											<attribute name="Position" value="0.974899 9.48252 0.005584" />
+											<attribute name="Rotation" value="0.998398 0.0225404 -0.00188452 -0.0518626" />
 											<attribute name="Scale" value="1 1 1" />
 											<attribute name="Variables" />
-											<node id="16777811">
+											<node id="16778171">
 												<attribute name="Is Enabled" value="true" />
-												<attribute name="Name" value="swat:RightHandIndex2" />
+												<attribute name="Name" value="mixamorig_RightHandMiddle2" />
 												<attribute name="Tags" />
-												<attribute name="Position" value="-5.3768 0 -0" />
-												<attribute name="Rotation" value="1 0 0 0" />
+												<attribute name="Position" value="-0.005132 3.69455 -0.164982" />
+												<attribute name="Rotation" value="0.999866 -0.0117091 8.45113e-05 -0.011452" />
 												<attribute name="Scale" value="1 1 1" />
 												<attribute name="Variables" />
-												<node id="16777812">
+												<node id="16778172">
 													<attribute name="Is Enabled" value="true" />
-													<attribute name="Name" value="swat:RightHandIndex3" />
+													<attribute name="Name" value="mixamorig_RightHandMiddle3" />
 													<attribute name="Tags" />
-													<attribute name="Position" value="-3.3855 0 -0" />
-													<attribute name="Rotation" value="1 0 0 0" />
+													<attribute name="Position" value="-0.071607 2.94939 -0.062601" />
+													<attribute name="Rotation" value="0.999814 -0.0125626 -0.000359067 0.0146412" />
 													<attribute name="Scale" value="1 1 1" />
 													<attribute name="Variables" />
 												</node>
 											</node>
 										</node>
-										<node id="16777813">
+										<node id="16778173">
 											<attribute name="Is Enabled" value="true" />
-											<attribute name="Name" value="swat:RightHandMiddle1" />
+											<attribute name="Name" value="mixamorig_RightHandIndex1" />
 											<attribute name="Tags" />
-											<attribute name="Position" value="-10.7596 0.4896 -0.4278" />
-											<attribute name="Rotation" value="0.999545 -2.88055e-07 -0.0198527 -0.0227207" />
+											<attribute name="Position" value="3.18895 8.82872 -0.469375" />
+											<attribute name="Rotation" value="0.9988 -0.00675486 0.000626752 -0.04851" />
 											<attribute name="Scale" value="1 1 1" />
 											<attribute name="Variables" />
-											<node id="16777814">
+											<node id="16778174">
 												<attribute name="Is Enabled" value="true" />
-												<attribute name="Name" value="swat:RightHandMiddle2" />
+												<attribute name="Name" value="mixamorig_RightHandIndex2" />
 												<attribute name="Tags" />
-												<attribute name="Position" value="-5.6168 0 -0" />
-												<attribute name="Rotation" value="1 0 0 0" />
+												<attribute name="Position" value="0.019823 3.67599 0.052022" />
+												<attribute name="Rotation" value="0.999704 0.0243452 -0.000242822 0.000240571" />
 												<attribute name="Scale" value="1 1 1" />
 												<attribute name="Variables" />
-												<node id="16777815">
+												<node id="16778175">
 													<attribute name="Is Enabled" value="true" />
-													<attribute name="Name" value="swat:RightHandMiddle3" />
+													<attribute name="Name" value="mixamorig_RightHandIndex3" />
 													<attribute name="Tags" />
-													<attribute name="Position" value="-3.7364 0 -0" />
-													<attribute name="Rotation" value="1 0 0 0" />
+													<attribute name="Position" value="0.016934 2.88129 -0.099644" />
+													<attribute name="Rotation" value="0.999555 0.0238879 -0.00133584 -0.0178254" />
 													<attribute name="Scale" value="1 1 1" />
 													<attribute name="Variables" />
 												</node>
 											</node>
 										</node>
-										<node id="16777816">
+										<node id="16778176">
 											<attribute name="Is Enabled" value="true" />
-											<attribute name="Name" value="swat:RightHandRing1" />
+											<attribute name="Name" value="mixamorig_RightHandThumb1" />
 											<attribute name="Tags" />
-											<attribute name="Position" value="-10.4702 0.3879 1.9363" />
-											<attribute name="Rotation" value="0.999545 -3.02803e-07 -0.0198527 -0.0227207" />
+											<attribute name="Position" value="2.94932 2.17548 -1.52117" />
+											<attribute name="Rotation" value="0.943301 -0.167613 0.0543398 -0.281313" />
 											<attribute name="Scale" value="1 1 1" />
 											<attribute name="Variables" />
-											<node id="16777817">
+											<node id="16778177">
 												<attribute name="Is Enabled" value="true" />
-												<attribute name="Name" value="swat:RightHandRing2" />
+												<attribute name="Name" value="mixamorig_RightHandThumb2" />
 												<attribute name="Tags" />
-												<attribute name="Position" value="-5.4013 0 -0" />
-												<attribute name="Rotation" value="1 0 0 0" />
+												<attribute name="Position" value="0.213203 4.14354 -0.414005" />
+												<attribute name="Rotation" value="0.992737 -0.0654322 -0.00494265 -0.100835" />
 												<attribute name="Scale" value="1 1 1" />
 												<attribute name="Variables" />
-												<node id="16777818">
+												<node id="16778178">
 													<attribute name="Is Enabled" value="true" />
-													<attribute name="Name" value="swat:RightHandRing3" />
+													<attribute name="Name" value="mixamorig_RightHandThumb3" />
 													<attribute name="Tags" />
-													<attribute name="Position" value="-3.3916 0 -0" />
-													<attribute name="Rotation" value="1 0 0 0" />
-													<attribute name="Scale" value="1 1 1" />
-													<attribute name="Variables" />
-												</node>
-											</node>
-										</node>
-										<node id="16777819">
-											<attribute name="Is Enabled" value="true" />
-											<attribute name="Name" value="swat:RightHandPinky1" />
-											<attribute name="Tags" />
-											<attribute name="Position" value="-9.9715 -0.1191 3.954" />
-											<attribute name="Rotation" value="0.999545 -3.02483e-07 -0.0198527 -0.0227207" />
-											<attribute name="Scale" value="1 1 1" />
-											<attribute name="Variables" />
-											<node id="16777820">
-												<attribute name="Is Enabled" value="true" />
-												<attribute name="Name" value="swat:RightHandPinky2" />
-												<attribute name="Tags" />
-												<attribute name="Position" value="-3.6528 0 -0" />
-												<attribute name="Rotation" value="1 0 0 0" />
-												<attribute name="Scale" value="1 1 1" />
-												<attribute name="Variables" />
-												<node id="16777821">
-													<attribute name="Is Enabled" value="true" />
-													<attribute name="Name" value="swat:RightHandPinky3" />
-													<attribute name="Tags" />
-													<attribute name="Position" value="-2.782 0 -0" />
-													<attribute name="Rotation" value="1 0 0 0" />
+													<attribute name="Position" value="-0.515433 3.3837 0.109017" />
+													<attribute name="Rotation" value="0.992909 0.0464823 0.00219129 0.109387" />
 													<attribute name="Scale" value="1 1 1" />
 													<attribute name="Variables" />
 												</node>
@@ -555,72 +515,72 @@
 					</node>
 				</node>
 			</node>
-			<node id="16777822">
+			<node id="16778179">
 				<attribute name="Is Enabled" value="true" />
-				<attribute name="Name" value="swat:LeftUpLeg" />
+				<attribute name="Name" value="mixamorig_LeftUpLeg" />
 				<attribute name="Tags" />
-				<attribute name="Position" value="9.6338 -3.2733 -0" />
-				<attribute name="Rotation" value="0.999901 0.0140757 7.1389e-07 -7.71172e-05" />
+				<attribute name="Position" value="8.20779 -6.75171 1.59956" />
+				<attribute name="Rotation" value="-1.00001e-06 -0 -0.00389653 0.999992" />
 				<attribute name="Scale" value="1 1 1" />
 				<attribute name="Variables" />
-				<node id="16777823">
+				<node id="16778180">
 					<attribute name="Is Enabled" value="true" />
-					<attribute name="Name" value="swat:LeftLeg" />
+					<attribute name="Name" value="mixamorig_LeftLeg" />
 					<attribute name="Tags" />
-					<attribute name="Position" value="0 -41.73 1.73" />
-					<attribute name="Rotation" value="0.999578 -0.0290497 -7.09329e-06 -1.95557e-07" />
+					<attribute name="Position" value="0 44.3714 -0" />
+					<attribute name="Rotation" value="0.999275 0.0380686 0 0" />
 					<attribute name="Scale" value="1 1 1" />
 					<attribute name="Variables" />
-					<node id="16777824">
+					<node id="16778181">
 						<attribute name="Is Enabled" value="true" />
-						<attribute name="Name" value="swat:LeftFoot" />
+						<attribute name="Name" value="mixamorig_LeftFoot" />
 						<attribute name="Tags" />
-						<attribute name="Position" value="0.0126 -39.19 0.8477" />
-						<attribute name="Rotation" value="0.999888 0.0149771 3.82169e-06 7.76038e-05" />
+						<attribute name="Position" value="0 44.5278 0.001568" />
+						<attribute name="Rotation" value="0.87961 -0.475695 0 0" />
 						<attribute name="Scale" value="1 1 1" />
 						<attribute name="Variables" />
-						<node id="16777825">
+						<node id="16778182">
 							<attribute name="Is Enabled" value="true" />
-							<attribute name="Name" value="swat:LeftToeBase" />
+							<attribute name="Name" value="mixamorig_LeftToeBase" />
 							<attribute name="Tags" />
-							<attribute name="Position" value="-0.1833 -12.1857 -8.2823" />
-							<attribute name="Rotation" value="1 0 0 0" />
+							<attribute name="Position" value="0 13.8078 0.499311" />
+							<attribute name="Rotation" value="0.948037 -0.318161 0 0" />
 							<attribute name="Scale" value="1 1 1" />
 							<attribute name="Variables" />
 						</node>
 					</node>
 				</node>
 			</node>
-			<node id="16777826">
+			<node id="16778183">
 				<attribute name="Is Enabled" value="true" />
-				<attribute name="Name" value="swat:RightUpLeg" />
+				<attribute name="Name" value="mixamorig_RightUpLeg" />
 				<attribute name="Tags" />
-				<attribute name="Position" value="-9.6338 -3.2733 -0" />
-				<attribute name="Rotation" value="0.999901 0.0140725 7.21215e-07 -7.71292e-05" />
+				<attribute name="Position" value="-8.20779 -6.75167 1.59956" />
+				<attribute name="Rotation" value="-1.00001e-06 -0 -0.00390453 0.999992" />
 				<attribute name="Scale" value="1 1 1" />
 				<attribute name="Variables" />
-				<node id="16777827">
+				<node id="16778184">
 					<attribute name="Is Enabled" value="true" />
-					<attribute name="Name" value="swat:RightLeg" />
+					<attribute name="Name" value="mixamorig_RightLeg" />
 					<attribute name="Tags" />
-					<attribute name="Position" value="0 -41.73 1.73" />
-					<attribute name="Rotation" value="0.999578 -0.0290442 -7.118e-06 -1.94747e-07" />
+					<attribute name="Position" value="0 44.3715 -5e-06" />
+					<attribute name="Rotation" value="0.999274 0.0380851 0 0" />
 					<attribute name="Scale" value="1 1 1" />
 					<attribute name="Variables" />
-					<node id="16777828">
+					<node id="16778185">
 						<attribute name="Is Enabled" value="true" />
-						<attribute name="Name" value="swat:RightFoot" />
+						<attribute name="Name" value="mixamorig_RightFoot" />
 						<attribute name="Tags" />
-						<attribute name="Position" value="0.0126 -39.19 0.8477" />
-						<attribute name="Rotation" value="0.999888 0.0149747 3.83062e-06 7.76153e-05" />
+						<attribute name="Position" value="0 44.5278 0.001577" />
+						<attribute name="Rotation" value="0.879606 -0.475703 0 0" />
 						<attribute name="Scale" value="1 1 1" />
 						<attribute name="Variables" />
-						<node id="16777829">
+						<node id="16778186">
 							<attribute name="Is Enabled" value="true" />
-							<attribute name="Name" value="swat:RightToeBase" />
+							<attribute name="Name" value="mixamorig_RightToeBase" />
 							<attribute name="Tags" />
-							<attribute name="Position" value="-0.1833 -12.1857 -8.2823" />
-							<attribute name="Rotation" value="1 0 0 0" />
+							<attribute name="Position" value="0 13.8078 0.499311" />
+							<attribute name="Rotation" value="0.948037 -0.318161 0 0" />
 							<attribute name="Scale" value="1 1 1" />
 							<attribute name="Variables" />
 						</node>
@@ -638,14 +598,10 @@
 		<attribute name="Scale" value="1 1 1" />
 		<attribute name="Variables" />
 		<component type="AnimatedModel" id="72">
-			<attribute name="Model" value="Model;Models/Swat.mdl" />
-			<attribute name="Material" value="Material;Materials/DefaultGrey.xml;Materials/DefaultGrey.xml;Materials/DefaultGrey.xml" />
+			<attribute name="Model" value="Model;Default_Character/Models/Female.mdl" />
+			<attribute name="Material" value="Material;Default_Character/Materials/Beta_Joints_MAT.xml;Default_Character/Materials/asdf1_Beta_HighLimbsGeoSG2.xml" />
 			<attribute name="Cast Shadows" value="true" />
 			<attribute name="Bone Animation Enabled">
-				<variant type="Bool" value="true" />
-				<variant type="Bool" value="true" />
-				<variant type="Bool" value="true" />
-				<variant type="Bool" value="true" />
 				<variant type="Bool" value="true" />
 				<variant type="Bool" value="true" />
 				<variant type="Bool" value="true" />
@@ -707,7 +663,7 @@
 			<attribute name="Node Animation States">
 				<variant type="Int" value="0" />
 			</attribute>
-			<attribute name="Skeleton" value="XMLFile;Models/Swat_Skeleton.xml" />
+			<attribute name="Skeleton" value="XMLFile;Default_Character/Models/Female_Skeleton.xml" />
 			<attribute name="Animation Rotation" value="-4.37114e-08 0 1 -0" />
 		</component>
 		<component type="ScriptInstance" id="74">
@@ -716,254 +672,218 @@
 			<attribute name="Class Name" value="Animator" />
 			<attribute name="rotation" value="-180" />
 		</component>
-		<node id="16777832">
+		<node id="16778187">
 			<attribute name="Is Enabled" value="true" />
-			<attribute name="Name" value="swat:Hips" />
+			<attribute name="Name" value="mixamorig_Hips" />
 			<attribute name="Tags" />
-			<attribute name="Position" value="3.64755e-08 0.963687 0.000356898" />
-			<attribute name="Rotation" value="1 0 0 0" />
+			<attribute name="Position" value="1.1e-07 1.04275 -0.0155431" />
+			<attribute name="Rotation" value="1 0 0 -5e-07" />
 			<attribute name="Scale" value="0.01 0.01 0.01" />
 			<attribute name="Variables" />
-			<node id="16777833">
+			<node id="16778188">
 				<attribute name="Is Enabled" value="true" />
-				<attribute name="Name" value="swat:Spine" />
+				<attribute name="Name" value="mixamorig_Spine" />
 				<attribute name="Tags" />
-				<attribute name="Position" value="0 9.2263 -1.5771" />
-				<attribute name="Rotation" value="1 0 0 0" />
+				<attribute name="Position" value="0 10.1816 -0.131521" />
+				<attribute name="Rotation" value="0.998777 0.049444 2.50306e-07 -4.45545e-05" />
 				<attribute name="Scale" value="1 1 1" />
 				<attribute name="Variables" />
-				<node id="16777834">
+				<node id="16778189">
 					<attribute name="Is Enabled" value="true" />
-					<attribute name="Name" value="swat:Spine1" />
+					<attribute name="Name" value="mixamorig_Spine1" />
 					<attribute name="Tags" />
-					<attribute name="Position" value="0 16.254 0.1656" />
-					<attribute name="Rotation" value="1 0 0 0" />
+					<attribute name="Position" value="-0.000921 10.133 -0" />
+					<attribute name="Rotation" value="0.999677 0.0254302 -1.70585e-13 3.30107e-05" />
 					<attribute name="Scale" value="1 1 1" />
 					<attribute name="Variables" />
-					<node id="16777835">
+					<node id="16778190">
 						<attribute name="Is Enabled" value="true" />
-						<attribute name="Name" value="swat:Spine2" />
+						<attribute name="Name" value="mixamorig_Spine2" />
 						<attribute name="Tags" />
-						<attribute name="Position" value="0 13.6396 1.2923" />
+						<attribute name="Position" value="-0.000228 9.20307 -0" />
 						<attribute name="Rotation" value="1 0 0 0" />
 						<attribute name="Scale" value="1 1 1" />
 						<attribute name="Variables" />
-						<node id="16777836">
+						<node id="16778191">
 							<attribute name="Is Enabled" value="true" />
-							<attribute name="Name" value="swat:Neck" />
+							<attribute name="Name" value="mixamorig_Neck" />
 							<attribute name="Tags" />
-							<attribute name="Position" value="0 13.8774 4.3542" />
-							<attribute name="Rotation" value="1 0 0 0" />
+							<attribute name="Position" value="-0.000418 16.8605 -0" />
+							<attribute name="Rotation" value="0.997196 -0.0748273 2.75773e-06 1.27858e-05" />
 							<attribute name="Scale" value="1 1 1" />
 							<attribute name="Variables" />
-							<node id="16777837">
+							<node id="16778192">
 								<attribute name="Is Enabled" value="true" />
-								<attribute name="Name" value="swat:Neck1" />
+								<attribute name="Name" value="mixamorig_Head" />
 								<attribute name="Tags" />
-								<attribute name="Position" value="0 4.34 -0.9269" />
-								<attribute name="Rotation" value="1 0 0 0" />
+								<attribute name="Position" value="0 9.61788 -1.68501" />
+								<attribute name="Rotation" value="1 0 -1.5e-06 0" />
 								<attribute name="Scale" value="1 1 1" />
 								<attribute name="Variables" />
-								<node id="16777838">
-									<attribute name="Is Enabled" value="true" />
-									<attribute name="Name" value="swat:Head" />
-									<attribute name="Tags" />
-									<attribute name="Position" value="0 4.0266 -0.8585" />
-									<attribute name="Rotation" value="1 0 0 0" />
-									<attribute name="Scale" value="1 1 1" />
-									<attribute name="Variables" />
-									<node id="16777839">
-										<attribute name="Is Enabled" value="true" />
-										<attribute name="Name" value="swat:RightEye" />
-										<attribute name="Tags" />
-										<attribute name="Position" value="-3.0057 7.2618 -7.9556" />
-										<attribute name="Rotation" value="0.998207 -0.0541571 -0.0254469 -0.0013806" />
-										<attribute name="Scale" value="1 1 1" />
-										<attribute name="Variables" />
-									</node>
-									<node id="16777840">
-										<attribute name="Is Enabled" value="true" />
-										<attribute name="Name" value="swat:LeftEye" />
-										<attribute name="Tags" />
-										<attribute name="Position" value="3.0057 7.2618 -7.9556" />
-										<attribute name="Rotation" value="0.998087 -0.0526761 -0.0323087 -0.00170516" />
-										<attribute name="Scale" value="1 1 1" />
-										<attribute name="Variables" />
-									</node>
-									<node id="16777841">
-										<attribute name="Is Enabled" value="true" />
-										<attribute name="Name" value="swat:Jaw" />
-										<attribute name="Tags" />
-										<attribute name="Position" value="0 2.0303 -2.4562" />
-										<attribute name="Rotation" value="1 0 0 0" />
-										<attribute name="Scale" value="1 1 1" />
-										<attribute name="Variables" />
-									</node>
-								</node>
 							</node>
 						</node>
-						<node id="16777842">
+						<node id="16778193">
 							<attribute name="Is Enabled" value="true" />
-							<attribute name="Name" value="swat:LeftShoulder" />
+							<attribute name="Name" value="mixamorig_LeftShoulder" />
 							<attribute name="Tags" />
-							<attribute name="Position" value="6.1442 10.187 3.7932" />
-							<attribute name="Rotation" value="1 0 0 0" />
+							<attribute name="Position" value="4.57018 11.2157 0.965006" />
+							<attribute name="Rotation" value="-0.38822 0.51276 0.589092 0.489216" />
 							<attribute name="Scale" value="1 1 1" />
 							<attribute name="Variables" />
-							<node id="16777843">
+							<node id="16778194">
 								<attribute name="Is Enabled" value="true" />
-								<attribute name="Name" value="swat:LeftArm" />
+								<attribute name="Name" value="mixamorig_LeftArm" />
 								<attribute name="Tags" />
-								<attribute name="Position" value="12.3191 -1.113 1.7935" />
-								<attribute name="Rotation" value="1 0 0 0" />
+								<attribute name="Position" value="0.320732 10.8308 -0.213868" />
+								<attribute name="Rotation" value="0.995919 0.00317722 -0.000574344 0.0901971" />
 								<attribute name="Scale" value="1 1 1" />
 								<attribute name="Variables" />
-								<node id="16777844">
+								<node id="16778195">
 									<attribute name="Is Enabled" value="true" />
-									<attribute name="Name" value="swat:LeftForeArm" />
+									<attribute name="Name" value="mixamorig_LeftForeArm" />
 									<attribute name="Tags" />
-									<attribute name="Position" value="27.687 0 -0" />
-									<attribute name="Rotation" value="1 0 0 0" />
+									<attribute name="Position" value="0.193078 27.8206 1.06067" />
+									<attribute name="Rotation" value="0.999714 0.0236808 0.00321642 0.00105455" />
 									<attribute name="Scale" value="1 1 1" />
 									<attribute name="Variables" />
-									<node id="16777845">
+									<node id="16778196">
 										<attribute name="Is Enabled" value="true" />
-										<attribute name="Name" value="swat:LeftHand" />
+										<attribute name="Name" value="mixamorig_LeftHand" />
 										<attribute name="Tags" />
-										<attribute name="Position" value="27.8738 0 -0" />
-										<attribute name="Rotation" value="0.998051 -0.0511365 -0.0219713 -0.0282335" />
+										<attribute name="Position" value="0.253564 28.3265 -0.260771" />
+										<attribute name="Rotation" value="0.998146 -0.00584309 0.0237448 -0.0557426" />
 										<attribute name="Scale" value="1 1 1" />
 										<attribute name="Variables" />
-										<node id="16777846">
+										<node id="16778197">
 											<attribute name="Is Enabled" value="true" />
-											<attribute name="Name" value="swat:LeftHandThumb1" />
+											<attribute name="Name" value="mixamorig_LeftHandThumb1" />
 											<attribute name="Tags" />
-											<attribute name="Position" value="2.3785 -1.0029 -2.6209" />
-											<attribute name="Rotation" value="0.996287 -0.0534186 -0.0496936 -0.0456982" />
+											<attribute name="Position" value="-2.94914 2.17644 -1.52435" />
+											<attribute name="Rotation" value="0.943287 -0.16771 -0.0543562 0.281296" />
 											<attribute name="Scale" value="1 1 1" />
 											<attribute name="Variables" />
-											<node id="16777847">
+											<node id="16778198">
 												<attribute name="Is Enabled" value="true" />
-												<attribute name="Name" value="swat:LeftHandThumb2" />
+												<attribute name="Name" value="mixamorig_LeftHandThumb2" />
 												<attribute name="Tags" />
-												<attribute name="Position" value="3.3624 -1.0029 -2.8398" />
-												<attribute name="Rotation" value="0.992428 0.0352053 0.117673 0.000126919" />
+												<attribute name="Position" value="-0.213359 4.14349 -0.414375" />
+												<attribute name="Rotation" value="0.99273 -0.0655239 0.00494319 0.100844" />
 												<attribute name="Scale" value="1 1 1" />
 												<attribute name="Variables" />
-												<node id="16777848">
+												<node id="16778199">
 													<attribute name="Is Enabled" value="true" />
-													<attribute name="Name" value="swat:LeftHandThumb3" />
+													<attribute name="Name" value="mixamorig_LeftHandThumb3" />
 													<attribute name="Tags" />
-													<attribute name="Position" value="4.5018 -1.3445 -2.1783" />
-													<attribute name="Rotation" value="0.991357 -0.0550657 0.00810093 -0.118801" />
+													<attribute name="Position" value="0.515291 3.38371 0.109272" />
+													<attribute name="Rotation" value="0.992905 0.0465669 -0.00219029 -0.109394" />
 													<attribute name="Scale" value="1 1 1" />
 													<attribute name="Variables" />
 												</node>
 											</node>
 										</node>
-										<node id="16777849">
+										<node id="16778200">
 											<attribute name="Is Enabled" value="true" />
-											<attribute name="Name" value="swat:LeftHandMiddle1" />
+											<attribute name="Name" value="mixamorig_LeftHandIndex1" />
 											<attribute name="Tags" />
-											<attribute name="Position" value="10.4639 0.6148 -0.4298" />
-											<attribute name="Rotation" value="0.99936 -2.40843e-07 0.0204978 0.0293207" />
+											<attribute name="Position" value="-3.18865 8.82971 -0.472725" />
+											<attribute name="Rotation" value="0.998795 -0.00693535 -0.000646529 0.0485705" />
 											<attribute name="Scale" value="1 1 1" />
 											<attribute name="Variables" />
-											<node id="16777850">
+											<node id="16778201">
 												<attribute name="Is Enabled" value="true" />
-												<attribute name="Name" value="swat:LeftHandMiddle2" />
+												<attribute name="Name" value="mixamorig_LeftHandIndex2" />
 												<attribute name="Tags" />
-												<attribute name="Position" value="5.7921 0 -0" />
-												<attribute name="Rotation" value="1 0 0 0" />
+												<attribute name="Position" value="-0.019232 3.67599 0.0521" />
+												<attribute name="Rotation" value="0.999702 0.0243938 0.00023682 -0.000252825" />
 												<attribute name="Scale" value="1 1 1" />
 												<attribute name="Variables" />
-												<node id="16777851">
+												<node id="16778202">
 													<attribute name="Is Enabled" value="true" />
-													<attribute name="Name" value="swat:LeftHandMiddle3" />
+													<attribute name="Name" value="mixamorig_LeftHandIndex3" />
 													<attribute name="Tags" />
-													<attribute name="Position" value="3.7132 0 -0" />
-													<attribute name="Rotation" value="1 0 0 0" />
+													<attribute name="Position" value="-0.016458 2.88129 -0.099755" />
+													<attribute name="Rotation" value="0.999567 0.0233529 0.00133158 0.0178407" />
 													<attribute name="Scale" value="1 1 1" />
 													<attribute name="Variables" />
 												</node>
 											</node>
 										</node>
-										<node id="16777852">
+										<node id="16778203">
 											<attribute name="Is Enabled" value="true" />
-											<attribute name="Name" value="swat:LeftHandIndex1" />
+											<attribute name="Name" value="mixamorig_LeftHandMiddle1" />
 											<attribute name="Tags" />
-											<attribute name="Position" value="10.3945 0.6148 -2.7055" />
-											<attribute name="Rotation" value="0.99936 -3.15425e-07 0.0204978 0.0293208" />
+											<attribute name="Position" value="-0.974614 9.48345 0.002382" />
+											<attribute name="Rotation" value="0.998403 0.0223727 0.00188125 0.0518413" />
 											<attribute name="Scale" value="1 1 1" />
 											<attribute name="Variables" />
-											<node id="16777853">
+											<node id="16778204">
 												<attribute name="Is Enabled" value="true" />
-												<attribute name="Name" value="swat:LeftHandIndex2" />
+												<attribute name="Name" value="mixamorig_LeftHandMiddle2" />
 												<attribute name="Tags" />
-												<attribute name="Position" value="5.5493 0 -0" />
-												<attribute name="Rotation" value="1 0 0 0" />
+												<attribute name="Position" value="0.005079 3.69455 -0.16499" />
+												<attribute name="Rotation" value="0.999866 -0.0116926 -8.40112e-05 0.011452" />
 												<attribute name="Scale" value="1 1 1" />
 												<attribute name="Variables" />
-												<node id="16777854">
+												<node id="16778205">
 													<attribute name="Is Enabled" value="true" />
-													<attribute name="Name" value="swat:LeftHandIndex3" />
+													<attribute name="Name" value="mixamorig_LeftHandMiddle3" />
 													<attribute name="Tags" />
-													<attribute name="Position" value="3.3911 0 -0" />
-													<attribute name="Rotation" value="1 0 0 0" />
+													<attribute name="Position" value="0.071581 2.94939 -0.062733" />
+													<attribute name="Rotation" value="0.999815 -0.0124563 0.000356316 -0.0146592" />
 													<attribute name="Scale" value="1 1 1" />
 													<attribute name="Variables" />
 												</node>
 											</node>
 										</node>
-										<node id="16777855">
+										<node id="16778206">
 											<attribute name="Is Enabled" value="true" />
-											<attribute name="Name" value="swat:LeftHandRing1" />
+											<attribute name="Name" value="mixamorig_LeftHandRing1" />
 											<attribute name="Tags" />
-											<attribute name="Position" value="10.3252 0.3211 1.8755" />
-											<attribute name="Rotation" value="0.99936 -2.70985e-07 0.0204978 0.0293208" />
+											<attribute name="Position" value="0.923424 9.2474 -0.076253" />
+											<attribute name="Rotation" value="0.998929 0.000139399 -0.000241759 0.0462733" />
 											<attribute name="Scale" value="1 1 1" />
 											<attribute name="Variables" />
-											<node id="16777856">
+											<node id="16778207">
 												<attribute name="Is Enabled" value="true" />
-												<attribute name="Name" value="swat:LeftHandRing2" />
+												<attribute name="Name" value="mixamorig_LeftHandRing2" />
 												<attribute name="Tags" />
-												<attribute name="Position" value="5.4452 0 -0" />
-												<attribute name="Rotation" value="1 0 0 0" />
+												<attribute name="Position" value="-0.031011 3.15387 -0" />
+												<attribute name="Rotation" value="0.999754 0.0220112 0.000246061 -0.00281919" />
 												<attribute name="Scale" value="1 1 1" />
 												<attribute name="Variables" />
-												<node id="16777857">
+												<node id="16778208">
 													<attribute name="Is Enabled" value="true" />
-													<attribute name="Name" value="swat:LeftHandRing3" />
+													<attribute name="Name" value="mixamorig_LeftHandRing3" />
 													<attribute name="Tags" />
-													<attribute name="Position" value="3.7132 0 -0" />
-													<attribute name="Rotation" value="1 0 0 0" />
+													<attribute name="Position" value="-0.045394 2.93447 -0.12934" />
+													<attribute name="Rotation" value="0.999156 -0.0403483 0.000149626 0.00766998" />
 													<attribute name="Scale" value="1 1 1" />
 													<attribute name="Variables" />
 												</node>
 											</node>
 										</node>
-										<node id="16777858">
+										<node id="16778209">
 											<attribute name="Is Enabled" value="true" />
-											<attribute name="Name" value="swat:LeftHandPinky1" />
+											<attribute name="Name" value="mixamorig_LeftHandPinky1" />
 											<attribute name="Tags" />
-											<attribute name="Position" value="10.013 -0.0783 3.9671" />
-											<attribute name="Rotation" value="0.99936 -2.70635e-07 0.0204978 0.0293208" />
+											<attribute name="Position" value="2.95064 8.4237 -0.557203" />
+											<attribute name="Rotation" value="0.998102 0.00636884 -0.00104448 0.061243" />
 											<attribute name="Scale" value="1 1 1" />
 											<attribute name="Variables" />
-											<node id="16777859">
+											<node id="16778210">
 												<attribute name="Is Enabled" value="true" />
-												<attribute name="Name" value="swat:LeftHandPinky2" />
+												<attribute name="Name" value="mixamorig_LeftHandPinky2" />
 												<attribute name="Tags" />
-												<attribute name="Position" value="3.6763 0 -0" />
-												<attribute name="Rotation" value="1 0 0 0" />
+												<attribute name="Position" value="0.072522 3.59903 -0.044598" />
+												<attribute name="Rotation" value="0.99983 -0.0163418 -2.22538e-05 -0.00848569" />
 												<attribute name="Scale" value="1 1 1" />
 												<attribute name="Variables" />
-												<node id="16777860">
+												<node id="16778211">
 													<attribute name="Is Enabled" value="true" />
-													<attribute name="Name" value="swat:LeftHandPinky3" />
+													<attribute name="Name" value="mixamorig_LeftHandPinky3" />
 													<attribute name="Tags" />
-													<attribute name="Position" value="2.8113 0 -0" />
-													<attribute name="Rotation" value="1 0 0 0" />
+													<attribute name="Position" value="0.006701 2.11377 0.042923" />
+													<attribute name="Rotation" value="0.999924 0.0113874 0.000101508 0.00474386" />
 													<attribute name="Scale" value="1 1 1" />
 													<attribute name="Variables" />
 												</node>
@@ -973,168 +893,168 @@
 								</node>
 							</node>
 						</node>
-						<node id="16777861">
+						<node id="16778212">
 							<attribute name="Is Enabled" value="true" />
-							<attribute name="Name" value="swat:RightShoulder" />
+							<attribute name="Name" value="mixamorig_RightShoulder" />
 							<attribute name="Tags" />
-							<attribute name="Position" value="-6.1402 10.187 3.7932" />
-							<attribute name="Rotation" value="1 0 0 0" />
+							<attribute name="Position" value="-4.57024 11.2157 0.965072" />
+							<attribute name="Rotation" value="0.38822 -0.512756 0.589089 0.489225" />
 							<attribute name="Scale" value="1 1 1" />
 							<attribute name="Variables" />
-							<node id="16777862">
+							<node id="16778213">
 								<attribute name="Is Enabled" value="true" />
-								<attribute name="Name" value="swat:RightArm" />
+								<attribute name="Name" value="mixamorig_RightArm" />
 								<attribute name="Tags" />
-								<attribute name="Position" value="-12.3231 -1.113 1.7935" />
-								<attribute name="Rotation" value="1 0 0 0" />
+								<attribute name="Position" value="-0.320559 10.8313 -0.214489" />
+								<attribute name="Rotation" value="0.995918 0.00317421 0.000573089 -0.0902024" />
 								<attribute name="Scale" value="1 1 1" />
 								<attribute name="Variables" />
-								<node id="16777863">
+								<node id="16778214">
 									<attribute name="Is Enabled" value="true" />
-									<attribute name="Name" value="swat:RightForeArm" />
+									<attribute name="Name" value="mixamorig_RightForeArm" />
 									<attribute name="Tags" />
-									<attribute name="Position" value="-27.687 0 -0" />
-									<attribute name="Rotation" value="1 0 0 0" />
+									<attribute name="Position" value="-0.193222 27.8207 1.05967" />
+									<attribute name="Rotation" value="0.999714 0.0236823 -0.00321367 -0.0010423" />
 									<attribute name="Scale" value="1 1 1" />
 									<attribute name="Variables" />
-									<node id="16777864">
+									<node id="16778215">
 										<attribute name="Is Enabled" value="true" />
-										<attribute name="Name" value="swat:RightHand" />
+										<attribute name="Name" value="mixamorig_RightHand" />
 										<attribute name="Tags" />
-										<attribute name="Position" value="-27.8738 0 -0" />
-										<attribute name="Rotation" value="0.998717 -0.0406809 0.020761 0.0218939" />
+										<attribute name="Position" value="-0.252989 28.3265 -0.261912" />
+										<attribute name="Rotation" value="0.998145 -0.00603044 -0.0237258 0.055749" />
 										<attribute name="Scale" value="1 1 1" />
 										<attribute name="Variables" />
-										<node id="16777865">
+										<node id="16778216">
 											<attribute name="Is Enabled" value="true" />
-											<attribute name="Name" value="swat:RightHandThumb1" />
+											<attribute name="Name" value="mixamorig_RightHandPinky1" />
 											<attribute name="Tags" />
-											<attribute name="Position" value="-2.5178 -0.9367 -2.5137" />
-											<attribute name="Rotation" value="0.994886 -0.0611502 0.0684332 0.0421955" />
-											<attribute name="Scale" value="1 1 1" />
+											<attribute name="Position" value="-2.95035 8.4229 -0.554315" />
+											<attribute name="Rotation" value="0.998092 0.00653748 0.00106102 -0.0613892" />
+											<attribute name="Scale" value="0.999999 1 1" />
 											<attribute name="Variables" />
-											<node id="16777866">
+											<node id="16778217">
 												<attribute name="Is Enabled" value="true" />
-												<attribute name="Name" value="swat:RightHandThumb2" />
+												<attribute name="Name" value="mixamorig_RightHandPinky2" />
 												<attribute name="Tags" />
-												<attribute name="Position" value="-3.2638 -1.087 -2.9669" />
-												<attribute name="Rotation" value="0.990239 0.0380769 -0.133887 0.00716575" />
+												<attribute name="Position" value="-0.07336 3.59901 -0.044561" />
+												<attribute name="Rotation" value="0.999826 -0.0166254 2.12537e-05 0.00849223" />
 												<attribute name="Scale" value="1 1 1" />
 												<attribute name="Variables" />
-												<node id="16777867">
+												<node id="16778218">
 													<attribute name="Is Enabled" value="true" />
-													<attribute name="Name" value="swat:RightHandThumb3" />
+													<attribute name="Name" value="mixamorig_RightHandPinky3" />
 													<attribute name="Tags" />
-													<attribute name="Position" value="-4.4165 -1.3703 -2.135" />
-													<attribute name="Rotation" value="0.989769 -0.0403787 -0.0608437 0.122579" />
+													<attribute name="Position" value="-0.007192 2.11374 0.044115" />
+													<attribute name="Rotation" value="0.999915 0.012152 -0.000107259 -0.00475191" />
+													<attribute name="Scale" value="1 0.999999 1" />
+													<attribute name="Variables" />
+												</node>
+											</node>
+										</node>
+										<node id="16778219">
+											<attribute name="Is Enabled" value="true" />
+											<attribute name="Name" value="mixamorig_RightHandRing1" />
+											<attribute name="Tags" />
+											<attribute name="Position" value="-0.92314 9.24652 -0.073197" />
+											<attribute name="Rotation" value="0.998926 0.000339364 0.000246014 -0.0463418" />
+											<attribute name="Scale" value="1 1 1" />
+											<attribute name="Variables" />
+											<node id="16778220">
+												<attribute name="Is Enabled" value="true" />
+												<attribute name="Name" value="mixamorig_RightHandRing2" />
+												<attribute name="Tags" />
+												<attribute name="Position" value="0.030743 3.15388 -0.000173" />
+												<attribute name="Rotation" value="0.999755 0.0219454 -0.00024381 0.00283269" />
+												<attribute name="Scale" value="1 1 1" />
+												<attribute name="Variables" />
+												<node id="16778221">
+													<attribute name="Is Enabled" value="true" />
+													<attribute name="Name" value="mixamorig_RightHandRing3" />
+													<attribute name="Tags" />
+													<attribute name="Position" value="0.045155 2.93448 -0.12914" />
+													<attribute name="Rotation" value="0.999163 -0.0401824 -0.000149876 -0.00767392" />
 													<attribute name="Scale" value="1 1 1" />
 													<attribute name="Variables" />
 												</node>
 											</node>
 										</node>
-										<node id="16777868">
+										<node id="16778222">
 											<attribute name="Is Enabled" value="true" />
-											<attribute name="Name" value="swat:RightHandIndex1" />
+											<attribute name="Name" value="mixamorig_RightHandMiddle1" />
 											<attribute name="Tags" />
-											<attribute name="Position" value="-10.4665 0.4896 -2.712" />
-											<attribute name="Rotation" value="0.999545 -2.87939e-07 -0.0198528 -0.0227207" />
+											<attribute name="Position" value="0.974899 9.48252 0.005584" />
+											<attribute name="Rotation" value="0.998398 0.0225404 -0.00188452 -0.0518626" />
 											<attribute name="Scale" value="1 1 1" />
 											<attribute name="Variables" />
-											<node id="16777869">
+											<node id="16778223">
 												<attribute name="Is Enabled" value="true" />
-												<attribute name="Name" value="swat:RightHandIndex2" />
+												<attribute name="Name" value="mixamorig_RightHandMiddle2" />
 												<attribute name="Tags" />
-												<attribute name="Position" value="-5.3768 0 -0" />
-												<attribute name="Rotation" value="1 0 0 0" />
+												<attribute name="Position" value="-0.005132 3.69455 -0.164982" />
+												<attribute name="Rotation" value="0.999866 -0.0117091 8.45113e-05 -0.011452" />
 												<attribute name="Scale" value="1 1 1" />
 												<attribute name="Variables" />
-												<node id="16777870">
+												<node id="16778224">
 													<attribute name="Is Enabled" value="true" />
-													<attribute name="Name" value="swat:RightHandIndex3" />
+													<attribute name="Name" value="mixamorig_RightHandMiddle3" />
 													<attribute name="Tags" />
-													<attribute name="Position" value="-3.3855 0 -0" />
-													<attribute name="Rotation" value="1 0 0 0" />
+													<attribute name="Position" value="-0.071607 2.94939 -0.062601" />
+													<attribute name="Rotation" value="0.999814 -0.0125626 -0.000359067 0.0146412" />
 													<attribute name="Scale" value="1 1 1" />
 													<attribute name="Variables" />
 												</node>
 											</node>
 										</node>
-										<node id="16777871">
+										<node id="16778225">
 											<attribute name="Is Enabled" value="true" />
-											<attribute name="Name" value="swat:RightHandMiddle1" />
+											<attribute name="Name" value="mixamorig_RightHandIndex1" />
 											<attribute name="Tags" />
-											<attribute name="Position" value="-10.7596 0.4896 -0.4278" />
-											<attribute name="Rotation" value="0.999545 -2.88055e-07 -0.0198527 -0.0227207" />
+											<attribute name="Position" value="3.18895 8.82872 -0.469375" />
+											<attribute name="Rotation" value="0.9988 -0.00675486 0.000626752 -0.04851" />
 											<attribute name="Scale" value="1 1 1" />
 											<attribute name="Variables" />
-											<node id="16777872">
+											<node id="16778226">
 												<attribute name="Is Enabled" value="true" />
-												<attribute name="Name" value="swat:RightHandMiddle2" />
+												<attribute name="Name" value="mixamorig_RightHandIndex2" />
 												<attribute name="Tags" />
-												<attribute name="Position" value="-5.6168 0 -0" />
-												<attribute name="Rotation" value="1 0 0 0" />
+												<attribute name="Position" value="0.019823 3.67599 0.052022" />
+												<attribute name="Rotation" value="0.999704 0.0243452 -0.000242822 0.000240571" />
 												<attribute name="Scale" value="1 1 1" />
 												<attribute name="Variables" />
-												<node id="16777873">
+												<node id="16778227">
 													<attribute name="Is Enabled" value="true" />
-													<attribute name="Name" value="swat:RightHandMiddle3" />
+													<attribute name="Name" value="mixamorig_RightHandIndex3" />
 													<attribute name="Tags" />
-													<attribute name="Position" value="-3.7364 0 -0" />
-													<attribute name="Rotation" value="1 0 0 0" />
+													<attribute name="Position" value="0.016934 2.88129 -0.099644" />
+													<attribute name="Rotation" value="0.999555 0.0238879 -0.00133584 -0.0178254" />
 													<attribute name="Scale" value="1 1 1" />
 													<attribute name="Variables" />
 												</node>
 											</node>
 										</node>
-										<node id="16777874">
+										<node id="16778228">
 											<attribute name="Is Enabled" value="true" />
-											<attribute name="Name" value="swat:RightHandRing1" />
+											<attribute name="Name" value="mixamorig_RightHandThumb1" />
 											<attribute name="Tags" />
-											<attribute name="Position" value="-10.4702 0.3879 1.9363" />
-											<attribute name="Rotation" value="0.999545 -3.02803e-07 -0.0198527 -0.0227207" />
+											<attribute name="Position" value="2.94932 2.17548 -1.52117" />
+											<attribute name="Rotation" value="0.943301 -0.167613 0.0543398 -0.281313" />
 											<attribute name="Scale" value="1 1 1" />
 											<attribute name="Variables" />
-											<node id="16777875">
+											<node id="16778229">
 												<attribute name="Is Enabled" value="true" />
-												<attribute name="Name" value="swat:RightHandRing2" />
+												<attribute name="Name" value="mixamorig_RightHandThumb2" />
 												<attribute name="Tags" />
-												<attribute name="Position" value="-5.4013 0 -0" />
-												<attribute name="Rotation" value="1 0 0 0" />
+												<attribute name="Position" value="0.213203 4.14354 -0.414005" />
+												<attribute name="Rotation" value="0.992737 -0.0654322 -0.00494265 -0.100835" />
 												<attribute name="Scale" value="1 1 1" />
 												<attribute name="Variables" />
-												<node id="16777876">
+												<node id="16778230">
 													<attribute name="Is Enabled" value="true" />
-													<attribute name="Name" value="swat:RightHandRing3" />
+													<attribute name="Name" value="mixamorig_RightHandThumb3" />
 													<attribute name="Tags" />
-													<attribute name="Position" value="-3.3916 0 -0" />
-													<attribute name="Rotation" value="1 0 0 0" />
-													<attribute name="Scale" value="1 1 1" />
-													<attribute name="Variables" />
-												</node>
-											</node>
-										</node>
-										<node id="16777877">
-											<attribute name="Is Enabled" value="true" />
-											<attribute name="Name" value="swat:RightHandPinky1" />
-											<attribute name="Tags" />
-											<attribute name="Position" value="-9.9715 -0.1191 3.954" />
-											<attribute name="Rotation" value="0.999545 -3.02483e-07 -0.0198527 -0.0227207" />
-											<attribute name="Scale" value="1 1 1" />
-											<attribute name="Variables" />
-											<node id="16777878">
-												<attribute name="Is Enabled" value="true" />
-												<attribute name="Name" value="swat:RightHandPinky2" />
-												<attribute name="Tags" />
-												<attribute name="Position" value="-3.6528 0 -0" />
-												<attribute name="Rotation" value="1 0 0 0" />
-												<attribute name="Scale" value="1 1 1" />
-												<attribute name="Variables" />
-												<node id="16777879">
-													<attribute name="Is Enabled" value="true" />
-													<attribute name="Name" value="swat:RightHandPinky3" />
-													<attribute name="Tags" />
-													<attribute name="Position" value="-2.782 0 -0" />
-													<attribute name="Rotation" value="1 0 0 0" />
+													<attribute name="Position" value="-0.515433 3.3837 0.109017" />
+													<attribute name="Rotation" value="0.992909 0.0464823 0.00219129 0.109387" />
 													<attribute name="Scale" value="1 1 1" />
 													<attribute name="Variables" />
 												</node>
@@ -1147,72 +1067,72 @@
 					</node>
 				</node>
 			</node>
-			<node id="16777880">
+			<node id="16778231">
 				<attribute name="Is Enabled" value="true" />
-				<attribute name="Name" value="swat:LeftUpLeg" />
+				<attribute name="Name" value="mixamorig_LeftUpLeg" />
 				<attribute name="Tags" />
-				<attribute name="Position" value="9.6338 -3.2733 -0" />
-				<attribute name="Rotation" value="0.999901 0.0140757 7.1389e-07 -7.71172e-05" />
+				<attribute name="Position" value="8.20779 -6.75171 1.59956" />
+				<attribute name="Rotation" value="-1.00001e-06 -0 -0.00389653 0.999992" />
 				<attribute name="Scale" value="1 1 1" />
 				<attribute name="Variables" />
-				<node id="16777881">
+				<node id="16778232">
 					<attribute name="Is Enabled" value="true" />
-					<attribute name="Name" value="swat:LeftLeg" />
+					<attribute name="Name" value="mixamorig_LeftLeg" />
 					<attribute name="Tags" />
-					<attribute name="Position" value="0 -41.73 1.73" />
-					<attribute name="Rotation" value="0.999578 -0.0290497 -7.09329e-06 -1.95557e-07" />
+					<attribute name="Position" value="0 44.3714 -0" />
+					<attribute name="Rotation" value="0.999275 0.0380686 0 0" />
 					<attribute name="Scale" value="1 1 1" />
 					<attribute name="Variables" />
-					<node id="16777882">
+					<node id="16778233">
 						<attribute name="Is Enabled" value="true" />
-						<attribute name="Name" value="swat:LeftFoot" />
+						<attribute name="Name" value="mixamorig_LeftFoot" />
 						<attribute name="Tags" />
-						<attribute name="Position" value="0.0126 -39.19 0.8477" />
-						<attribute name="Rotation" value="0.999888 0.0149771 3.82169e-06 7.76038e-05" />
+						<attribute name="Position" value="0 44.5278 0.001568" />
+						<attribute name="Rotation" value="0.87961 -0.475695 0 0" />
 						<attribute name="Scale" value="1 1 1" />
 						<attribute name="Variables" />
-						<node id="16777883">
+						<node id="16778234">
 							<attribute name="Is Enabled" value="true" />
-							<attribute name="Name" value="swat:LeftToeBase" />
+							<attribute name="Name" value="mixamorig_LeftToeBase" />
 							<attribute name="Tags" />
-							<attribute name="Position" value="-0.1833 -12.1857 -8.2823" />
-							<attribute name="Rotation" value="1 0 0 0" />
+							<attribute name="Position" value="0 13.8078 0.499311" />
+							<attribute name="Rotation" value="0.948037 -0.318161 0 0" />
 							<attribute name="Scale" value="1 1 1" />
 							<attribute name="Variables" />
 						</node>
 					</node>
 				</node>
 			</node>
-			<node id="16777884">
+			<node id="16778235">
 				<attribute name="Is Enabled" value="true" />
-				<attribute name="Name" value="swat:RightUpLeg" />
+				<attribute name="Name" value="mixamorig_RightUpLeg" />
 				<attribute name="Tags" />
-				<attribute name="Position" value="-9.6338 -3.2733 -0" />
-				<attribute name="Rotation" value="0.999901 0.0140725 7.21215e-07 -7.71292e-05" />
+				<attribute name="Position" value="-8.20779 -6.75167 1.59956" />
+				<attribute name="Rotation" value="-1.00001e-06 -0 -0.00390453 0.999992" />
 				<attribute name="Scale" value="1 1 1" />
 				<attribute name="Variables" />
-				<node id="16777885">
+				<node id="16778236">
 					<attribute name="Is Enabled" value="true" />
-					<attribute name="Name" value="swat:RightLeg" />
+					<attribute name="Name" value="mixamorig_RightLeg" />
 					<attribute name="Tags" />
-					<attribute name="Position" value="0 -41.73 1.73" />
-					<attribute name="Rotation" value="0.999578 -0.0290442 -7.118e-06 -1.94747e-07" />
+					<attribute name="Position" value="0 44.3715 -5e-06" />
+					<attribute name="Rotation" value="0.999274 0.0380851 0 0" />
 					<attribute name="Scale" value="1 1 1" />
 					<attribute name="Variables" />
-					<node id="16777886">
+					<node id="16778237">
 						<attribute name="Is Enabled" value="true" />
-						<attribute name="Name" value="swat:RightFoot" />
+						<attribute name="Name" value="mixamorig_RightFoot" />
 						<attribute name="Tags" />
-						<attribute name="Position" value="0.0126 -39.19 0.8477" />
-						<attribute name="Rotation" value="0.999888 0.0149747 3.83062e-06 7.76153e-05" />
+						<attribute name="Position" value="0 44.5278 0.001577" />
+						<attribute name="Rotation" value="0.879606 -0.475703 0 0" />
 						<attribute name="Scale" value="1 1 1" />
 						<attribute name="Variables" />
-						<node id="16777887">
+						<node id="16778238">
 							<attribute name="Is Enabled" value="true" />
-							<attribute name="Name" value="swat:RightToeBase" />
+							<attribute name="Name" value="mixamorig_RightToeBase" />
 							<attribute name="Tags" />
-							<attribute name="Position" value="-0.1833 -12.1857 -8.2823" />
-							<attribute name="Rotation" value="1 0 0 0" />
+							<attribute name="Position" value="0 13.8078 0.499311" />
+							<attribute name="Rotation" value="0.948037 -0.318161 0 0" />
 							<attribute name="Scale" value="1 1 1" />
 							<attribute name="Variables" />
 						</node>
