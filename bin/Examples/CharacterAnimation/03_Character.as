@@ -29,14 +29,14 @@ class Animator
     // Configuration
     private Array<String> _animations; ///< Animations for each state.
     private Array<WalkAnimationDesc> _walkAnimations; ///< Walk animations.
-    
+
     float modelFootScale = 1;
     float idleThreshold = 0.1;
     float walkSwitchDuration = 0.2;
     float jumpSwitchDuration = 0.1;
-    float flySwitchDuration = 0.4;
+    float flySwitchDuration = 0.1;
     private float _switchDuration = 0.2;
-    
+
     /// Add walk animation. Shall be ordered from negative to positive speeds.
     void AddWalkAnimation(String &in animation, float minVelocity)
     {
@@ -64,7 +64,7 @@ class Animator
     // Internal state
     State _state = Idle;
     float _idleTimer = 0;
-    
+
     /// Construct.
     Animator()
     {
@@ -116,7 +116,7 @@ class Animator
     void Update(CharacterAnimationController@ characterController, float timeStep)
     {
         AnimationController@ animController = characterController;
-        
+
         // Compute parameters
         bool movingX = Abs(movementSpeed) > 0;
         if (movingX)
@@ -150,12 +150,12 @@ class Animator
         else
         {
             // Convert jump to fall
-            if (_state == Jump && verticalSpeed <= 0)
+            if (_state == Idle || _state == Walk || (_state == Jump && verticalSpeed <= 0))
             {
                 _state = Fall;
             }
         }
-        
+
         // Apply animation
         switch (_state)
         {
@@ -184,7 +184,7 @@ class Controller
     // Grounding configuration
     float flyThreshold = 0.1;
     float jumpCooldown = 0.5;
-    
+
     // Movement parameters
     float moveVelocity = 1;
     float jumpVelocity = 6;
@@ -194,14 +194,14 @@ class Controller
     float rotationNegative = 90;    ///< Rotation angle for negative direction.
     float rotationNeutral = 0;      ///< Rotation angle for zero direction.
     float rotationPositive = -90;   ///< Rotation angle for positive direction.
-    
+
     // Control variables
     int moveDirection = 0;          ///< Movement direction.
     bool slow = false;              ///< Whether the character is in slow movement mode.
     bool grounded = false;          ///< Whether the character is on the ground.
     bool jump = false;              ///< Whether the character is about to jump.
     int lookDirection = 1;          ///< Look direction.
-    
+
     ///  90   -90
     ///  <  0  >
     ///     v
@@ -210,9 +210,9 @@ class Controller
     private float _currentDirection = 1;
 
     private float _inAirTimer = 0;
-    private float _jumpTimer = 0;
+    private float _jumpTimer = M_INFINITY;
     private bool _softGrounded = false;
-    
+
     private void UpdateParameters(float timeStep)
     {
         // Update timers
@@ -245,22 +245,19 @@ class Controller
         else if (isMoving)
             _direction = moveDirection >= 0 ? 1 : -1;
 
-        // Update jump
+        // Update velocity
+        Vector3 linearVelocity = rigidBody.linearVelocity;
+        animator.movementSpeed = Abs(linearVelocity.x) > 0.05 ? linearVelocity.x * _direction : 0;
+        animator.verticalSpeed = linearVelocity.y;
+        linearVelocity.x = moveVelocity * moveDirection;
         if (jump)
         {
-            rigidBody.ApplyImpulse(Vector3(0, 1, 0) * rigidBody.mass * jumpVelocity);
+            linearVelocity.y = jumpVelocity;
             animator.jump = true;
             jump = false;
         }
-
-        // Apply movement
-        float speed = moveVelocity * moveDirection;
-        animator.movementSpeed = speed * _direction;
-        Vector3 linearVelocity = rigidBody.linearVelocity;
-        linearVelocity.x = speed;
         rigidBody.linearVelocity = linearVelocity;
-        animator.verticalSpeed = linearVelocity.y;
-        
+
         // Interpolate direction and apply node rotation
         float flipSpeed = 1 / (0.5 * flipDuration);
         _currentDirection = Clamp(_currentDirection + Sign(_direction - _currentDirection) * flipSpeed * timeStep, -1.0f, 1.0f);
@@ -342,7 +339,7 @@ class Main : ScriptObject
         _controller.Update(node, rigidBody, _animator, timeStep);
         _animator.modelFootScale = _modelFootScale;
         _animator.Update(characterController, timeStep);
-        
+
         _controller.grounded = false;
     }
     void ApplyAttributes()
