@@ -57,6 +57,7 @@ class Animator
 
     // Control variables
     bool grounded = false; ///< Whether the character is on the ground.
+    bool aboutToGround = false; ///< Whether the character is about to ground.
     bool jump = false; ///< Whether the character is about to jump.
     float movementSpeed = 0; ///< Horizontal movement speed.
     float verticalSpeed = 0; ///< Vertical movement speed.
@@ -123,16 +124,16 @@ class Animator
             _idleTimer = 0;
 
         // Update state
-        if (grounded)
+        if (grounded && jump)
         {
-            // Jump if asked for
-            if (jump)
-            {
-                _state = Jump;
-                jump = false;
-            }
+            // Jump if requested
+            _state = Jump;
+            jump = false;
+        }
+        if (grounded || aboutToGround)
+        {
             // Start movement
-            else if (movingX)
+            if (movingX)
             {
                 _state = Walk;
             }
@@ -164,7 +165,7 @@ class Animator
             _switchDuration = walkSwitchDuration;
             break;
         case Walk:
-            UpdateWalkAnimation(animController, movementSpeed, _switchDuration);
+            UpdateWalkAnimation(animController, grounded ? movementSpeed : 0, _switchDuration);
             _switchDuration = walkSwitchDuration;
             break;
         case Jump:
@@ -199,6 +200,7 @@ class Controller
     int moveDirection = 0;          ///< Movement direction.
     bool slow = false;              ///< Whether the character is in slow movement mode.
     bool grounded = false;          ///< Whether the character is on the ground.
+    bool aboutToGround = false;     ///< Whether the character is about to ground.
     bool jump = false;              ///< Whether the character is about to jump.
     int lookDirection = 1;          ///< Look direction.
 
@@ -237,6 +239,7 @@ class Controller
         // Update parameters
         UpdateParameters(timeStep);
         animator.grounded = _softGrounded;
+        animator.aboutToGround = aboutToGround;
 
         // Update direction and speed
         bool isMoving = moveDirection != 0;
@@ -282,7 +285,8 @@ class Main : ScriptObject
 
     void DelayedStart()
     {
-        SubscribeToEvent(node, "NodeCollision", "HandleNodeCollision");
+        SubscribeToEvent(node.childrenByName["[ground]"], "NodeCollision", "HandleGrounded");
+        SubscribeToEvent(node.childrenByName["[about_to_ground]"], "NodeCollision", "HandleAboutToGround");
         SubscribeToEvent("KeyDown", "HandleKeyDown");
 
         @_animator = Animator();
@@ -294,25 +298,19 @@ class Main : ScriptObject
         _animator.AddWalkAnimation("Default_Character/Animations/walking.ani", 1);
         _animator.AddWalkAnimation("Default_Character/Animations/running.ani", 3);
     }
-    void HandleNodeCollision(StringHash eventType, VariantMap& eventData)
+    void HandleGrounded(StringHash eventType, VariantMap& eventData)
     {
-        VectorBuffer contacts = eventData["Contacts"].GetBuffer();
-
-        while (!contacts.eof)
-        {
-            Vector3 contactPosition = contacts.ReadVector3();
-            Vector3 contactNormal = contacts.ReadVector3();
-            float contactDistance = contacts.ReadFloat();
-            float contactImpulse = contacts.ReadFloat();
-
-            // If contact is below node center and pointing up, assume it's a ground contact
-            if (contactPosition.y < (node.position.y + 1.0f))
-            {
-                float level = contactNormal.y;
-                if (level > 0.75)
-                    _controller.grounded = true;
-            }
-        }
+        Node@ otherNode = eventData["OtherNode"].GetPtr();
+        RigidBody@ otherBody = eventData["OtherBody"].GetPtr();
+        if (@otherNode != @node && !otherBody.trigger)
+            _controller.grounded = true;
+    }
+    void HandleAboutToGround(StringHash eventType, VariantMap& eventData)
+    {
+        Node@ otherNode = eventData["OtherNode"].GetPtr();
+        RigidBody@ otherBody = eventData["OtherBody"].GetPtr();
+        if (@otherNode != @node && !otherBody.trigger)
+            _controller.aboutToGround = true;
     }
     void HandleKeyDown(StringHash eventType, VariantMap& eventData)
     {
@@ -341,6 +339,7 @@ class Main : ScriptObject
         _animator.Update(characterController, timeStep);
 
         _controller.grounded = false;
+        _controller.aboutToGround = false;
     }
     void ApplyAttributes()
     {

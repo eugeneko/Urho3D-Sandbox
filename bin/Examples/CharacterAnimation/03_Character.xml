@@ -5,10 +5,10 @@
 	<attribute name="Smoothing Constant" value="50" />
 	<attribute name="Snap Threshold" value="5" />
 	<attribute name="Elapsed Time" value="0" />
-	<attribute name="Next Replicated Node ID" value="16" />
-	<attribute name="Next Replicated Component ID" value="41" />
-	<attribute name="Next Local Node ID" value="16777830" />
-	<attribute name="Next Local Component ID" value="16777600" />
+	<attribute name="Next Replicated Node ID" value="18" />
+	<attribute name="Next Replicated Component ID" value="45" />
+	<attribute name="Next Local Node ID" value="16777834" />
+	<attribute name="Next Local Component ID" value="16777648" />
 	<attribute name="Variables" />
 	<attribute name="Variable Names" value="" />
 	<component type="Octree" id="1" />
@@ -632,6 +632,46 @@
 					</node>
 				</node>
 			</node>
+		</node>
+		<node id="16">
+			<attribute name="Is Enabled" value="true" />
+			<attribute name="Name" value="[ground]" />
+			<attribute name="Tags" />
+			<attribute name="Position" value="0 0 0" />
+			<attribute name="Rotation" value="1 0 0 0" />
+			<attribute name="Scale" value="1 1 1" />
+			<attribute name="Variables" />
+			<component type="CollisionShape" id="42">
+				<attribute name="Shape Type" value="Sphere" />
+				<attribute name="Size" value="0.3 0.3 0.3" />
+				<attribute name="Offset Position" value="0 0.1 0" />
+			</component>
+			<component type="RigidBody" id="41">
+				<attribute name="Physics Rotation" value="0.707107 0 -0.707107 0" />
+				<attribute name="Mass" value="1" />
+				<attribute name="Is Kinematic" value="true" />
+				<attribute name="Is Trigger" value="true" />
+			</component>
+		</node>
+		<node id="17">
+			<attribute name="Is Enabled" value="true" />
+			<attribute name="Name" value="[about_to_ground]" />
+			<attribute name="Tags" />
+			<attribute name="Position" value="0 0 0" />
+			<attribute name="Rotation" value="1 0 0 0" />
+			<attribute name="Scale" value="1 1 1" />
+			<attribute name="Variables" />
+			<component type="CollisionShape" id="43">
+				<attribute name="Shape Type" value="Sphere" />
+				<attribute name="Size" value="0.3 0.3 0.3" />
+				<attribute name="Offset Position" value="0 -0.3 0" />
+			</component>
+			<component type="RigidBody" id="44">
+				<attribute name="Physics Rotation" value="0.707107 0 -0.707107 0" />
+				<attribute name="Mass" value="1" />
+				<attribute name="Is Kinematic" value="true" />
+				<attribute name="Is Trigger" value="true" />
+			</component>
 		</node>
 	</node>
 </scene>
