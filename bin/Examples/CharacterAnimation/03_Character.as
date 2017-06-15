@@ -14,27 +14,32 @@ enum State
     State_COUNT
 }
 
-class WalkAnimationDesc
+class AnimationDesc
 {
     String animationName;
     Animation@ animation;
+    float length;
+}
+
+class WalkAnimationDesc : AnimationDesc
+{
     float minVelocity;
     float baseVelocity;
     float footScale;
-    float length;
 }
 
 class Animator
 {
     // Configuration
-    private Array<String> _animations; ///< Animations for each state.
+    private Array<AnimationDesc> _animations; ///< Animations for each state.
     private Array<WalkAnimationDesc> _walkAnimations; ///< Walk animations.
 
     float modelFootScale = 1;
     float idleThreshold = 0.1;
+    float jumpBaseSpeed = 10;
     float walkSwitchDuration = 0.2;
-    float jumpSwitchDuration = 0.1;
-    float flySwitchDuration = 0.1;
+    float jumpSwitchDuration = 0.2;
+    float flySwitchDuration = 0.5;
     private float _switchDuration = 0.2;
 
     /// Add walk animation. Shall be ordered from negative to positive speeds.
@@ -43,16 +48,18 @@ class Animator
         WalkAnimationDesc desc;
         desc.animationName = animation;
         desc.animation = cache.GetResource("Animation", animation);
+        desc.length = desc.animation.length;
         desc.minVelocity = minVelocity;
         desc.baseVelocity = desc.animation.metadata["speed"].GetFloat();
         desc.footScale = desc.animation.metadata["footscale"].GetFloat();
-        desc.length = desc.animation.length;
         _walkAnimations.Push(desc);
     }
     /// Add animation. Don't use this for walk animations.
     void AddAnimation(State state, String &in animation)
     {
-        _animations[state] = animation;
+        _animations[state].animationName = animation;
+        _animations[state].animation = cache.GetResource("Animation", animation);
+        _animations[state].length = _animations[state].animation.length;
     }
 
     // Control variables
@@ -117,6 +124,7 @@ class Animator
     void Update(CharacterAnimationController@ characterController, float timeStep)
     {
         AnimationController@ animController = characterController;
+        State oldState = _state;
 
         // Compute parameters
         bool movingX = Abs(movementSpeed) > 0;
@@ -124,13 +132,13 @@ class Animator
             _idleTimer = 0;
 
         // Update state
-        if (grounded && jump)
+        if (jump)
         {
             // Jump if requested
             _state = Jump;
             jump = false;
         }
-        if (grounded || aboutToGround)
+        else if (grounded || aboutToGround)
         {
             // Start movement
             if (movingX)
@@ -151,17 +159,18 @@ class Animator
         else
         {
             // Convert jump to fall
-            if (_state == Idle || _state == Walk || (_state == Jump && verticalSpeed <= 0))
+            if (_state != Jump || verticalSpeed < 0)
             {
                 _state = Fall;
             }
         }
 
         // Apply animation
+        String currentAnimation = _animations[_state].animationName;
         switch (_state)
         {
         case Idle:
-            animController.PlayExclusive(_animations[Idle], 0, true, _switchDuration);
+            animController.PlayExclusive(currentAnimation, 0, true, _switchDuration);
             _switchDuration = walkSwitchDuration;
             break;
         case Walk:
@@ -169,12 +178,16 @@ class Animator
             _switchDuration = walkSwitchDuration;
             break;
         case Jump:
-            animController.PlayExclusive(_animations[Jump], 0, false, jumpSwitchDuration);
-            animController.SetSpeed(_animations[Jump], 0.5);
+            animController.PlayExclusive(currentAnimation, 0, false, jumpSwitchDuration);
+            animController.SetSpeed(currentAnimation, 0);
+            animController.SetTime(currentAnimation, Clamp(1 - verticalSpeed / jumpBaseSpeed, 0.0, 1.0) * _animations[Jump].length);
+            Print(Max(verticalSpeed / jumpBaseSpeed, 0.0));
             _switchDuration = jumpSwitchDuration;
             break;
         case Fall:
-            animController.PlayExclusive(_animations[Fall], 0, false, flySwitchDuration);
+            animController.PlayExclusive(currentAnimation, 0, false, flySwitchDuration);
+            animController.SetSpeed(currentAnimation, 0);
+            animController.SetTime(currentAnimation, Clamp(-verticalSpeed / jumpBaseSpeed, 0.0, 1.0) * _animations[Jump].length);
             break;
         }
     }
@@ -214,6 +227,7 @@ class Controller
     private float _inAirTimer = 0;
     private float _jumpTimer = M_INFINITY;
     private bool _softGrounded = false;
+    private bool _softAboutToGround = false;
 
     private void UpdateParameters(float timeStep)
     {
@@ -223,23 +237,27 @@ class Controller
         else
             _inAirTimer = 0.0f;
         _jumpTimer += timeStep;
-        _softGrounded = _jumpTimer > jumpCooldown && _inAirTimer < flyThreshold;
+        const bool readyToJump = _jumpTimer > jumpCooldown;
+        const bool ableToJump = readyToJump && _inAirTimer < flyThreshold;
 
         // Update jump state
         if (jump)
         {
-            if (!_softGrounded)
+            if (!ableToJump)
                 jump = false;
             else
                 _jumpTimer = 0;
         }
+
+        _softGrounded = readyToJump && !jump && _inAirTimer < flyThreshold;
+        _softAboutToGround = readyToJump && !jump && aboutToGround;
     }
     void Update(Node@ node, RigidBody@ rigidBody, Animator@ animator, float timeStep)
     {
         // Update parameters
         UpdateParameters(timeStep);
         animator.grounded = _softGrounded;
-        animator.aboutToGround = aboutToGround;
+        animator.aboutToGround = _softAboutToGround;
 
         // Update direction and speed
         bool isMoving = moveDirection != 0;
@@ -252,6 +270,7 @@ class Controller
         Vector3 linearVelocity = rigidBody.linearVelocity;
         animator.movementSpeed = Abs(linearVelocity.x) > 0.05 ? linearVelocity.x * _direction : 0;
         animator.verticalSpeed = linearVelocity.y;
+        animator.jumpBaseSpeed = jumpVelocity;
         linearVelocity.x = moveVelocity * moveDirection;
         if (jump)
         {

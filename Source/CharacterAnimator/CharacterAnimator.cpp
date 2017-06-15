@@ -1088,7 +1088,7 @@ void CharacterAnimationTrack::GetKeyFrame(float time, unsigned& firstFrame, unsi
     firstFrame = GetKeyFrameIndex(time);
     secondFrame = firstFrame + 1 < timeStamps_.Size() ? firstFrame + 1 : 0;
     const float timeInterval = Max(0.0f, timeStamps_[secondFrame] - timeStamps_[firstFrame]);
-    factor = timeInterval > 0.0f ? (time - timeStamps_[firstFrame]) / timeInterval : 1.0f;
+    factor = timeInterval > 0.0f ? (time - timeStamps_[firstFrame]) / timeInterval : 0.0f;
 }
 
 float CharacterAnimationTrack::GetLength() const
@@ -1751,7 +1751,7 @@ void OverrideModelScale(const String& outputName, const String& modelName, const
     if (!cache)
         return;
 
-    SharedPtr<Model> model(cache->GetResource<Model>(modelName));
+    SharedPtr<Model> model(cache->GetTempResource<Model>(modelName));
     if (!model)
         return;
 
@@ -1771,7 +1771,7 @@ void OverrideAnimationScale(const String& outputName, const String& animationNam
         return;
 
     SharedPtr<Model> model(cache->GetResource<Model>(modelName));
-    SharedPtr<Animation> animation(cache->GetResource<Animation>(animationName));
+    SharedPtr<Animation> animation(cache->GetTempResource<Animation>(animationName));
     if (!model || !animation)
         return;
 
@@ -1808,7 +1808,7 @@ void ResetRootAnimationTrackPosition(const String& outputName, const String& ani
         return;
 
     SharedPtr<Model> model(cache->GetResource<Model>(modelName));
-    SharedPtr<Animation> animation(cache->GetResource<Animation>(animationName));
+    SharedPtr<Animation> animation(cache->GetTempResource<Animation>(animationName));
     if (!model || !animation)
         return;
 
@@ -1839,7 +1839,7 @@ void TrimAnimation(const String& outputName, const String& animationName, float 
     if (!cache)
         return;
 
-    SharedPtr<Animation> animation(cache->GetResource<Animation>(animationName));
+    SharedPtr<Animation> animation(cache->GetTempResource<Animation>(animationName));
     if (!animation)
         return;
 

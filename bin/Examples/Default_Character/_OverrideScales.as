@@ -11,24 +11,24 @@ OverrideModelScale(cache.resourceDirs[0] +
 OverrideAnimationScale(cache.resourceDirs[0] +
     "Default_Character/Animations/idle.ani",
     "Default_Character/Animations/idle.ani",
-    "Default_Character/Models/Model.mdl", scale);
+    "Default_Character/Models/Female.mdl", scale);
 
 OverrideAnimationScale(cache.resourceDirs[0] +
     "Default_Character/Animations/walking.ani",
     "Default_Character/Animations/walking.ani",
-    "Default_Character/Models/Model.mdl", scale);
+    "Default_Character/Models/Female.mdl", scale);
 
 OverrideAnimationScale(cache.resourceDirs[0] +
     "Default_Character/Animations/running.ani",
     "Default_Character/Animations/running.ani",
-    "Default_Character/Models/Model.mdl", scale);
+    "Default_Character/Models/Female.mdl", scale);
 
 OverrideAnimationScale(cache.resourceDirs[0] +
     "Default_Character/Animations/walking_backward.ani",
     "Default_Character/Animations/walking_backward.ani",
-    "Default_Character/Models/Model.mdl", scale);
+    "Default_Character/Models/Female.mdl", scale);
 
 OverrideAnimationScale(cache.resourceDirs[0] +
     "Default_Character/Animations/jump.full.ani",
     "Default_Character/Animations/jump.full.ani",
-    "Default_Character/Models/Model.mdl", scale);
+    "Default_Character/Models/Female.mdl", scale);
