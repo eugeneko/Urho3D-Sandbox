@@ -300,7 +300,9 @@ class Main : ScriptObject
     private Controls _controls;
     private Animator@ _animator;
     private Controller@ _controller;
-    float _velocity;
+
+    bool _grounded = false;
+    Vector3 _previousPosition;
 
     void DelayedStart()
     {
@@ -354,11 +356,37 @@ class Main : ScriptObject
         _controller.moveVelocity = _controls.IsDown(CTRL_SLOW) ? walkVelocity : runVelocity;
         //_controller.aim = Vector2(_controls.yaw, _controls.pitch);
         _controller.Update(node, rigidBody, _animator, timeStep);
-        _animator.modelFootScale = _modelFootScale;
-        _animator.Update(characterController, timeStep);
 
+        _grounded = _animator.grounded && !_animator.jump;
+        _previousPosition = node.worldPosition;
         _controller.grounded = false;
         _controller.aboutToGround = false;
+        
+        // Glue to ground
+        rigidBody.useGravity = !_grounded;
+    }
+    void FixedPostUpdate(float timeStep)
+    {
+        CharacterAnimationController@ characterController = node.GetComponent("CharacterAnimationController");
+        RigidBody@ rigidBody = node.GetComponent("RigidBody");
+        CollisionShape@ collisionShape = node.GetComponent("CollisionShape");
+        
+        if (_grounded)
+        {
+            Vector3 newPosition;
+            if (GlueRigidBody(rigidBody, collisionShape, 0.1, newPosition))
+            {
+                Vector3 realVelocity = (newPosition - _previousPosition) / timeStep;
+                rigidBody.linearVelocity = realVelocity;
+                Print(realVelocity.x + "|" + realVelocity.y + "|" + realVelocity.z);
+            }
+            //rigidBody.linearVelocity = Vector3(0, 0, 0);
+            //Vector3 realVelocity = (node.worldPosition - _previousPosition) / timeStep;
+            //
+        }
+
+        _animator.modelFootScale = _modelFootScale;
+        _animator.Update(characterController, timeStep);
     }
     void ApplyAttributes()
     {

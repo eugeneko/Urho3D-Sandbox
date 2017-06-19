@@ -1935,8 +1935,12 @@ void CharacterAnimationController_SetTargetRotationBalance(const String& segment
     characterAnimationController->SetTargetRotationBalance(segment, globalFactor);
 }
 
+void RegisterPhysicsHack(asIScriptEngine* engine);
+
 void RegisterCharacterAnimatorScriptAPI(asIScriptEngine* engine)
 {
+    RegisterPhysicsHack(engine);
+
     RegisterResource<CharacterSkeleton>(engine, "CharacterSkeleton");
 
     engine->RegisterGlobalFunction("void DumpCharacterSkeletonDirections(const String&in, const String&in, const String&in)", asFUNCTION(DumpCharacterSkeletonDirections), asCALL_CDECL);
@@ -1955,3 +1959,81 @@ void RegisterCharacterAnimatorScriptAPI(asIScriptEngine* engine)
 }
 
 }
+
+// #TODO Extract this
+#include <Urho3D/Scene/Scene.h>
+#include <Urho3D/Physics/CollisionShape.h>
+#include <Urho3D/Physics/RigidBody.h>
+#include <Urho3D/Physics/PhysicsWorld.h>
+#include <Urho3D/Physics/PhysicsUtils.h>
+#include <Bullet/BulletCollision/CollisionShapes/btSphereShape.h>
+#include <Bullet/BulletDynamics/Dynamics/btDiscreteDynamicsWorld.h>
+#include <Bullet/BulletDynamics/Dynamics/btRigidBody.h>
+#include <Bullet/BulletCollision/CollisionDispatch/btCollisionObject.h>
+
+namespace Urho3D
+{
+
+struct ClosestConvexResultCallbackNotMe : public btCollisionWorld::ClosestConvexResultCallback
+{
+    btCollisionObject* me_;
+    ClosestConvexResultCallbackNotMe(btCollisionObject* me, const btVector3& convexFromWorld, const btVector3& convexToWorld)
+        : ClosestConvexResultCallback(convexFromWorld, convexToWorld)
+        , me_(me)
+    {
+    }
+    virtual	btScalar addSingleResult(btCollisionWorld::LocalConvexResult& convexResult, bool normalInWorldSpace)
+    {
+        if (convexResult.m_hitCollisionObject == me_ || convexResult.m_hitCollisionObject->getCollisionFlags() & btCollisionObject::CF_NO_CONTACT_RESPONSE)
+            return 1.0;
+        return ClosestConvexResultCallback::addSingleResult(convexResult, normalInWorldSpace);
+    }
+};
+
+bool GlueRigidBody(RigidBody* rigidBody, CollisionShape* collisionShape, float distance, Vector3& newPosition)
+{
+    Scene* scene = GetScriptContextScene();
+    PhysicsWorld* physicsWorld = scene->GetComponent<PhysicsWorld>();
+    Node* node = rigidBody->GetNode();
+    btDiscreteDynamicsWorld* bulletWorld = physicsWorld->GetWorld();
+
+    Vector3 shapeSize = collisionShape->GetSize();
+    btSphereShape shape(shapeSize.x_ / 2);
+    Vector3 groundOffset = collisionShape->GetPosition() + Vector3::UP * (shapeSize.x_ - shapeSize.y_) / 2;
+    Vector3 beginPos = node->GetWorldPosition() + groundOffset;
+    Vector3 endPos = beginPos + distance * Vector3::DOWN;
+
+    ClosestConvexResultCallbackNotMe convexCallback(rigidBody->GetBody(), ToBtVector3(beginPos), ToBtVector3(endPos));
+    convexCallback.m_collisionFilterGroup = (short)0xffff;
+    convexCallback.m_collisionFilterMask = (short)rigidBody->GetCollisionMask();
+
+    bulletWorld->convexSweepTest(&shape, btTransform(btQuaternion::getIdentity(), convexCallback.m_convexFromWorld),
+        btTransform(btQuaternion::getIdentity(), convexCallback.m_convexToWorld), convexCallback);
+
+    if (convexCallback.hasHit())
+    {
+        newPosition = rigidBody->GetPosition();
+        URHO3D_LOGINFOF("%f|%f|%f -> %f", newPosition.x_, newPosition.y_, newPosition.z_, convexCallback.m_hitPointWorld.y());
+        newPosition.y_ = convexCallback.m_hitPointWorld.y();
+//         rigidBody->SetPosition(ToVector3(convexCallback.m_hitPointWorld));
+        rigidBody->SetPosition(newPosition);
+//         btTransform transform;
+//         rigidBody->getWorldTransform(transform);
+//         transform.setOrigin(transform.getOrigin() + );
+//         rigidBody->setWorldTransform()
+//         btRigidBody* bulletBody = rigidBody->GetBody();
+//         bulletBody->getMotionState()
+//         //node->SetWorldPosition(ToVector3(convexCallback.m_hitPointWorld));
+//         node->SetWorldPosition(node->GetWorldPosition());
+        return true;
+    }
+    return false;
+}
+
+void RegisterPhysicsHack(asIScriptEngine* engine)
+{
+    engine->RegisterGlobalFunction("bool GlueRigidBody(RigidBody@, CollisionShape@, float, Vector3 &out)", asFUNCTION(GlueRigidBody), asCALL_CDECL);
+}
+
+}
+
