@@ -278,6 +278,10 @@ class Controller
             animator.jump = true;
             jump = false;
         }
+        else if (moveDirection == 0 && _softGrounded)
+        {
+            linearVelocity.y = 0;
+        }
         rigidBody.linearVelocity = linearVelocity;
 
         // Interpolate direction and apply node rotation
@@ -379,7 +383,8 @@ class Main : ScriptObject
         //_controller.aim = Vector2(_controls.yaw, _controls.pitch);
         _controller.Update(node, rigidBody, _animator, timeStep);
 
-        _grounded = _animator.grounded && !_animator.jump;
+        //_grounded = _animator.grounded && !_animator.jump;
+        _grounded = _controller.grounded && !_animator.jump;
         //Print(_grounded ? "GROUNDED" : "FLYING");
         _previousPosition = node.worldPosition;
         _controller.grounded = false;

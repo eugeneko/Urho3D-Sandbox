@@ -1994,14 +1994,15 @@ bool GlueRigidBody(RigidBody* rigidBody, CollisionShape* collisionShape, float d
 {
     Scene* scene = GetScriptContextScene();
     PhysicsWorld* physicsWorld = scene->GetComponent<PhysicsWorld>();
-    Node* node = rigidBody->GetNode();
+    DebugRenderer* debugRenderer = scene->GetComponent<DebugRenderer>();
+    Vector3 oldPosition = rigidBody->GetPosition();
     btDiscreteDynamicsWorld* bulletWorld = physicsWorld->GetWorld();
 
     Vector3 shapeSize = collisionShape->GetSize();
     btSphereShape shape(shapeSize.x_ / 2);
     Vector3 groundOffset = collisionShape->GetPosition() + Vector3::UP * (shapeSize.x_ - shapeSize.y_) / 2;
-    Vector3 beginPos = node->GetWorldPosition() + groundOffset;
-    Vector3 endPos = node->GetWorldPosition() + Vector3::UP * (shapeSize.x_ / 2 - distance);
+    Vector3 beginPos = oldPosition + groundOffset;
+    Vector3 endPos = oldPosition + Vector3::UP * (shapeSize.x_ / 2 - distance);
 
     ClosestConvexResultCallbackNotMe convexCallback(rigidBody->GetBody(), ToBtVector3(beginPos), ToBtVector3(endPos));
     convexCallback.m_collisionFilterGroup = (short)0xffff;
@@ -2012,9 +2013,11 @@ bool GlueRigidBody(RigidBody* rigidBody, CollisionShape* collisionShape, float d
 
     if (convexCallback.hasHit())
     {
-        newPosition = rigidBody->GetPosition();
-        //URHO3D_LOGINFOF("%f|%f|%f -> %f", newPosition.x_, newPosition.y_, newPosition.z_, convexCallback.m_hitPointWorld.y());
-        newPosition.y_ = convexCallback.m_hitPointWorld.y();
+        newPosition = oldPosition;
+        newPosition.y_ = Lerp(beginPos.y_, endPos.y_, convexCallback.m_closestHitFraction) - shapeSize.x_ / 2;
+        //newPosition.y_ = convexCallback.m_hitPointWorld.y();
+        //newPosition = ToVector3(convexCallback.m_hitPointWorld);
+        URHO3D_LOGINFOF("%f|%f|%f -> %f", oldPosition.x_, oldPosition.y_, oldPosition.z_, newPosition.y_);
 //         rigidBody->SetPosition(ToVector3(convexCallback.m_hitPointWorld));
         rigidBody->SetPosition(newPosition);
 //         btTransform transform;
@@ -2025,6 +2028,7 @@ bool GlueRigidBody(RigidBody* rigidBody, CollisionShape* collisionShape, float d
 //         bulletBody->getMotionState()
 //         //node->SetWorldPosition(ToVector3(convexCallback.m_hitPointWorld));
 //         node->SetWorldPosition(node->GetWorldPosition());
+        debugRenderer->AddSphere(Sphere(Lerp(beginPos, endPos, convexCallback.m_closestHitFraction), shapeSize.x_ / 2), Color::GREEN);
         return true;
     }
     return false;
