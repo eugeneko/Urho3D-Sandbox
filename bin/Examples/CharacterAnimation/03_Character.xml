@@ -167,9 +167,10 @@
 			<attribute name="Physics Rotation" value="0.707107 0 -0.707107 0" />
 			<attribute name="Physics Position" value="-0.5 0.5 0" />
 			<attribute name="Mass" value="65" />
-			<attribute name="Friction" value="0" />
+			<attribute name="Friction" value="2" />
 			<attribute name="Linear Factor" value="1 1 0" />
 			<attribute name="Angular Factor" value="0 0 0" />
+			<attribute name="Collision Event Mode" value="Always" />
 		</component>
 		<component type="CharacterAnimationController" id="36">
 			<attribute name="Node Animation States">

@@ -214,6 +214,7 @@ class Controller
     bool slow = false;              ///< Whether the character is in slow movement mode.
     bool grounded = false;          ///< Whether the character is on the ground.
     bool aboutToGround = false;     ///< Whether the character is about to ground.
+    Vector3 contactNormal;          ///< Average normal of ground contacts.
     bool jump = false;              ///< Whether the character is about to jump.
     int lookDirection = 1;          ///< Look direction.
 
@@ -271,16 +272,16 @@ class Controller
         animator.movementSpeed = Abs(linearVelocity.x) > 0.05 ? linearVelocity.x * _direction : 0;
         animator.verticalSpeed = linearVelocity.y;
         animator.jumpBaseSpeed = jumpVelocity;
-        linearVelocity.x = moveVelocity * moveDirection;
+        Print("[" + _softGrounded + "] " + contactNormal.ToString());
         if (jump)
         {
             linearVelocity.y = jumpVelocity;
             animator.jump = true;
             jump = false;
         }
-        else if (moveDirection == 0 && _softGrounded)
+        else if (_softGrounded)
         {
-            linearVelocity.y = 0;
+            linearVelocity = contactNormal.CrossProduct(Vector3(0, 0, 1)) * moveVelocity * moveDirection;
         }
         rigidBody.linearVelocity = linearVelocity;
 
@@ -307,6 +308,7 @@ class Main : ScriptObject
 
     bool _grounded = false;
     Vector3 _previousPosition;
+    Vector3 _averageContactNormal;
 
     void DelayedStart()
     {
@@ -336,12 +338,11 @@ class Main : ScriptObject
             float contactImpulse = contacts.ReadFloat();
 
             // If contact is below node center and pointing up, assume it's a ground contact
-            if (contactPosition.y < (node.position.y + 1.0f))
+            bool isGround = contactNormal.y > 0.1;
+            if (isGround)
             {
-                float level = contactNormal.y;
-                //Print(level);
-                if (level > 0.5)
-                    _controller.grounded = true;
+                _controller.grounded = true;
+                _averageContactNormal += contactNormal;
             }
         }
     }
@@ -380,6 +381,8 @@ class Main : ScriptObject
         _controller.jump = _controls.IsDown(CTRL_UP);
         _controller.lookDirection = _controls.yaw >= graphics.width / 2 ? 1 : -1;
         _controller.moveVelocity = _controls.IsDown(CTRL_SLOW) ? walkVelocity : runVelocity;
+        _controller.contactNormal = _averageContactNormal.Normalized();
+        _averageContactNormal = Vector3(0, 0, 0);
         //_controller.aim = Vector2(_controls.yaw, _controls.pitch);
         _controller.Update(node, rigidBody, _animator, timeStep);
 
@@ -391,7 +394,7 @@ class Main : ScriptObject
         _controller.aboutToGround = false;
         
         // Glue to ground
-        rigidBody.useGravity = !_grounded;
+        //rigidBody.useGravity = !_grounded;
     }
     void FixedPostUpdate(float timeStep)
     {
@@ -399,7 +402,7 @@ class Main : ScriptObject
         RigidBody@ rigidBody = node.GetComponent("RigidBody");
         CollisionShape@ collisionShape = node.GetComponent("CollisionShape");
         
-        if (_grounded)
+        /*if (_grounded)
         {
             Vector3 newPosition;
             if (GlueRigidBody(rigidBody, collisionShape, 0.1, newPosition))
@@ -415,7 +418,7 @@ class Main : ScriptObject
             //rigidBody.linearVelocity = Vector3(0, 0, 0);
             //Vector3 realVelocity = (node.worldPosition - _previousPosition) / timeStep;
             //
-        }
+        }*/
 
         _animator.modelFootScale = _modelFootScale;
         _animator.Update(characterController, timeStep);
