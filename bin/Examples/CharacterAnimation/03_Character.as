@@ -181,7 +181,7 @@ class Animator
             animController.PlayExclusive(currentAnimation, 0, false, jumpSwitchDuration);
             animController.SetSpeed(currentAnimation, 0);
             animController.SetTime(currentAnimation, Clamp(1 - verticalSpeed / jumpBaseSpeed, 0.0, 1.0) * _animations[Jump].length);
-            Print(Max(verticalSpeed / jumpBaseSpeed, 0.0));
+            //Print(Max(verticalSpeed / jumpBaseSpeed, 0.0));
             _switchDuration = jumpSwitchDuration;
             break;
         case Fall:
@@ -306,7 +306,8 @@ class Main : ScriptObject
 
     void DelayedStart()
     {
-        SubscribeToEvent(node.childrenByName["[ground]"], "NodeCollision", "HandleGrounded");
+        SubscribeToEvent(node, "NodeCollision", "HandleNodeCollision");
+        //SubscribeToEvent(node.childrenByName["[ground]"], "NodeCollision", "HandleGrounded");
         SubscribeToEvent(node.childrenByName["[about_to_ground]"], "NodeCollision", "HandleAboutToGround");
         SubscribeToEvent("KeyDown", "HandleKeyDown");
 
@@ -319,13 +320,34 @@ class Main : ScriptObject
         _animator.AddWalkAnimation("Default_Character/Animations/walking.ani", 1);
         _animator.AddWalkAnimation("Default_Character/Animations/running.ani", 3);
     }
-    void HandleGrounded(StringHash eventType, VariantMap& eventData)
+    void HandleNodeCollision(StringHash eventType, VariantMap& eventData)
+    {
+        VectorBuffer contacts = eventData["Contacts"].GetBuffer();
+
+        while (!contacts.eof)
+        {
+            Vector3 contactPosition = contacts.ReadVector3();
+            Vector3 contactNormal = contacts.ReadVector3();
+            float contactDistance = contacts.ReadFloat();
+            float contactImpulse = contacts.ReadFloat();
+
+            // If contact is below node center and pointing up, assume it's a ground contact
+            if (contactPosition.y < (node.position.y + 1.0f))
+            {
+                float level = contactNormal.y;
+                //Print(level);
+                if (level > 0.5)
+                    _controller.grounded = true;
+            }
+        }
+    }
+    /*void HandleGrounded(StringHash eventType, VariantMap& eventData)
     {
         Node@ otherNode = eventData["OtherNode"].GetPtr();
         RigidBody@ otherBody = eventData["OtherBody"].GetPtr();
         if (@otherNode != @node && !otherBody.trigger)
             _controller.grounded = true;
-    }
+    }*/
     void HandleAboutToGround(StringHash eventType, VariantMap& eventData)
     {
         Node@ otherNode = eventData["OtherNode"].GetPtr();
@@ -358,6 +380,7 @@ class Main : ScriptObject
         _controller.Update(node, rigidBody, _animator, timeStep);
 
         _grounded = _animator.grounded && !_animator.jump;
+        //Print(_grounded ? "GROUNDED" : "FLYING");
         _previousPosition = node.worldPosition;
         _controller.grounded = false;
         _controller.aboutToGround = false;
@@ -378,8 +401,12 @@ class Main : ScriptObject
             {
                 Vector3 realVelocity = (newPosition - _previousPosition) / timeStep;
                 rigidBody.linearVelocity = realVelocity;
-                Print(realVelocity.x + "|" + realVelocity.y + "|" + realVelocity.z);
+                //Print(realVelocity.x + "|" + realVelocity.y + "|" + realVelocity.z);
+                _controller.grounded = true;
+                Print("GLUED");
             }
+            else
+                Print("DETACHED");
             //rigidBody.linearVelocity = Vector3(0, 0, 0);
             //Vector3 realVelocity = (node.worldPosition - _previousPosition) / timeStep;
             //

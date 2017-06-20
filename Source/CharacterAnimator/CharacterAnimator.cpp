@@ -2001,7 +2001,7 @@ bool GlueRigidBody(RigidBody* rigidBody, CollisionShape* collisionShape, float d
     btSphereShape shape(shapeSize.x_ / 2);
     Vector3 groundOffset = collisionShape->GetPosition() + Vector3::UP * (shapeSize.x_ - shapeSize.y_) / 2;
     Vector3 beginPos = node->GetWorldPosition() + groundOffset;
-    Vector3 endPos = beginPos + distance * Vector3::DOWN;
+    Vector3 endPos = node->GetWorldPosition() + Vector3::UP * (shapeSize.x_ / 2 - distance);
 
     ClosestConvexResultCallbackNotMe convexCallback(rigidBody->GetBody(), ToBtVector3(beginPos), ToBtVector3(endPos));
     convexCallback.m_collisionFilterGroup = (short)0xffff;
@@ -2013,7 +2013,7 @@ bool GlueRigidBody(RigidBody* rigidBody, CollisionShape* collisionShape, float d
     if (convexCallback.hasHit())
     {
         newPosition = rigidBody->GetPosition();
-        URHO3D_LOGINFOF("%f|%f|%f -> %f", newPosition.x_, newPosition.y_, newPosition.z_, convexCallback.m_hitPointWorld.y());
+        //URHO3D_LOGINFOF("%f|%f|%f -> %f", newPosition.x_, newPosition.y_, newPosition.z_, convexCallback.m_hitPointWorld.y());
         newPosition.y_ = convexCallback.m_hitPointWorld.y();
 //         rigidBody->SetPosition(ToVector3(convexCallback.m_hitPointWorld));
         rigidBody->SetPosition(newPosition);
