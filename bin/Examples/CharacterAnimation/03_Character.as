@@ -269,7 +269,7 @@ class Controller
 
         // Update velocity
         Vector3 linearVelocity = rigidBody.linearVelocity;
-        animator.movementSpeed = Abs(linearVelocity.x) > 0.05 ? linearVelocity.x * _direction : 0;
+        animator.movementSpeed = linearVelocity.length > 0.05 ? linearVelocity.length * Sign(linearVelocity.x) * _direction : 0;
         animator.verticalSpeed = linearVelocity.y;
         animator.jumpBaseSpeed = jumpVelocity;
         Print("[" + _softGrounded + "] " + contactNormal.ToString());
@@ -278,12 +278,16 @@ class Controller
             linearVelocity.y = jumpVelocity;
             animator.jump = true;
             jump = false;
+
+            rigidBody.linearVelocity = linearVelocity;
         }
-        else if (_softGrounded)
+        else if (_softGrounded && contactNormal.length > M_EPSILON)
         {
-            linearVelocity = contactNormal.CrossProduct(Vector3(0, 0, 1)) * moveVelocity * moveDirection;
+            Vector3 accelDirection = contactNormal.CrossProduct(Vector3(0, 0, 1)).Normalized() * moveVelocity * moveDirection;
+            rigidBody.ApplyImpulse(accelDirection * rigidBody.mass * 0.25);
+            rigidBody.linearVelocity = rigidBody.linearVelocity.Normalized() * Min(rigidBody.linearVelocity.length, accelDirection.length);
         }
-        rigidBody.linearVelocity = linearVelocity;
+        //rigidBody.linearVelocity = linearVelocity;
 
         // Interpolate direction and apply node rotation
         float flipSpeed = 1 / (0.5 * flipDuration);
@@ -337,13 +341,8 @@ class Main : ScriptObject
             float contactDistance = contacts.ReadFloat();
             float contactImpulse = contacts.ReadFloat();
 
-            // If contact is below node center and pointing up, assume it's a ground contact
-            bool isGround = contactNormal.y > 0.1;
-            if (isGround)
-            {
-                _controller.grounded = true;
+            if (contactNormal.y > 0)
                 _averageContactNormal += contactNormal;
-            }
         }
     }
     /*void HandleGrounded(StringHash eventType, VariantMap& eventData)
@@ -382,6 +381,7 @@ class Main : ScriptObject
         _controller.lookDirection = _controls.yaw >= graphics.width / 2 ? 1 : -1;
         _controller.moveVelocity = _controls.IsDown(CTRL_SLOW) ? walkVelocity : runVelocity;
         _controller.contactNormal = _averageContactNormal.Normalized();
+        _controller.grounded = _averageContactNormal.y > 0.1;
         _averageContactNormal = Vector3(0, 0, 0);
         //_controller.aim = Vector2(_controls.yaw, _controls.pitch);
         _controller.Update(node, rigidBody, _animator, timeStep);
