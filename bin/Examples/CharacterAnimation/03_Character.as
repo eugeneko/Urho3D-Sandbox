@@ -193,6 +193,32 @@ class Animator
     }
 }
 
+class Rotator
+{
+    // Rotation parameters
+    float flipDuration = 0.3;       ///< Flip from -1 to 1 duration.
+    float rotationNegative = 90;    ///< Rotation angle for negative direction.
+    float rotationNeutral = 0;      ///< Rotation angle for zero direction.
+    float rotationPositive = -90;   ///< Rotation angle for positive direction.
+
+    ///  90   -90
+    ///  <  0  >
+    ///     v
+    /// -1  0  1
+    int direction = 1;
+    private float _currentDirection = 1;
+
+    void Update(Node@ node, float timeStep)
+    {
+        float flipSpeed = 1 / (0.5 * flipDuration);
+        _currentDirection = Clamp(_currentDirection + Sign(direction - _currentDirection) * flipSpeed * timeStep, -1.0f, 1.0f);
+        float angle = _currentDirection < 0
+            ? Lerp(rotationNeutral, rotationNegative, -_currentDirection)
+            : Lerp(rotationNeutral, rotationPositive, _currentDirection);
+        node.worldRotation = Quaternion(angle, Vector3(0, 1, 0));
+    }
+}
+
 class Controller
 {
     // Grounding configuration
@@ -203,11 +229,7 @@ class Controller
     float moveVelocity = 1;
     float jumpVelocity = 6;
 
-    // Rotation parameters
-    float flipDuration = 0.3;       ///< Flip from -1 to 1 duration.
-    float rotationNegative = 90;    ///< Rotation angle for negative direction.
-    float rotationNeutral = 0;      ///< Rotation angle for zero direction.
-    float rotationPositive = -90;   ///< Rotation angle for positive direction.
+    private Rotator _rotator;
 
     // Control variables
     int moveDirection = 0;          ///< Movement direction.
@@ -217,13 +239,6 @@ class Controller
     Vector3 contactNormal;          ///< Average normal of ground contacts.
     bool jump = false;              ///< Whether the character is about to jump.
     int lookDirection = 1;          ///< Look direction.
-
-    ///  90   -90
-    ///  <  0  >
-    ///     v
-    /// -1  0  1
-    private int _direction = 1;
-    private float _currentDirection = 1;
 
     private float _inAirTimer = 0;
     private float _jumpTimer = M_INFINITY;
@@ -263,13 +278,13 @@ class Controller
         // Update direction and speed
         bool isMoving = moveDirection != 0;
         if (slow)
-            _direction = lookDirection;
+            _rotator.direction = lookDirection;
         else if (isMoving)
-            _direction = moveDirection >= 0 ? 1 : -1;
+            _rotator.direction = moveDirection >= 0 ? 1 : -1;
 
         // Update velocity
         Vector3 linearVelocity = rigidBody.linearVelocity;
-        animator.movementSpeed = linearVelocity.length > 0.05 ? linearVelocity.length * Sign(linearVelocity.x) * _direction : 0;
+        animator.movementSpeed = linearVelocity.length > 0.05 ? linearVelocity.length * Sign(linearVelocity.x) * _rotator.direction : 0;
         animator.verticalSpeed = linearVelocity.y;
         animator.jumpBaseSpeed = jumpVelocity;
         Print("[" + _softGrounded + "] " + contactNormal.ToString());
@@ -283,19 +298,14 @@ class Controller
         }
         else if (_softGrounded && contactNormal.length > M_EPSILON)
         {
-            Vector3 accelDirection = contactNormal.CrossProduct(Vector3(0, 0, 1)).Normalized() * moveVelocity * moveDirection;
+            Vector3 accelDirection = (Vector3(1,0,0) * moveDirection).Orthogonalize(contactNormal) * moveVelocity;
             rigidBody.ApplyImpulse(accelDirection * rigidBody.mass * 0.25);
             rigidBody.linearVelocity = rigidBody.linearVelocity.Normalized() * Min(rigidBody.linearVelocity.length, accelDirection.length);
         }
         //rigidBody.linearVelocity = linearVelocity;
 
         // Interpolate direction and apply node rotation
-        float flipSpeed = 1 / (0.5 * flipDuration);
-        _currentDirection = Clamp(_currentDirection + Sign(_direction - _currentDirection) * flipSpeed * timeStep, -1.0f, 1.0f);
-        float angle = _currentDirection < 0
-            ? Lerp(rotationNeutral, rotationNegative, -_currentDirection)
-            : Lerp(rotationNeutral, rotationPositive, _currentDirection);
-        node.worldRotation = Quaternion(angle, Vector3(0, 1, 0));
+        _rotator.Update(node, timeStep);
     }
 }
 
@@ -309,6 +319,8 @@ class Main : ScriptObject
     private Controls _controls;
     private Animator@ _animator;
     private Controller@ _controller;
+    private CharacterController@ _characterController;
+    private Rotator _rotator;
 
     bool _grounded = false;
     Vector3 _previousPosition;
@@ -323,6 +335,8 @@ class Main : ScriptObject
 
         @_animator = Animator();
         @_controller = Controller();
+        _characterController = CreateObject("CharacterController");
+        _characterController.node = node;
         _animator.AddAnimation(Idle, "Default_Character/Animations/idle.ani");
         _animator.AddAnimation(Jump, "Default_Character/Animations/jump.up.ani");
         _animator.AddAnimation(Fall, "Default_Character/Animations/jump.down.ani");
@@ -384,14 +398,37 @@ class Main : ScriptObject
         _controller.grounded = _averageContactNormal.y > 0.1;
         _averageContactNormal = Vector3(0, 0, 0);
         //_controller.aim = Vector2(_controls.yaw, _controls.pitch);
-        _controller.Update(node, rigidBody, _animator, timeStep);
+        //_controller.Update(node, rigidBody, _animator, timeStep);
+        
+        // Update character controller
+        Vector3 velocity = _characterController.velocity;
+        _animator.movementSpeed = velocity.length * Sign(velocity.x) * _rotator.direction;
+        _animator.verticalSpeed = velocity.y;
+        _animator.jumpBaseSpeed = _characterController.jumpVelocity;
 
+        _characterController.jump = _controls.IsDown(CTRL_UP);
+        _characterController.velocity = Vector3(moveDirection, 0, 0) * (_controls.IsDown(CTRL_SLOW) ? walkVelocity : runVelocity);
+        _characterController.FixedUpdate(timeStep);
+
+        _animator.grounded = _characterController.grounded;
+        _animator.aboutToGround = _animator.grounded; // fixme
+        _animator.jump = _characterController.hasJumped;
+
+        // Update direction and speed
+        const bool slow = _controls.IsDown(CTRL_SLOW);
+        const int lookDirection = _controls.yaw >= graphics.width / 2 ? 1 : -1;
+        if (slow)
+            _rotator.direction = lookDirection;
+        else if (moveDirection != 0)
+            _rotator.direction = moveDirection >= 0 ? 1 : -1;
+        _rotator.Update(node, timeStep);
+        
         //_grounded = _animator.grounded && !_animator.jump;
-        _grounded = _controller.grounded && !_animator.jump;
+        /*_grounded = _controller.grounded && !_animator.jump;
         //Print(_grounded ? "GROUNDED" : "FLYING");
         _previousPosition = node.worldPosition;
         _controller.grounded = false;
-        _controller.aboutToGround = false;
+        _controller.aboutToGround = false;*/
         
         // Glue to ground
         //rigidBody.useGravity = !_grounded;

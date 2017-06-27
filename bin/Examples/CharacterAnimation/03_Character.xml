@@ -7,8 +7,8 @@
 	<attribute name="Elapsed Time" value="0" />
 	<attribute name="Next Replicated Node ID" value="25" />
 	<attribute name="Next Replicated Component ID" value="70" />
-	<attribute name="Next Local Node ID" value="16777844" />
-	<attribute name="Next Local Component ID" value="16777768" />
+	<attribute name="Next Local Node ID" value="16777845" />
+	<attribute name="Next Local Component ID" value="16777780" />
 	<attribute name="Variables" />
 	<attribute name="Variable Names" value="" />
 	<component type="Octree" id="1" />
@@ -167,7 +167,6 @@
 			<attribute name="Physics Rotation" value="0.707107 0 -0.707107 0" />
 			<attribute name="Physics Position" value="-0.5 0.5 0" />
 			<attribute name="Mass" value="65" />
-			<attribute name="Friction" value="2" />
 			<attribute name="Linear Factor" value="1 1 0" />
 			<attribute name="Angular Factor" value="0 0 0" />
 			<attribute name="Collision Event Mode" value="Always" />

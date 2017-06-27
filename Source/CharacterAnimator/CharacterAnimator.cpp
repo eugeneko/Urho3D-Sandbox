@@ -482,12 +482,6 @@ Vector3 ProjectPointOntoSegment(const Vector3& point, const Vector3& from, const
     return direction * (point - from).ProjectOntoAxis(direction) + from;
 }
 
-/// Make vector orthogonal to axis.
-Vector3 OrthogonalizeVector(const Vector3& vec, const Vector3& axis)
-{
-    return axis.CrossProduct(vec).CrossProduct(axis).Normalized();
-}
-
 /// Resolve knee position.
 Vector3 ResolveKneePosition(const Vector3& thighPosition, const Vector3& targetHeelPosition, const Vector3& jointDirection,
     float thighLength, float calfLength)
@@ -496,7 +490,7 @@ Vector3 ResolveKneePosition(const Vector3& thighPosition, const Vector3& targetH
     float radius;
     IntersectSphereSphereGuaranteed(Sphere(thighPosition, thighLength), Sphere(targetHeelPosition, calfLength), distance, radius);
     const Vector3 direction = (targetHeelPosition - thighPosition).Normalized();
-    const Vector3 orthoJointDirection = OrthogonalizeVector(jointDirection, direction);
+    const Vector3 orthoJointDirection = jointDirection.Orthogonalize(direction);
     return thighPosition + direction * distance + orthoJointDirection * radius;
 }
 
@@ -756,14 +750,14 @@ void CharacterLimbSegmentData::Import(const CharacterSkeletonSegment& src)
     // Get reference bend direction
     const Vector3 initialDirection = initialC.Translation() - initialA.Translation();
     const Vector3 currentDirection = transformC.Translation() - transformA.Translation();
-    const Vector3 referenceBendDirection = OrthogonalizeVector(
-        Quaternion(initialDirection, currentDirection) * src.jointDirection_, currentDirection);
+    const Vector3 referenceBendDirectionDirty = Quaternion(initialDirection, currentDirection) * src.jointDirection_;
+    const Vector3 referenceBendDirection = referenceBendDirectionDirty.Orthogonalize(currentDirection);
 
     // Get actual bend direction
     const Vector3 positionBproj = ProjectPointOntoSegment(
         transformB.Translation(), transformA.Translation(), transformC.Translation());
-    const Vector3 actualBendDirection = OrthogonalizeVector(
-        transformB.Translation() - positionBproj, currentDirection);
+    const Vector3 actualBendDirectionDirty = transformB.Translation() - positionBproj;
+    const Vector3 actualBendDirection = actualBendDirectionDirty.Orthogonalize(currentDirection);
 
     // Compute and revert limb rotation
     const Quaternion bendDirectionRotation(referenceBendDirection, actualBendDirection);
@@ -875,8 +869,8 @@ void CharacterLimbSegmentData::Export(
     const Vector3 initialDirection = rootTransform.RotationMatrix() * (initialC.Translation() - initialA.Translation());
     const Vector3 currentDirection = worldPosition - nodeA.GetWorldPosition();
     const Quaternion limbRotation(initialDirection, currentDirection);
-    const Vector3 bendDirection = OrthogonalizeVector(
-        limbRotation * rootTransform.Rotation() * dest.jointDirection_, currentDirection);
+    const Vector3 bendDirectionDirty = limbRotation * rootTransform.Rotation() * dest.jointDirection_;
+    const Vector3 bendDirection = bendDirectionDirty.Orthogonalize(currentDirection);
 
     // Resolve limb
     const Vector3 worldPos0 = nodeA.GetWorldPosition();

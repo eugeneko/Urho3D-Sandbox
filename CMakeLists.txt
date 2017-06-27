@@ -15,6 +15,7 @@ include_directories (${CMAKE_SOURCE_DIR}/Source)
 
 # Libraries
 add_subdirectory (Source/CharacterAnimator)
+add_subdirectory (Source/CharacterController)
 
 # Tools
 add_subdirectory (Source/CharacterAnimationTool)
