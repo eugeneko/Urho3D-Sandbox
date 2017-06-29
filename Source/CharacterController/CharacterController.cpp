@@ -76,11 +76,16 @@ void CharacterController::FixedUpdate(float timeStep)
     else if (softGrounded_)
     {
         const Vector3 accelerationDirection = controllerVelocity_.Orthogonalize(contactNormal_);
-        body_->ApplyImpulse(accelerationDirection * body_->GetMass() * 0.25);
+        body_->ApplyImpulse(accelerationDirection * body_->GetMass() * acceleration_);
         Vector3 linearVelocity = body_->GetLinearVelocity();
         linearVelocity = linearVelocity.Normalized() * Min(linearVelocity.Length(), controllerVelocity_.Length());
         body_->SetLinearVelocity(linearVelocity);
     }
+
+    // Update friction
+    const bool wantToMove = controllerVelocity_.Length() > M_EPSILON;
+    body_->SetFriction(!wantToMove && softGrounded_ ? staticFriction_ : dynamicFriction_);
+
     contactNormal_ = Vector3::ZERO;
 
     linearVelocity_ = body_->GetLinearVelocity();
@@ -100,13 +105,13 @@ void CharacterController::HandleCollsion(StringHash eventType, VariantMap& event
 
     while (!contacts.IsEof())
     {
-        const Vector3 contactPosition = contacts.ReadVector3();
-        const Vector3 contactNormal = contacts.ReadVector3();
-        const float contactDistance = contacts.ReadFloat();
-        const float contactImpulse = contacts.ReadFloat();
+        /*const Vector3 position =*/ contacts.ReadVector3();
+        const Vector3 normal = contacts.ReadVector3();
+        /*const float distance =*/ contacts.ReadFloat();
+        /*const float impulse =*/ contacts.ReadFloat();
 
-        if (contactNormal.y_ > 0)
-            contactNormal_ += contactNormal;
+        if (normal.y_ > 0 && (!strictSlopeLimit_ || normal.y_ > Cos(maxSlope_)))
+            contactNormal_ += normal;
     }
 }
 

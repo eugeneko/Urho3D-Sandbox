@@ -77,6 +77,14 @@ private:
     float jumpVelocity_ = 6.0f;
     /// Max slope.
     float maxSlope_ = 70.0f;
+    /// Set to check slope for each contact.
+    bool strictSlopeLimit_ = true;
+    /// Static friction.
+    float staticFriction_ = 10.0f;
+    /// Dynamic friction.
+    float dynamicFriction_ = 0.5f;
+    /// Movement acceleration.
+    float acceleration_ = 1.0f;
 
     /// Whether the body is grounded.
     bool grounded_ = false;
