@@ -1,5 +1,6 @@
 #include "Urho3DPlayer.h"
 #include <CharacterAnimator/CharacterAnimator.h>
+#include <CharacterController/CharacterController.h>
 
 using namespace Urho3D;
 
@@ -37,10 +38,12 @@ void FlexEnginePlayer::Start()
     GetSubsystem<Renderer>()->SetNumExtraInstancingBufferElements(1);
 
     RegisterCharacterAnimator(context_);
+    RegisterCharacterController(context_);
 
     Urho3DPlayer::Start();
 
     Script* scriptSubsystem = GetSubsystem<Script>();
     asIScriptEngine* scriptEngine = scriptSubsystem->GetScriptEngine();
     RegisterCharacterAnimatorScriptAPI(scriptEngine);
+    RegisterCharacterControllerScriptAPI(scriptEngine);
 }

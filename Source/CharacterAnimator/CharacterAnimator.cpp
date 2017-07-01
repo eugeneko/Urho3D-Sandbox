@@ -482,12 +482,6 @@ Vector3 ProjectPointOntoSegment(const Vector3& point, const Vector3& from, const
     return direction * (point - from).ProjectOntoAxis(direction) + from;
 }
 
-/// Make vector orthogonal to axis.
-Vector3 OrthogonalizeVector(const Vector3& vec, const Vector3& axis)
-{
-    return axis.CrossProduct(vec).CrossProduct(axis).Normalized();
-}
-
 /// Resolve knee position.
 Vector3 ResolveKneePosition(const Vector3& thighPosition, const Vector3& targetHeelPosition, const Vector3& jointDirection,
     float thighLength, float calfLength)
@@ -496,7 +490,7 @@ Vector3 ResolveKneePosition(const Vector3& thighPosition, const Vector3& targetH
     float radius;
     IntersectSphereSphereGuaranteed(Sphere(thighPosition, thighLength), Sphere(targetHeelPosition, calfLength), distance, radius);
     const Vector3 direction = (targetHeelPosition - thighPosition).Normalized();
-    const Vector3 orthoJointDirection = OrthogonalizeVector(jointDirection, direction);
+    const Vector3 orthoJointDirection = jointDirection.Orthogonalize(direction);
     return thighPosition + direction * distance + orthoJointDirection * radius;
 }
 
@@ -756,14 +750,14 @@ void CharacterLimbSegmentData::Import(const CharacterSkeletonSegment& src)
     // Get reference bend direction
     const Vector3 initialDirection = initialC.Translation() - initialA.Translation();
     const Vector3 currentDirection = transformC.Translation() - transformA.Translation();
-    const Vector3 referenceBendDirection = OrthogonalizeVector(
-        Quaternion(initialDirection, currentDirection) * src.jointDirection_, currentDirection);
+    const Vector3 referenceBendDirectionDirty = Quaternion(initialDirection, currentDirection) * src.jointDirection_;
+    const Vector3 referenceBendDirection = referenceBendDirectionDirty.Orthogonalize(currentDirection);
 
     // Get actual bend direction
     const Vector3 positionBproj = ProjectPointOntoSegment(
         transformB.Translation(), transformA.Translation(), transformC.Translation());
-    const Vector3 actualBendDirection = OrthogonalizeVector(
-        transformB.Translation() - positionBproj, currentDirection);
+    const Vector3 actualBendDirectionDirty = transformB.Translation() - positionBproj;
+    const Vector3 actualBendDirection = actualBendDirectionDirty.Orthogonalize(currentDirection);
 
     // Compute and revert limb rotation
     const Quaternion bendDirectionRotation(referenceBendDirection, actualBendDirection);
@@ -875,8 +869,8 @@ void CharacterLimbSegmentData::Export(
     const Vector3 initialDirection = rootTransform.RotationMatrix() * (initialC.Translation() - initialA.Translation());
     const Vector3 currentDirection = worldPosition - nodeA.GetWorldPosition();
     const Quaternion limbRotation(initialDirection, currentDirection);
-    const Vector3 bendDirection = OrthogonalizeVector(
-        limbRotation * rootTransform.Rotation() * dest.jointDirection_, currentDirection);
+    const Vector3 bendDirectionDirty = limbRotation * rootTransform.Rotation() * dest.jointDirection_;
+    const Vector3 bendDirection = bendDirectionDirty.Orthogonalize(currentDirection);
 
     // Resolve limb
     const Vector3 worldPos0 = nodeA.GetWorldPosition();
@@ -1935,8 +1929,12 @@ void CharacterAnimationController_SetTargetRotationBalance(const String& segment
     characterAnimationController->SetTargetRotationBalance(segment, globalFactor);
 }
 
+void RegisterPhysicsHack(asIScriptEngine* engine);
+
 void RegisterCharacterAnimatorScriptAPI(asIScriptEngine* engine)
 {
+    RegisterPhysicsHack(engine);
+
     RegisterResource<CharacterSkeleton>(engine, "CharacterSkeleton");
 
     engine->RegisterGlobalFunction("void DumpCharacterSkeletonDirections(const String&in, const String&in, const String&in)", asFUNCTION(DumpCharacterSkeletonDirections), asCALL_CDECL);
@@ -1955,3 +1953,85 @@ void RegisterCharacterAnimatorScriptAPI(asIScriptEngine* engine)
 }
 
 }
+
+// #TODO Extract this
+#include <Urho3D/Scene/Scene.h>
+#include <Urho3D/Physics/CollisionShape.h>
+#include <Urho3D/Physics/RigidBody.h>
+#include <Urho3D/Physics/PhysicsWorld.h>
+#include <Urho3D/Physics/PhysicsUtils.h>
+#include <Bullet/BulletCollision/CollisionShapes/btSphereShape.h>
+#include <Bullet/BulletDynamics/Dynamics/btDiscreteDynamicsWorld.h>
+#include <Bullet/BulletDynamics/Dynamics/btRigidBody.h>
+#include <Bullet/BulletCollision/CollisionDispatch/btCollisionObject.h>
+
+namespace Urho3D
+{
+
+struct ClosestConvexResultCallbackNotMe : public btCollisionWorld::ClosestConvexResultCallback
+{
+    btCollisionObject* me_;
+    ClosestConvexResultCallbackNotMe(btCollisionObject* me, const btVector3& convexFromWorld, const btVector3& convexToWorld)
+        : ClosestConvexResultCallback(convexFromWorld, convexToWorld)
+        , me_(me)
+    {
+    }
+    virtual	btScalar addSingleResult(btCollisionWorld::LocalConvexResult& convexResult, bool normalInWorldSpace)
+    {
+        if (convexResult.m_hitCollisionObject == me_ || convexResult.m_hitCollisionObject->getCollisionFlags() & btCollisionObject::CF_NO_CONTACT_RESPONSE)
+            return 1.0;
+        return ClosestConvexResultCallback::addSingleResult(convexResult, normalInWorldSpace);
+    }
+};
+
+bool GlueRigidBody(RigidBody* rigidBody, CollisionShape* collisionShape, float distance, Vector3& newPosition)
+{
+    Scene* scene = GetScriptContextScene();
+    PhysicsWorld* physicsWorld = scene->GetComponent<PhysicsWorld>();
+    DebugRenderer* debugRenderer = scene->GetComponent<DebugRenderer>();
+    Vector3 oldPosition = rigidBody->GetPosition();
+    btDiscreteDynamicsWorld* bulletWorld = physicsWorld->GetWorld();
+
+    Vector3 shapeSize = collisionShape->GetSize();
+    btSphereShape shape(shapeSize.x_ / 2);
+    Vector3 groundOffset = collisionShape->GetPosition() + Vector3::UP * (shapeSize.x_ - shapeSize.y_) / 2;
+    Vector3 beginPos = oldPosition + groundOffset;
+    Vector3 endPos = oldPosition + Vector3::UP * (shapeSize.x_ / 2 - distance);
+
+    ClosestConvexResultCallbackNotMe convexCallback(rigidBody->GetBody(), ToBtVector3(beginPos), ToBtVector3(endPos));
+    convexCallback.m_collisionFilterGroup = (short)0xffff;
+    convexCallback.m_collisionFilterMask = (short)rigidBody->GetCollisionMask();
+
+    bulletWorld->convexSweepTest(&shape, btTransform(btQuaternion::getIdentity(), convexCallback.m_convexFromWorld),
+        btTransform(btQuaternion::getIdentity(), convexCallback.m_convexToWorld), convexCallback);
+
+    if (convexCallback.hasHit())
+    {
+        newPosition = oldPosition;
+        newPosition.y_ = Lerp(beginPos.y_, endPos.y_, convexCallback.m_closestHitFraction) - shapeSize.x_ / 2;
+        //newPosition.y_ = convexCallback.m_hitPointWorld.y();
+        //newPosition = ToVector3(convexCallback.m_hitPointWorld);
+        URHO3D_LOGINFOF("%f|%f|%f -> %f", oldPosition.x_, oldPosition.y_, oldPosition.z_, newPosition.y_);
+//         rigidBody->SetPosition(ToVector3(convexCallback.m_hitPointWorld));
+        rigidBody->SetPosition(newPosition);
+//         btTransform transform;
+//         rigidBody->getWorldTransform(transform);
+//         transform.setOrigin(transform.getOrigin() + );
+//         rigidBody->setWorldTransform()
+//         btRigidBody* bulletBody = rigidBody->GetBody();
+//         bulletBody->getMotionState()
+//         //node->SetWorldPosition(ToVector3(convexCallback.m_hitPointWorld));
+//         node->SetWorldPosition(node->GetWorldPosition());
+        debugRenderer->AddSphere(Sphere(Lerp(beginPos, endPos, convexCallback.m_closestHitFraction), shapeSize.x_ / 2), Color::GREEN);
+        return true;
+    }
+    return false;
+}
+
+void RegisterPhysicsHack(asIScriptEngine* engine)
+{
+    engine->RegisterGlobalFunction("bool GlueRigidBody(RigidBody@, CollisionShape@, float, Vector3 &out)", asFUNCTION(GlueRigidBody), asCALL_CDECL);
+}
+
+}
+

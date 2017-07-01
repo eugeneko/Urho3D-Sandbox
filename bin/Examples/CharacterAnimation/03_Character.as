@@ -127,7 +127,7 @@ class Animator
         State oldState = _state;
 
         // Compute parameters
-        bool movingX = Abs(movementSpeed) > 0;
+        bool movingX = Abs(movementSpeed) > 0.01;
         if (movingX)
             _idleTimer = 0;
 
@@ -181,7 +181,7 @@ class Animator
             animController.PlayExclusive(currentAnimation, 0, false, jumpSwitchDuration);
             animController.SetSpeed(currentAnimation, 0);
             animController.SetTime(currentAnimation, Clamp(1 - verticalSpeed / jumpBaseSpeed, 0.0, 1.0) * _animations[Jump].length);
-            Print(Max(verticalSpeed / jumpBaseSpeed, 0.0));
+            //Print(Max(verticalSpeed / jumpBaseSpeed, 0.0));
             _switchDuration = jumpSwitchDuration;
             break;
         case Fall:
@@ -190,6 +190,32 @@ class Animator
             animController.SetTime(currentAnimation, Clamp(-verticalSpeed / jumpBaseSpeed, 0.0, 1.0) * _animations[Jump].length);
             break;
         }
+    }
+}
+
+class Rotator
+{
+    // Rotation parameters
+    float flipDuration = 0.3;       ///< Flip from -1 to 1 duration.
+    float rotationNegative = 90;    ///< Rotation angle for negative direction.
+    float rotationNeutral = 0;      ///< Rotation angle for zero direction.
+    float rotationPositive = -90;   ///< Rotation angle for positive direction.
+
+    ///  90   -90
+    ///  <  0  >
+    ///     v
+    /// -1  0  1
+    int direction = 1;
+    private float _currentDirection = 1;
+
+    void Update(Node@ node, float timeStep)
+    {
+        float flipSpeed = 1 / (0.5 * flipDuration);
+        _currentDirection = Clamp(_currentDirection + Sign(direction - _currentDirection) * flipSpeed * timeStep, -1.0f, 1.0f);
+        float angle = _currentDirection < 0
+            ? Lerp(rotationNeutral, rotationNegative, -_currentDirection)
+            : Lerp(rotationNeutral, rotationPositive, _currentDirection);
+        node.worldRotation = Quaternion(angle, Vector3(0, 1, 0));
     }
 }
 
@@ -203,26 +229,16 @@ class Controller
     float moveVelocity = 1;
     float jumpVelocity = 6;
 
-    // Rotation parameters
-    float flipDuration = 0.3;       ///< Flip from -1 to 1 duration.
-    float rotationNegative = 90;    ///< Rotation angle for negative direction.
-    float rotationNeutral = 0;      ///< Rotation angle for zero direction.
-    float rotationPositive = -90;   ///< Rotation angle for positive direction.
+    private Rotator _rotator;
 
     // Control variables
     int moveDirection = 0;          ///< Movement direction.
     bool slow = false;              ///< Whether the character is in slow movement mode.
     bool grounded = false;          ///< Whether the character is on the ground.
     bool aboutToGround = false;     ///< Whether the character is about to ground.
+    Vector3 contactNormal;          ///< Average normal of ground contacts.
     bool jump = false;              ///< Whether the character is about to jump.
     int lookDirection = 1;          ///< Look direction.
-
-    ///  90   -90
-    ///  <  0  >
-    ///     v
-    /// -1  0  1
-    private int _direction = 1;
-    private float _currentDirection = 1;
 
     private float _inAirTimer = 0;
     private float _jumpTimer = M_INFINITY;
@@ -262,31 +278,34 @@ class Controller
         // Update direction and speed
         bool isMoving = moveDirection != 0;
         if (slow)
-            _direction = lookDirection;
+            _rotator.direction = lookDirection;
         else if (isMoving)
-            _direction = moveDirection >= 0 ? 1 : -1;
+            _rotator.direction = moveDirection >= 0 ? 1 : -1;
 
         // Update velocity
         Vector3 linearVelocity = rigidBody.linearVelocity;
-        animator.movementSpeed = Abs(linearVelocity.x) > 0.05 ? linearVelocity.x * _direction : 0;
+        animator.movementSpeed = linearVelocity.length > 0.05 ? linearVelocity.length * Sign(linearVelocity.x) * _rotator.direction : 0;
         animator.verticalSpeed = linearVelocity.y;
         animator.jumpBaseSpeed = jumpVelocity;
-        linearVelocity.x = moveVelocity * moveDirection;
+        Print("[" + _softGrounded + "] " + contactNormal.ToString());
         if (jump)
         {
             linearVelocity.y = jumpVelocity;
             animator.jump = true;
             jump = false;
+
+            rigidBody.linearVelocity = linearVelocity;
         }
-        rigidBody.linearVelocity = linearVelocity;
+        else if (_softGrounded && contactNormal.length > M_EPSILON)
+        {
+            Vector3 accelDirection = (Vector3(1,0,0) * moveDirection).Orthogonalize(contactNormal) * moveVelocity;
+            rigidBody.ApplyImpulse(accelDirection * rigidBody.mass * 0.25);
+            rigidBody.linearVelocity = rigidBody.linearVelocity.Normalized() * Min(rigidBody.linearVelocity.length, accelDirection.length);
+        }
+        //rigidBody.linearVelocity = linearVelocity;
 
         // Interpolate direction and apply node rotation
-        float flipSpeed = 1 / (0.5 * flipDuration);
-        _currentDirection = Clamp(_currentDirection + Sign(_direction - _currentDirection) * flipSpeed * timeStep, -1.0f, 1.0f);
-        float angle = _currentDirection < 0
-            ? Lerp(rotationNeutral, rotationNegative, -_currentDirection)
-            : Lerp(rotationNeutral, rotationPositive, _currentDirection);
-        node.worldRotation = Quaternion(angle, Vector3(0, 1, 0));
+        _rotator.Update(node, timeStep);
     }
 }
 
@@ -300,16 +319,24 @@ class Main : ScriptObject
     private Controls _controls;
     private Animator@ _animator;
     private Controller@ _controller;
-    float _velocity;
+    private CharacterController@ _characterController;
+    private Rotator _rotator;
+
+    bool _grounded = false;
+    Vector3 _previousPosition;
+    Vector3 _averageContactNormal;
 
     void DelayedStart()
     {
-        SubscribeToEvent(node.childrenByName["[ground]"], "NodeCollision", "HandleGrounded");
+        SubscribeToEvent(node, "NodeCollision", "HandleNodeCollision");
+        //SubscribeToEvent(node.childrenByName["[ground]"], "NodeCollision", "HandleGrounded");
         SubscribeToEvent(node.childrenByName["[about_to_ground]"], "NodeCollision", "HandleAboutToGround");
         SubscribeToEvent("KeyDown", "HandleKeyDown");
 
         @_animator = Animator();
         @_controller = Controller();
+        _characterController = CreateObject("CharacterController");
+        _characterController.node = node;
         _animator.AddAnimation(Idle, "Default_Character/Animations/idle.ani");
         _animator.AddAnimation(Jump, "Default_Character/Animations/jump.up.ani");
         _animator.AddAnimation(Fall, "Default_Character/Animations/jump.down.ani");
@@ -317,13 +344,28 @@ class Main : ScriptObject
         _animator.AddWalkAnimation("Default_Character/Animations/walking.ani", 1);
         _animator.AddWalkAnimation("Default_Character/Animations/running.ani", 3);
     }
-    void HandleGrounded(StringHash eventType, VariantMap& eventData)
+    void HandleNodeCollision(StringHash eventType, VariantMap& eventData)
+    {
+        VectorBuffer contacts = eventData["Contacts"].GetBuffer();
+
+        while (!contacts.eof)
+        {
+            Vector3 contactPosition = contacts.ReadVector3();
+            Vector3 contactNormal = contacts.ReadVector3();
+            float contactDistance = contacts.ReadFloat();
+            float contactImpulse = contacts.ReadFloat();
+
+            if (contactNormal.y > 0)
+                _averageContactNormal += contactNormal;
+        }
+    }
+    /*void HandleGrounded(StringHash eventType, VariantMap& eventData)
     {
         Node@ otherNode = eventData["OtherNode"].GetPtr();
         RigidBody@ otherBody = eventData["OtherBody"].GetPtr();
         if (@otherNode != @node && !otherBody.trigger)
             _controller.grounded = true;
-    }
+    }*/
     void HandleAboutToGround(StringHash eventType, VariantMap& eventData)
     {
         Node@ otherNode = eventData["OtherNode"].GetPtr();
@@ -352,13 +394,79 @@ class Main : ScriptObject
         _controller.jump = _controls.IsDown(CTRL_UP);
         _controller.lookDirection = _controls.yaw >= graphics.width / 2 ? 1 : -1;
         _controller.moveVelocity = _controls.IsDown(CTRL_SLOW) ? walkVelocity : runVelocity;
+        _controller.contactNormal = _averageContactNormal.Normalized();
+        _controller.grounded = _averageContactNormal.y > 0.1;
+        _averageContactNormal = Vector3(0, 0, 0);
         //_controller.aim = Vector2(_controls.yaw, _controls.pitch);
-        _controller.Update(node, rigidBody, _animator, timeStep);
+        //_controller.Update(node, rigidBody, _animator, timeStep);
+        //if (Abs(rigidBody.linearVelocity.x) > 0.0001)
+        //    Print("Pre:" + rigidBody.linearVelocity.x);
+        
+        // Update character controller
+        Vector3 velocity = _characterController.velocity;
+        //Print(velocity.x);
+        _animator.movementSpeed = velocity.length * Sign(velocity.x) * _rotator.direction;
+        _animator.verticalSpeed = velocity.y;
+        _animator.jumpBaseSpeed = _characterController.jumpVelocity;
+
+        _characterController.flyAcceleration = 3;
+        _characterController.jump = _controls.IsDown(CTRL_UP);
+        _characterController.velocity = Vector3(moveDirection, 0, 0) * (_controls.IsDown(CTRL_SLOW) ? walkVelocity : runVelocity);
+        _characterController.FixedUpdate(timeStep);
+
+        _animator.grounded = _characterController.grounded;
+        _animator.aboutToGround = _animator.grounded; // fixme
+        _animator.jump = _characterController.hasJumped;
+
+        // Update direction and speed
+        const bool slow = _controls.IsDown(CTRL_SLOW);
+        const int lookDirection = _controls.yaw >= graphics.width / 2 ? 1 : -1;
+        if (slow)
+            _rotator.direction = lookDirection;
+        else if (moveDirection != 0)
+            _rotator.direction = moveDirection >= 0 ? 1 : -1;
+        _rotator.Update(node, timeStep);
+        
+        //_grounded = _animator.grounded && !_animator.jump;
+        /*_grounded = _controller.grounded && !_animator.jump;
+        //Print(_grounded ? "GROUNDED" : "FLYING");
+        _previousPosition = node.worldPosition;
+        _controller.grounded = false;
+        _controller.aboutToGround = false;*/
+        
+        // Glue to ground
+        //rigidBody.useGravity = !_grounded;
+    }
+    void FixedPostUpdate(float timeStep)
+    {
+        CharacterAnimationController@ characterController = node.GetComponent("CharacterAnimationController");
+        RigidBody@ rigidBody = node.GetComponent("RigidBody");
+        CollisionShape@ collisionShape = node.GetComponent("CollisionShape");
+        //if (Abs(rigidBody.linearVelocity.x) > 0.0001)
+        //    Print("Post:" + rigidBody.linearVelocity.x);
+        
+        _characterController.FixedPostUpdate(timeStep);
+        
+        /*if (_grounded)
+        {
+            Vector3 newPosition;
+            if (GlueRigidBody(rigidBody, collisionShape, 0.1, newPosition))
+            {
+                Vector3 realVelocity = (newPosition - _previousPosition) / timeStep;
+                rigidBody.linearVelocity = realVelocity;
+                //Print(realVelocity.x + "|" + realVelocity.y + "|" + realVelocity.z);
+                _controller.grounded = true;
+                Print("GLUED");
+            }
+            else
+                Print("DETACHED");
+            //rigidBody.linearVelocity = Vector3(0, 0, 0);
+            //Vector3 realVelocity = (node.worldPosition - _previousPosition) / timeStep;
+            //
+        }*/
+
         _animator.modelFootScale = _modelFootScale;
         _animator.Update(characterController, timeStep);
-
-        _controller.grounded = false;
-        _controller.aboutToGround = false;
     }
     void ApplyAttributes()
     {
