@@ -70,6 +70,8 @@ private:
     void HandleCollsion(StringHash eventType, VariantMap& eventData);
     /// Check integrity of the component.
     bool CheckIntegrity();
+    /// Clamp vector length.
+    Vector3 ClampLength(const Vector3& vec, float maxLength) { return vec.Normalized() * Min(vec.Length(), maxLength); }
 
 private:
     /// Rigid body of character.

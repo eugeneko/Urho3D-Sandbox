@@ -79,12 +79,14 @@ void CharacterController::FixedUpdate(float timeStep)
     }
     else if (softGrounded_)
     {
-        // Grounded movement, clip velocity if actually moving
+        // Grounded movement
         const Vector3 moveDirection = controllerVelocity_.Orthogonalize(contactNormal_);
         body_->ApplyImpulse(moveDirection * body_->GetMass() * groundAcceleration_);
+
+        // Clip velocity if actually moving
         Vector3 linearVelocity = body_->GetLinearVelocity();
         if (shallMove)
-            linearVelocity = linearVelocity.Normalized() * Min(linearVelocity.Length(), controllerVelocity_.Length());
+            linearVelocity = ClampLength(linearVelocity, controllerVelocity_.Length());
         body_->SetLinearVelocity(linearVelocity);
     }
     else
@@ -108,6 +110,15 @@ void CharacterController::FixedPostUpdate(float timeStep)
     {
         /*Vector3 linearVelocity =*/ body_->GetLinearVelocity();
         body_->SetLinearVelocity(currentJumpVelocity_);
+    }
+    else if (softGrounded_)
+    {
+        // Clip velocity if actually moving
+        const bool shallMove = controllerVelocity_.Length() > M_EPSILON;
+        Vector3 linearVelocity = body_->GetLinearVelocity();
+        if (shallMove)
+            linearVelocity = ClampLength(linearVelocity, controllerVelocity_.Length());
+        body_->SetLinearVelocity(linearVelocity);
     }
 }
 
