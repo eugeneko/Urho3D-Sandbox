@@ -111,7 +111,7 @@
 		</component>
 		<component type="ScriptInstance" id="70">
 			<attribute name="Delayed Method Calls" value="0" />
-			<attribute name="Script File" value="ScriptFile;CharacterAnimation/01_CompareAnimations.as" />
+			<attribute name="Script File" value="ScriptFile;Scenes/01_CompareAnimations.as" />
 			<attribute name="Class Name" value="Animator" />
 			<attribute name="rotation" value="0" />
 		</component>
@@ -668,7 +668,7 @@
 		</component>
 		<component type="ScriptInstance" id="74">
 			<attribute name="Delayed Method Calls" value="0" />
-			<attribute name="Script File" value="ScriptFile;CharacterAnimation/01_CompareAnimations.as" />
+			<attribute name="Script File" value="ScriptFile;Scenes/01_CompareAnimations.as" />
 			<attribute name="Class Name" value="Animator" />
 			<attribute name="rotation" value="-180" />
 		</component>

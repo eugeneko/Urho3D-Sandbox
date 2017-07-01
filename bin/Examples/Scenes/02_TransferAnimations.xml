@@ -111,7 +111,7 @@
 		</component>
 		<component type="ScriptInstance" id="70">
 			<attribute name="Delayed Method Calls" value="0" />
-			<attribute name="Script File" value="ScriptFile;CharacterAnimation/02_TransferAnimations.as" />
+			<attribute name="Script File" value="ScriptFile;Scenes/02_TransferAnimations.as" />
 			<attribute name="Class Name" value="Animator" />
 			<attribute name="rotation" value="0" />
 		</component>
@@ -689,7 +689,7 @@
 		</component>
 		<component type="ScriptInstance" id="89">
 			<attribute name="Delayed Method Calls" value="0" />
-			<attribute name="Script File" value="ScriptFile;CharacterAnimation/02_TransferAnimations.as" />
+			<attribute name="Script File" value="ScriptFile;Scenes/02_TransferAnimations.as" />
 			<attribute name="Class Name" value="Animator" />
 			<attribute name="rotation" value="0" />
 		</component>
