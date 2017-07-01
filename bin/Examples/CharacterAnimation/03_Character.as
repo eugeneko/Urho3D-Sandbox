@@ -127,7 +127,7 @@ class Animator
         State oldState = _state;
 
         // Compute parameters
-        bool movingX = Abs(movementSpeed) > 0;
+        bool movingX = Abs(movementSpeed) > 0.01;
         if (movingX)
             _idleTimer = 0;
 
@@ -399,13 +399,17 @@ class Main : ScriptObject
         _averageContactNormal = Vector3(0, 0, 0);
         //_controller.aim = Vector2(_controls.yaw, _controls.pitch);
         //_controller.Update(node, rigidBody, _animator, timeStep);
+        //if (Abs(rigidBody.linearVelocity.x) > 0.0001)
+        //    Print("Pre:" + rigidBody.linearVelocity.x);
         
         // Update character controller
         Vector3 velocity = _characterController.velocity;
+        //Print(velocity.x);
         _animator.movementSpeed = velocity.length * Sign(velocity.x) * _rotator.direction;
         _animator.verticalSpeed = velocity.y;
         _animator.jumpBaseSpeed = _characterController.jumpVelocity;
 
+        _characterController.flyAcceleration = 3;
         _characterController.jump = _controls.IsDown(CTRL_UP);
         _characterController.velocity = Vector3(moveDirection, 0, 0) * (_controls.IsDown(CTRL_SLOW) ? walkVelocity : runVelocity);
         _characterController.FixedUpdate(timeStep);
@@ -438,6 +442,10 @@ class Main : ScriptObject
         CharacterAnimationController@ characterController = node.GetComponent("CharacterAnimationController");
         RigidBody@ rigidBody = node.GetComponent("RigidBody");
         CollisionShape@ collisionShape = node.GetComponent("CollisionShape");
+        //if (Abs(rigidBody.linearVelocity.x) > 0.0001)
+        //    Print("Post:" + rigidBody.linearVelocity.x);
+        
+        _characterController.FixedPostUpdate(timeStep);
         
         /*if (_grounded)
         {

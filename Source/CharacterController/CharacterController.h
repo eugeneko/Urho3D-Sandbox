@@ -39,11 +39,17 @@ public:
 
     /// @see LogicComponent::FixedUpdate
     virtual void FixedUpdate(float timeStep) override;
+    /// @see LogicComponent::FixedPostUpdate
+    virtual void FixedPostUpdate(float timeStep) override;
 
     /// Set jump velocity.
     void SetJumpVelocity(float velocity) { jumpVelocity_ = velocity; }
     /// Return jump velocity.
     float GetJumpVelocity() const { return jumpVelocity_; }
+    /// Set fly acceleration.
+    void SetFlyAcceleration(float acceleration) { flyAcceleration_ = acceleration; }
+    /// Return fly acceleration.
+    float GetFlyAcceleration() const { return flyAcceleration_; }
 
     /// Set whether the jump is requested.
     void SetJump(bool wantToJump) { wantToJump_ = wantToJump; }
@@ -83,14 +89,16 @@ private:
     float staticFriction_ = 10.0f;
     /// Dynamic friction.
     float dynamicFriction_ = 0.5f;
-    /// Movement acceleration.
-    float acceleration_ = 1.0f;
+    /// Ground movement acceleration.
+    float groundAcceleration_ = 1.0f;
+    /// Fly movement acceleration.
+    float flyAcceleration_ = 1.0f;
 
     /// Whether the body is grounded.
     bool grounded_ = false;
     /// Whether the jump is requested.
     bool wantToJump_ = false;
-    /// Movement velocity.
+    /// Desired movement velocity.
     Vector3 controllerVelocity_;
 
     /// Fly duration.
@@ -106,6 +114,8 @@ private:
     bool softGrounded_ = false;
     /// Linear velocity of the body.
     Vector3 linearVelocity_;
+    /// Current initial jump velocity.
+    Vector3 currentJumpVelocity_;
 };
 
 /// Register classes.

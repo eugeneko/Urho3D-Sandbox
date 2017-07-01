@@ -41,6 +41,9 @@ void CharacterController::FixedUpdate(float timeStep)
     if (!CheckIntegrity())
         return;
 
+    linearVelocity_ = body_->GetLinearVelocity();
+    currentJumpVelocity_ = Vector3(controllerVelocity_.x_, jumpVelocity_, controllerVelocity_.z_);
+
     // Use default contact normal if cannot compute real, normalize otherwise
     const bool contactNormalValid = contactNormal_.LengthSquared() > M_EPSILON;
     if (!contactNormalValid)
@@ -67,28 +70,45 @@ void CharacterController::FixedUpdate(float timeStep)
     }
 
     // Update body
+    const bool shallMove = controllerVelocity_.Length() > M_EPSILON;
     if (jumped_)
     {
-        Vector3 linearVelocity = body_->GetLinearVelocity();
-        linearVelocity.y_ = jumpVelocity_;
-        body_->SetLinearVelocity(linearVelocity);
+        // Apply jump to velocity
+        /*Vector3 linearVelocity =*/ body_->GetLinearVelocity();
+        body_->SetLinearVelocity(currentJumpVelocity_);
     }
     else if (softGrounded_)
     {
-        const Vector3 accelerationDirection = controllerVelocity_.Orthogonalize(contactNormal_);
-        body_->ApplyImpulse(accelerationDirection * body_->GetMass() * acceleration_);
+        // Grounded movement, clip velocity if actually moving
+        const Vector3 moveDirection = controllerVelocity_.Orthogonalize(contactNormal_);
+        body_->ApplyImpulse(moveDirection * body_->GetMass() * groundAcceleration_);
         Vector3 linearVelocity = body_->GetLinearVelocity();
-        linearVelocity = linearVelocity.Normalized() * Min(linearVelocity.Length(), controllerVelocity_.Length());
+        if (shallMove)
+            linearVelocity = linearVelocity.Normalized() * Min(linearVelocity.Length(), controllerVelocity_.Length());
         body_->SetLinearVelocity(linearVelocity);
+    }
+    else
+    {
+        // Fly movement, accelerate if target velocity isn't already reached
+        const Vector3 accelDirection = ((controllerVelocity_ - body_->GetLinearVelocity()) * Vector3(1, 0, 1)).Normalized();
+        body_->ApplyForce(body_->GetMass() * flyAcceleration_ * accelDirection);
     }
 
     // Update friction
-    const bool wantToMove = controllerVelocity_.Length() > M_EPSILON;
-    body_->SetFriction(!wantToMove && softGrounded_ ? staticFriction_ : dynamicFriction_);
+    const bool shallStand = !shallMove && softGrounded_;
+    body_->SetFriction(shallStand ? staticFriction_ : dynamicFriction_);
 
     contactNormal_ = Vector3::ZERO;
+}
 
-    linearVelocity_ = body_->GetLinearVelocity();
+void CharacterController::FixedPostUpdate(float timeStep)
+{
+    // Re-apply jump to ensure correct velocity
+    if (jumped_)
+    {
+        /*Vector3 linearVelocity =*/ body_->GetLinearVelocity();
+        body_->SetLinearVelocity(currentJumpVelocity_);
+    }
 }
 
 void CharacterController::OnNodeSet(Node* node)
@@ -136,6 +156,8 @@ void RegisterCharacterControllerScriptAPI(asIScriptEngine* engine)
 
     engine->RegisterObjectMethod("CharacterController", "void set_jumpVelocity(float)", asMETHOD(CharacterController, SetJumpVelocity), asCALL_THISCALL);
     engine->RegisterObjectMethod("CharacterController", "float get_jumpVelocity() const", asMETHOD(CharacterController, GetJumpVelocity), asCALL_THISCALL);
+    engine->RegisterObjectMethod("CharacterController", "void set_flyAcceleration(float)", asMETHOD(CharacterController, SetFlyAcceleration), asCALL_THISCALL);
+    engine->RegisterObjectMethod("CharacterController", "float get_flyAcceleration() const", asMETHOD(CharacterController, GetFlyAcceleration), asCALL_THISCALL);
 
     engine->RegisterObjectMethod("CharacterController", "void set_jump(bool)", asMETHOD(CharacterController, SetJump), asCALL_THISCALL);
     engine->RegisterObjectMethod("CharacterController", "void set_velocity(const Vector3&in)", asMETHOD(CharacterController, SetVelocity), asCALL_THISCALL);
@@ -145,6 +167,7 @@ void RegisterCharacterControllerScriptAPI(asIScriptEngine* engine)
     engine->RegisterObjectMethod("CharacterController", "Vector3& get_velocity() const", asMETHOD(CharacterController, GetVelocity), asCALL_THISCALL);
 
     engine->RegisterObjectMethod("CharacterController", "void FixedUpdate(float)", asMETHOD(CharacterController, FixedUpdate), asCALL_THISCALL);
+    engine->RegisterObjectMethod("CharacterController", "void FixedPostUpdate(float)", asMETHOD(CharacterController, FixedPostUpdate), asCALL_THISCALL);
 }
 
 }
